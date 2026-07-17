@@ -65,18 +65,6 @@ export function Home() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#1C1814]/80 via-transparent to-[#1C1814]/20" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#1C1814]/40 to-transparent" />
 
-        // ... après le hero
-<section className="py-16 text-center px-8 bg-[#F5EFE4]">
-  <div className="max-w-4xl mx-auto">
-    <h2 className="text-2xl md:text-4xl font-normal text-[#1C1814] leading-snug" style={{ fontFamily: "'Playfair Display', serif" }}>
-      Une équitation fondée sur la compréhension et la légèreté
-    </h2>
-    <p className="mt-4 text-lg text-[#1C1814]/60 font-light">
-      Former le cheval, accompagner le cavalier
-    </p>
-  </div>
-</section>
-
         <div className="relative z-10 h-full flex flex-col justify-end px-10 md:px-20 pb-20 md:pb-28">
           <div className="max-w-[680px]">
             <p className="text-[9px] tracking-[0.5em] uppercase mb-8" style={{ color: "#C09A3C" }}>
@@ -90,8 +78,11 @@ export function Home() {
                 color: "#F5EFE4",
               }}
             >
-              Connexion Équine<br />
-              <em style={{ color: "#C09A3C" }}>Du comportement à la performance</em>
+              R.G EQUITATION ET EDUCATION EQUINE<br />
+              <em style={{ color: "#C09A3C" }}>Une équitation fondée sur la compréhension et la légèreté<br>
+      Former le cheval, accompagner le cavalier
+    </br></em>
+              
             </h1>
             <div className="flex items-center gap-8 flex-wrap">
               <Link
