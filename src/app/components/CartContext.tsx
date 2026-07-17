@@ -87,7 +87,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/create-checkout-session", {
+      const response = await fetch("https://r-g-equitation-et-education-equine.onrender.com/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
