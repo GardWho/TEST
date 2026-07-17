@@ -1,0 +1,8 @@
+@import 'tailwindcss';
+@import './fonts.css';
+@import './theme.css';
+
+/* Ajoutez vos styles globaux ici si besoin */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
