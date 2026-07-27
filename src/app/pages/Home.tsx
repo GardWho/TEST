@@ -183,26 +183,41 @@ export function Home() {
         </div>
       </section>
 
-      {/* ── QUOTE BANNER ── */}
-      <section className="py-28 text-center px-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="w-px h-12 bg-[#C09A3C]/30 mx-auto mb-10" />
-          <blockquote
-            className="text-3xl md:text-4xl font-normal italic text-[#1C1814] leading-[1.2] mb-10"
-            style={{ fontFamily: "'Playfair Display', serif" }}
-          >
-            "La légèreté n'est pas un but — c'est la conséquence d'une relation juste."
-          </blockquote>
-          <div className="w-px h-12 bg-[#C09A3C]/30 mx-auto mb-8" />
-          <Link
-            to="/contact"
-            className="group inline-flex items-center gap-3 px-10 py-4 bg-[#C09A3C] text-[#FDFAF5] text-[11px] tracking-[0.25em] uppercase hover:bg-[#1C1814] transition-colors duration-300"
-          >
-            Réserver une séance
-            <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
-      </section>
+{/* ── QUOTE BANNER avec fond et parallaxe ── */}
+<section className="relative py-28 text-center px-8 overflow-hidden bg-[#2A2318]">
+  {/* Image de fond avec parallaxe */}
+  <div className="absolute inset-0">
+    <img
+      src="https://images.unsplash.com/photo-1772902540156-e298bcc8e3cc?w=1600&h=900&fit=crop&auto=format&q=85"
+      alt="Cheval au coucher du soleil"
+      className="w-full h-full object-cover"
+      style={{ 
+        transform: "scale(1.1)",
+        opacity: 0.4,
+        filter: "sepia(30%) saturate(0.8)"
+      }}
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-[#1C1814]/90 via-[#1C1814]/60 to-[#1C1814]/70" />
+  </div>
+  
+  <div className="relative z-10 max-w-3xl mx-auto">
+    <div className="w-px h-12 bg-[#C09A3C]/50 mx-auto mb-10" />
+    <blockquote
+      className="text-3xl md:text-4xl font-normal italic text-[#F5EFE4] leading-[1.2] mb-10"
+      style={{ fontFamily: "'Playfair Display', serif" }}
+    >
+      "La légèreté n'est pas un but — c'est la conséquence d'une relation juste."
+    </blockquote>
+    <div className="w-px h-12 bg-[#C09A3C]/50 mx-auto mb-8" />
+    <Link
+      to="/contact"
+      className="group inline-flex items-center gap-3 px-10 py-4 bg-[#C09A3C] text-[#FDFAF5] text-[11px] tracking-[0.25em] uppercase hover:bg-[#F5EFE4] hover:text-[#1C1814] transition-colors duration-300"
+    >
+      Réserver une séance
+      <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+    </Link>
+  </div>
+</section>
 
       {/* ── THIRD IMAGE ROW ── */}
       <section className="pb-32 px-8 md:px-16 max-w-[1400px] mx-auto">
