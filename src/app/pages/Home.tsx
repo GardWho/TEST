@@ -78,12 +78,13 @@ export function Home() {
                 color: "#F5EFE4",
               }}
             >
-              R.G EQUITATION ET EDUCATION EQUINE<br />
-              <em style={{ color: "#C09A3C" }}>Une équitation fondée sur la compréhension et la légèreté<br>
-      Former le cheval, accompagner le cavalier
-    </br></em>
-              
+            R.G EQUITATION ET EDUCATION EQUINE<br />
+              <em style={{ color: "#C09A3C" }}>
+              Une équitation fondée sur la compréhension et la légèreté<br />
+              Former le cheval, accompagner le cavalier
+              </em>
             </h1>
+            
             <div className="flex items-center gap-8 flex-wrap">
               <Link
                 to="/prestations"
