@@ -74,7 +74,7 @@ export function Home() {
               className="font-normal leading-[0.96] mb-8"
               style={{
                 fontFamily: "'Playfair Display', serif",
-                fontSize : "clamp(38px, 6vw, 76px)",
+                fontSize : "clamp(28px, 4vw, 56px)",
                 color: "#F5EFE4",
               }}
             >
@@ -84,7 +84,7 @@ export function Home() {
               Former le cheval, accompagner le cavalier
               </em>
             </h1>
-            
+
             <div className="flex items-center gap-8 flex-wrap">
               <Link
                 to="/prestations"
