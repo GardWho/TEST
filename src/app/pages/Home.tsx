@@ -120,7 +120,7 @@ export function Home() {
       </section>
 
       {/* ── PRESTATIONS (sans "Nos" et sans chiffres) ── */}
-      <section className="bg-[#FDFAF5] border-y border-[#C09A3C]/15 py-24">
+      <section className="bg-white border-y border-[#C09A3C]/15 py-24">
         <div className="max-w-[1400px] mx-auto px-8 md:px-16">
           <div className="text-center mb-16">
             <p className="text-[10px] tracking-[0.45em] uppercase text-[#C09A3C] mb-4">PRESTATIONS</p>
@@ -136,7 +136,7 @@ export function Home() {
               <Link
                 key={s.id}
                 to={s.link}
-                className="group bg-white p-6 rounded-sm shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center"
+                className="group bg-[#F5EFE4] p-6 rounded-sm shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center"
               >
                 <div className="flex justify-center mb-4">
                   <img
