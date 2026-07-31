@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const HERO_IMG = "https://images.unsplash.com/photo-1777133025718-ca8a34cdcd7d?w=1400&h=1800&fit=crop&auto=format&q=85";
 
+// Images de la galerie
 const GALLERY_IMGS = {
   coaching: "https://images.unsplash.com/photo-1600715151005-e6d44b9ef840?w=1400&h=900&fit=crop&auto=format&q=85",
   misty:    "https://images.unsplash.com/photo-1759323200025-c5d3e68a77d7?w=900&h=700&fit=crop&auto=format&q=85",
@@ -11,13 +13,41 @@ const GALLERY_IMGS = {
   arena:    "https://images.unsplash.com/photo-1726209431921-71cb661b4dbf?w=1400&h=900&fit=crop&auto=format&q=85",
 };
 
+// Liste des images pour le carrousel (5 images)
+const carouselImages = [
+  GALLERY_IMGS.coaching,
+  GALLERY_IMGS.misty,
+  GALLERY_IMGS.golden,
+  GALLERY_IMGS.sunset,
+  GALLERY_IMGS.arena,
+];
+
+const carouselAlts = [
+  "Coaching en action",
+  "Cheval dans la brume",
+  "Cheval au pré",
+  "Chevaux au coucher du soleil",
+  "Carrière d'équitation",
+];
+
 export function Propos() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Défilement automatique toutes les 5 secondes
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % carouselImages.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="bg-[#F8F3EC]">
 
       {/* ── HERO split‑screen ── */}
       <section className="min-h-screen grid grid-cols-1 md:grid-cols-2">
-        {/* Colonne gauche : texte avec padding-top pour descendre sous la navbar */}
+        {/* Colonne gauche : texte */}
         <div className="flex flex-col justify-center px-10 md:px-20 lg:px-28 pb-20 md:pb-0 pt-24 md:pt-28 order-2 md:order-1">
           <div className="max-w-lg">
             <p className="text-[10px] tracking-[0.45em] uppercase text-[#C09A3C] mb-10">
@@ -45,9 +75,6 @@ export function Propos() {
               <p>
                 À travers mes cours, je souhaite transmettre bien plus qu'une technique : une philosophie de l'équitation qui replace le cheval en tant que partenaire sensible, dans une recherche constante de légèreté et d'harmonie.
               </p>
-              <p className="text-[#C09A3C] font-medium italic" style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.1em" }}>
-                — Roxane
-              </p>
             </div>
           </div>
         </div>
@@ -61,36 +88,107 @@ export function Propos() {
           />
           <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#F8F3EC]/20" />
           <div className="absolute bottom-8 left-8 text-[10px] tracking-[0.35em] uppercase text-white/60">
-            RG Connexion Équine
           </div>
         </div>
       </section>
 
-      {/* ── GALERIE ── */}
+      {/* ── NOUVELLE SECTION : Approche de l'éducation et de la rééducation ── */}
+      <section className="py-24 px-8 md:px-20 max-w-[1400px] mx-auto">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-[10px] tracking-[0.45em] uppercase text-[#C09A3C] mb-6">
+            Approche
+          </p>
+          <h2
+            className="text-4xl md:text-5xl font-normal leading-[1.08] mb-8 text-[#1C1814]"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Approche de l'éducation<br />et de la rééducation
+          </h2>
+          <div className="space-y-4 text-[15px] text-[#1C1814]/60 leading-relaxed font-light">
+            <p>
+              Chaque cheval possède son histoire, sa sensibilité et ses modes d'apprentissage. Mon intervention s'adapte à sa personnalité, à son niveau et aux objectifs de son propriétaire.
+            </p>
+            <p>
+              J'interviens sur différentes problématiques : manque de confiance, stress, difficultés à la monte, raideurs, refus d'obstacle ou comportements devenus problématiques, voire dangereux.
+            </p>
+            <p>
+              Mon travail s'appuie notamment sur l'éthologie, en tant que science du comportement. L'objectif est d'observer et de comprendre les réactions du cheval, son état émotionnel, son environnement et ses mécanismes d'apprentissage, afin d'identifier l'origine de la difficulté plutôt que d'en corriger uniquement la manifestation.
+            </p>
+            <p>
+              Il ne s'agit jamais de « soumettre » le cheval, mais de lui proposer des réponses claires et cohérentes pour l'aider à comprendre ce qui est attendu de lui. Je cherche ainsi à restaurer sa confiance, sa disponibilité et sa sérénité, indispensables à un travail juste et durable.
+            </p>
+            <p className="text-[#C09A3C] font-light italic">
+              La légèreté, la cohérence et la progressivité restent au cœur de chaque accompagnement.
+            </p>
+                          <p className="text-[#C09A3C] font-medium italic" style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.1em" }}>
+                — Roxane
+              </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── GALERIE avec carrousel automatique ── */}
       <section className="py-24 px-8 md:px-14 max-w-[1500px] mx-auto">
         <div className="grid grid-cols-4 gap-3 items-end">
-          <div className="col-span-2 h-[340px] overflow-hidden bg-[#D4C9B8] group">
-            <img src={GALLERY_IMGS.coaching} alt="Coaching en action" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style={{ filter: "sepia(12%)" }} />
+          {/* Grande image (colspan 2) qui change toutes les 5 secondes */}
+          <div className="col-span-2 h-[340px] overflow-hidden bg-[#D4C9B8] group relative">
+            <img
+              src={carouselImages[currentIndex]}
+              alt={carouselAlts[currentIndex]}
+              className="w-full h-full object-cover transition-opacity duration-1000"
+              style={{ filter: "sepia(12%)" }}
+            />
+            {/* Indicateur de progression */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+              {carouselImages.map((_, index) => (
+                <div
+                  key={index}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    index === currentIndex ? "w-6 bg-[#C09A3C]" : "w-1.5 bg-white/50"
+                  }`}
+                />
+              ))}
+            </div>
           </div>
           <div className="h-[220px] overflow-hidden bg-[#D4C9B8] group">
-            <img src={GALLERY_IMGS.misty} alt="Cheval dans la brume" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style={{ filter: "sepia(18%)" }} />
+            <img
+              src={carouselImages[(currentIndex + 1) % carouselImages.length]}
+              alt={carouselAlts[(currentIndex + 1) % carouselImages.length]}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              style={{ filter: "sepia(18%)" }}
+            />
           </div>
           <div className="h-[280px] overflow-hidden bg-[#D4C9B8] group">
-            <img src={GALLERY_IMGS.golden} alt="Cheval au pré" className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700" style={{ filter: "sepia(14%)" }} />
+            <img
+              src={carouselImages[(currentIndex + 2) % carouselImages.length]}
+              alt={carouselAlts[(currentIndex + 2) % carouselImages.length]}
+              className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
+              style={{ filter: "sepia(14%)" }}
+            />
           </div>
         </div>
         <div className="grid grid-cols-4 gap-3 mt-3">
           <div className="h-[200px] overflow-hidden bg-[#D4C9B8] group">
-            <img src={GALLERY_IMGS.sunset} alt="Chevaux au coucher du soleil" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style={{ filter: "sepia(16%)" }} />
+            <img
+              src={carouselImages[(currentIndex + 3) % carouselImages.length]}
+              alt={carouselAlts[(currentIndex + 3) % carouselImages.length]}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              style={{ filter: "sepia(16%)" }}
+            />
           </div>
           <div className="col-span-2 h-[200px] flex flex-col items-center justify-center text-center px-8" style={{ background: "#EDE4D0" }}>
             <p className="text-[9px] tracking-[0.4em] uppercase mb-4" style={{ color: "#C09A3C" }}>Zones d'intervention</p>
             <p className="text-[13px] font-light" style={{ color: "rgba(28,24,20,0.55)" }}>
-              Séances sur votre lieu d'équitation — région et alentours.
+              sur votre lieu d'équitation - Bordeaux et alentours (15 premiers km inclus).
             </p>
           </div>
           <div className="h-[200px] overflow-hidden bg-[#D4C9B8] group">
-            <img src={GALLERY_IMGS.arena} alt="Carrière d'équitation" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" style={{ filter: "sepia(10%)" }} />
+            <img
+              src={carouselImages[(currentIndex + 4) % carouselImages.length]}
+              alt={carouselAlts[(currentIndex + 4) % carouselImages.length]}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              style={{ filter: "sepia(10%)" }}
+            />
           </div>
         </div>
       </section>
