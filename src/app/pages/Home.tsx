@@ -15,11 +15,12 @@ const I = {
 };
 
 // Import des logos PNG
-import LogoCoaching from "../images/logo-prestations/coaching-cavalier.png";
-import LogoTravail from "../images/logo-prestations/travail-cheval.png";
-import LogoEducation from "../images/logo-prestations/education-equine.png";
-import LogoConcours from "../images/logo-prestations/coaching-concours.png";
-import LogoCollectif from "../images/logo-prestations/cours-collectifs.png";
+// Les logos sont dans public/images/logo-prestations/
+const LogoCoaching = "/images/logo-prestations/coaching-cavalier.png";
+const LogoTravail = "/images/logo-prestations/travail-cheval.png";
+const LogoEducation = "/images/logo-prestations/education-equine.png";
+const LogoConcours = "/images/logo-prestations/coaching-concours.png";
+const LogoCollectif = "/images/logo-prestations/cours-collectifs.png";
 
 // Liste des services avec logos PNG
 const services = [
