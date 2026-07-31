@@ -43,17 +43,27 @@ export function EducationEquinePage() {
             Éducation équine
           </p>
           <h2
-            className="text-3xl md:text-4xl font-normal text-[#1C1814] mb-6"
+            className="text-3xl md:text-4xl font-normal text-[#C09A3C] mb-6"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            Éducation équine
+            Débourrage & éducation
           </h2>
-          <p className="text-[15px] text-[#1C1814]/60 leading-relaxed font-light mb-6 max-w-2xl">
-            L'éducation d'un jeune cheval est une étape fondamentale. Je propose un accompagnement complet qui respecte la nature du cheval et installe des bases solides, dans le calme et la confiance.
-          </p>
-          <p className="text-[15px] text-[#1C1814]/60 leading-relaxed font-light mb-8 max-w-2xl">
-            Le travail débute par une phase de familiarisation, de manipulation et de confiance à pied, puis évolue progressivement vers la délicate mise en selle et la construction d'une relation de partenariat. Chaque étape est conduite avec patience, clarté et bienveillance.
-          </p>
+          <div className="space-y-4 text-[15px] text-[#1C1814]/60 leading-relaxed font-light mb-8 max-w-2xl">
+            <p>
+              Le débourrage est une étape essentielle dans la vie du cheval. Il constitue la base de sa future relation avec l'humain, de sa confiance et de son équilibre mental comme physique.
+            </p>
+            <p>
+              Mon approche repose sur une mise en confiance progressive du jeune cheval, dans le respect de son rythme, de sa compréhension et de ses capacités. L'objectif est de former un cheval serein, attentif et disponible, prêt à évoluer dans le calme et la compréhension.
+            </p>
+          </div>
+
+          {/* Lien vers contact avec devis */}
+          <Link
+            to="/contact"
+            className="inline-block mb-8 px-6 py-3 bg-[#C09A3C] text-white text-[13px] font-medium hover:bg-[#1C1814] transition-colors"
+          >
+            À partir de 800€ - Demandez un devis
+          </Link>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {items.map((item) => (

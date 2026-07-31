@@ -78,7 +78,7 @@ export function Contact() {
                 ))}
               </div>
               <div className="pt-4 border-t border-[#C09A3C]/15">
-                <p className="text-[12px] text-[#1C1814]/40">Du lundi au samedi selon agenda. Réponse sous 48h.</p>
+                <p className="text-[12px] text-[#1C1814]/40">Du lundi au dimanche selon agenda. Réponse sous 48h.</p>
               </div>
             </div>
           </div>

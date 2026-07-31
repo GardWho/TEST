@@ -6,28 +6,24 @@ const HERO_IMG =
 
 const services = [
   {
-    num: "01",
     title: "Cours",
     sub: "Cours particuliers et collectifs, du loisir à la compétition, adaptés à vos objectifs et à votre niveau.",
     img: "https://images.unsplash.com/photo-1600715151005-e6d44b9ef840?w=1400&h=900&fit=crop&auto=format&q=85",
     link: "/cours",
   },
   {
-    num: "02",
     title: "Travail du cheval",
     sub: "Travail monté ou à pied, préparation physique et mentale de votre cheval.",
     img: "https://images.unsplash.com/photo-1777133025718-ca8a34cdcd7d?w=1200&h=1600&fit=crop&auto=format&q=85",
     link: "/travail-cheval",
   },
   {
-    num: "03",
     title: "Rééducation",
     sub: "Résolution des troubles comportementaux, remise en confiance et travail de fond.",
     img: "https://images.unsplash.com/photo-1567454931110-f321b2795990?w=800&h=1100&fit=crop&auto=format&q=85",
     link: "/reeducation",
   },
   {
-    num: "04",
     title: "Éducation équine",
     sub: "Débourrage et éducation du jeune cheval dans le respect de ses capacités et de son rythme.",
     img: "https://images.unsplash.com/photo-1772902540156-e298bcc8e3cc?w=900&h=1200&fit=crop&auto=format&q=85",
@@ -61,15 +57,15 @@ export function Prestations() {
         </div>
       </div>
 
-      {/* ── SERVICES (4 cartes) ── */}
+      {/* ── SERVICES (4 cartes sans chiffres) ── */}
       <section className="bg-[#EDE4D0] py-20">
         <div className="max-w-[1400px] mx-auto px-8 md:px-14">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {services.map((s) => (
+            {services.map((s, index) => (
               <Link
-                key={s.num}
+                key={index}
                 to={s.link}
-                className="group bg-[#F8F3EC] overflow-hidden hover:shadow-xl transition-shadow duration-300"
+                className="group bg-[#F8F3EC] overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col"
               >
                 <div className="relative h-64 overflow-hidden bg-[#D4C9B8]">
                   <img
@@ -78,11 +74,8 @@ export function Prestations() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     style={{ filter: "sepia(12%)" }}
                   />
-                  <span className="absolute top-4 left-4 text-[9px] tracking-[0.35em] uppercase text-[#C09A3C] bg-white/80 px-2 py-1">
-                    {s.num}
-                  </span>
                 </div>
-                <div className="p-6">
+                <div className="p-6 flex flex-col items-center text-center flex-1 justify-center">
                   <h3
                     className="text-xl font-normal text-[#1C1814] mb-2"
                     style={{ fontFamily: "'Playfair Display', serif" }}
