@@ -136,7 +136,7 @@ export function Home() {
               <Link
                 key={s.id}
                 to={s.link}
-                className="group bg-[#F5EFE4] p-6 rounded-sm shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center"
+                className="group bg-[#FDF8F0] p-6 rounded-sm shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center"
               >
                 <div className="flex justify-center mb-4">
                   <img
