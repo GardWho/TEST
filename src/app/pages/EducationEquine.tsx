@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useCart } from "../components/CartContext";
 
 const heroImg =
-  "https://images.unsplash.com/photo-1772902540156-e298bcc8e3cc?w=900&h=1200&fit=crop&auto=format&q=85";
+  "/images/débourage education/débourageeducation2.jpg";
 
 const items = [
   { label: "Débourrage complet (30 jours)", price: 0 },

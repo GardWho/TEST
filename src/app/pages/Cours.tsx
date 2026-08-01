@@ -3,7 +3,7 @@ import { useCart } from "../components/CartContext";
 import { useState } from "react";
 
 const heroImg =
-  "https://images.unsplash.com/photo-1600715151005-e6d44b9ef840?w=1400&h=900&fit=crop&auto=format&q=85";
+  "/images/cours collectifs/cours collectifs.png";
 
 // Nouveaux tarifs cours particuliers (uniquement 1h)
 const coursParticuliers = [

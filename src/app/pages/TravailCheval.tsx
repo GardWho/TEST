@@ -1,7 +1,7 @@
 import { useCart } from "../components/CartContext";
 
 const heroImg =
-  "https://images.unsplash.com/photo-1777133025718-ca8a34cdcd7d?w=1200&h=1600&fit=crop&auto=format&q=85";
+  "/images/travail cheval/travail cheval.jpg";
 
 // Nouveaux tarifs
 const items = [

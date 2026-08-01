@@ -2,31 +2,31 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 const HERO_IMG =
-  "https://images.unsplash.com/photo-1600715151005-e6d44b9ef840?w=1400&h=900&fit=crop&auto=format&q=85";
+  "/images/acceuil/acceuil.png";
 
 const services = [
   {
     title: "Cours",
     sub: "Cours particuliers et collectifs, du loisir à la compétition, adaptés à vos objectifs et à votre niveau.",
-    img: "https://images.unsplash.com/photo-1600715151005-e6d44b9ef840?w=1400&h=900&fit=crop&auto=format&q=85",
+    img: "/images/cours part/cours part.jpg",
     link: "/cours",
   },
   {
     title: "Travail du cheval",
     sub: "Travail monté ou à pied, préparation physique et mentale de votre cheval.",
-    img: "https://images.unsplash.com/photo-1777133025718-ca8a34cdcd7d?w=1200&h=1600&fit=crop&auto=format&q=85",
+    img: "images/travail cheval/travail cheval2.jpg",
     link: "/travail-cheval",
   },
   {
     title: "Rééducation",
     sub: "Résolution des troubles comportementaux, remise en confiance et travail de fond.",
-    img: "https://images.unsplash.com/photo-1567454931110-f321b2795990?w=800&h=1100&fit=crop&auto=format&q=85",
+    img: "images/travail cheval/travail cheval.jpg",
     link: "/reeducation",
   },
   {
     title: "Éducation équine",
     sub: "Débourrage et éducation du jeune cheval dans le respect de ses capacités et de son rythme.",
-    img: "https://images.unsplash.com/photo-1772902540156-e298bcc8e3cc?w=900&h=1200&fit=crop&auto=format&q=85",
+    img: "images/débourage education/débourage education.jpg",
     link: "/education-equine",
   },
 ];

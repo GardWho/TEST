@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Phone, Mail, ArrowRight, Check } from "lucide-react";
 
-const HERO_IMG = "https://images.unsplash.com/flagged/photo-1567367380042-5164565bcca0?w=1400&h=1800&fit=crop&auto=format&q=85";
+const HERO_IMG = "images/contact/contact.jpg";
 
 const contacts = [
   { Icon: Phone, label: "Téléphone", val: "+33 6 52 05 37 78" },

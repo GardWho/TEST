@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useCart } from "../components/CartContext";
 
 const heroImg =
-  "https://images.unsplash.com/photo-1567454931110-f321b2795990?w=800&h=1100&fit=crop&auto=format&q=85";
+  "/images/réeducation/réeducation.jpg";
 
 export function ReeducationPage() {
   const { addItem } = useCart();

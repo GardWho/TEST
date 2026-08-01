@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const HERO_IMG = "https://images.unsplash.com/photo-1777133025718-ca8a34cdcd7d?w=1400&h=1800&fit=crop&auto=format&q=85";
+const HERO_IMG = "/images/cours/cours.jpg";
 
 // Images de la galerie
 const GALLERY_IMGS = {
