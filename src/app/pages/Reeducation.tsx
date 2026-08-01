@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 import { useCart } from "../components/CartContext";
 
 const heroImg =
-  "/images/réeducation/réeducation.jpg";
+  "https://images.unsplash.com/photo-1567454931110-f321b2795990?w=800&h=1100&fit=crop&auto=format&q=85";
 
 export function ReeducationPage() {
   const { addItem } = useCart();
 
   return (
     <div className="bg-[#F5EFE4] min-h-screen">
-      {/* ── HERO ── */}
+      {/* HERO */}
       <div className="relative h-[40vh] min-h-[280px] overflow-hidden bg-[#2A2318]">
         <img
           src={heroImg}
@@ -31,45 +31,45 @@ export function ReeducationPage() {
         </div>
       </div>
 
-      {/* ── CONTENU ── */}
+      {/* CONTENU */}
       <div className="max-w-[1400px] mx-auto px-8 md:px-14 py-16">
         
-        {/* ── SECTION 1 : BILAN ── */}
-        <section className="mb-20">
-          <div className="max-w-3xl">
+        {/* ── SECTION BILAN en fond noir ── */}
+        <section className="mb-20 bg-[#1C1814] p-10 md:p-16 rounded-sm">
+          <div className="max-w-3xl mx-auto">
             <p className="text-[10px] tracking-[0.45em] uppercase text-[#C09A3C] mb-4">
-              La première étape
+              LA PREMIÈRE ÉTAPE
             </p>
             <h2
-              className="text-4xl md:text-5xl font-normal text-[#1C1814] mb-6"
+              className="text-4xl md:text-5xl font-normal text-[#F5EFE4] mb-6"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
               Bilan de rééducation
             </h2>
-            <p className="text-[15px] text-[#1C1814]/60 leading-relaxed font-light mb-8 max-w-2xl">
+            <p className="text-[15px] text-[#F5EFE4]/80 leading-relaxed font-light mb-8 max-w-2xl">
               Cette première rencontre permet d'observer le cheval dans son environnement, d'échanger sur son histoire et d'analyser les difficultés rencontrées. À l'issue du bilan, je vous propose un accompagnement adapté au cheval, au cavalier et aux objectifs recherchés.
             </p>
             <div className="flex items-center gap-8">
               <div>
-                <p className="text-[11px] tracking-[0.3em] uppercase text-[#1C1814]/40 mb-1">Durée</p>
-                <p className="text-2xl font-medium text-[#1C1814]">1H30</p>
+                <p className="text-[11px] tracking-[0.3em] uppercase text-[#C09A3C]/70 mb-1">Durée</p>
+                <p className="text-2xl font-medium text-[#F5EFE4]">1H30</p>
               </div>
               <div className="w-px h-10 bg-[#C09A3C]/30" />
               <div>
-                <p className="text-[11px] tracking-[0.3em] uppercase text-[#1C1814]/40 mb-1">Tarif</p>
+                <p className="text-[11px] tracking-[0.3em] uppercase text-[#C09A3C]/70 mb-1">Tarif</p>
                 <p className="text-3xl font-medium text-[#C09A3C]">80 €</p>
               </div>
             </div>
             <button
               onClick={() => addItem("Bilan rééducation (1h30)", 80, "reeducation")}
-              className="mt-8 px-6 py-3 text-[10px] tracking-[0.2em] uppercase bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors"
+              className="mt-8 px-8 py-3 text-[10px] tracking-[0.2em] uppercase bg-[#C09A3C] text-[#1C1814] hover:bg-[#F5EFE4] transition-colors font-medium"
             >
               Ajouter au panier
             </button>
           </div>
         </section>
 
-        {/* ── SECTION 2 : FORMULES D'ACCOMPAGNEMENT ── */}
+        {/* ── SECTION FORMULES ── */}
         <section className="max-w-4xl">
           <p className="text-[10px] tracking-[0.45em] uppercase text-[#C09A3C] mb-4">
             Après le bilan
@@ -84,9 +84,8 @@ export function ReeducationPage() {
             À la suite du bilan, plusieurs formules mensuelles peuvent être proposées. Les séances peuvent associer travail du cheval, accompagnement du cavalier et travail du couple, selon les besoins identifiés.
           </p>
 
-          {/* Cartes des formules (sans numéros) */}
           <div className="space-y-8">
-            {/* Carte 1 - Découverte */}
+            {/* Formule 1 */}
             <div className="bg-[#EDE4D0] p-8 rounded-sm hover:bg-[#E8DDD0] transition-colors">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                 <h3
@@ -107,7 +106,7 @@ export function ReeducationPage() {
               </p>
             </div>
 
-            {/* Carte 2 - Suivi régulier */}
+            {/* Formule 2 */}
             <div className="bg-[#EDE4D0] p-8 rounded-sm hover:bg-[#E8DDD0] transition-colors">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                 <h3
@@ -128,7 +127,7 @@ export function ReeducationPage() {
               </p>
             </div>
 
-            {/* Carte 3 - Rééducation intensive */}
+            {/* Formule 3 */}
             <div className="bg-[#EDE4D0] p-8 rounded-sm hover:bg-[#E8DDD0] transition-colors">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
                 <h3
@@ -150,12 +149,10 @@ export function ReeducationPage() {
             </div>
           </div>
 
-          {/* Note sur le rythme */}
           <p className="text-[14px] text-[#1C1814]/50 leading-relaxed font-light italic mt-6">
             Le rythme et le contenu de l'accompagnement sont définis après le bilan.
           </p>
 
-          {/* Bouton Contact */}
           <Link
             to="/contact"
             className="inline-block mt-8 px-8 py-4 bg-[#1C1814] text-[#F5EFE4] text-[11px] tracking-[0.25em] uppercase hover:bg-[#C09A3C] transition-colors duration-300"
@@ -164,7 +161,6 @@ export function ReeducationPage() {
           </Link>
         </section>
 
-        {/* ── FRAIS DE DÉPLACEMENT ── */}
         <p className="text-[11px] text-[#1C1814]/40 font-light italic border-t pt-6 mt-16 border-[#C09A3C]/15">
           Déplacement inclus dans les 15 premiers kilomètres · Au-delà : 0,50 € par kilomètre supplémentaire
         </p>

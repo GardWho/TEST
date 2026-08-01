@@ -1,21 +1,12 @@
 import { Link } from "react-router-dom";
-import { useCart } from "../components/CartContext";
 
 const heroImg =
-  "/images/débourage education/débourageeducation2.jpg";
-
-const items = [
-  { label: "Débourrage complet (30 jours)", price: 0 },
-  { label: "Séance d'éducation (1h)", price: 50 },
-  { label: "Pack 10 séances éducation", price: 460 },
-  { label: "Suivi éducatif à domicile", price: 0 },
-];
+  "https://images.unsplash.com/photo-1772902540156-e298bcc8e3cc?w=900&h=1200&fit=crop&auto=format&q=85";
 
 export function EducationEquinePage() {
-  const { addItem } = useCart();
-
   return (
     <div className="bg-[#F5EFE4] min-h-screen">
+      {/* HERO */}
       <div className="relative h-[40vh] min-h-[280px] overflow-hidden bg-[#2A2318]">
         <img
           src={heroImg}
@@ -57,44 +48,13 @@ export function EducationEquinePage() {
             </p>
           </div>
 
-          {/* Lien vers contact avec devis */}
+          {/* ✅ UNIQUEMENT le lien vers contact pour devis */}
           <Link
             to="/contact"
-            className="inline-block mb-8 px-6 py-3 bg-[#C09A3C] text-white text-[13px] font-medium hover:bg-[#1C1814] transition-colors"
+            className="inline-block px-8 py-4 bg-[#1C1814] text-[#F5EFE4] text-[11px] tracking-[0.25em] uppercase hover:bg-[#C09A3C] transition-colors duration-300"
           >
             À partir de 800€ - Demandez un devis
           </Link>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {items.map((item) => (
-              <div
-                key={item.label}
-                className="flex items-center justify-between p-4 bg-[#EDE4D0] rounded-sm hover:bg-[#E8DDD0] transition-colors"
-              >
-                <span className="text-[14px] text-[#1C1814] font-light">{item.label}</span>
-                <div className="flex items-center gap-4">
-                  <span className="text-[14px] font-medium text-[#C09A3C]">
-                    {item.price === 0 ? "Devis" : `${item.price} €`}
-                  </span>
-                  {item.price === 0 ? (
-                    <Link
-                      to="/contact"
-                      className="px-4 py-1.5 text-[10px] tracking-[0.2em] uppercase bg-[#1C1814] text-white hover:bg-[#C09A3C] transition-colors"
-                    >
-                      Nous contacter
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={() => addItem(item.label, item.price, "education")}
-                      className="px-4 py-1.5 text-[10px] tracking-[0.2em] uppercase bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors"
-                    >
-                      Ajouter
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
         </section>
 
         <p className="text-[11px] text-[#1C1814]/40 font-light italic border-t pt-6 mt-12 border-[#C09A3C]/15">
