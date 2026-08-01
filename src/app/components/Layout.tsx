@@ -31,6 +31,9 @@ export function Layout() {
 
   const floating = isTransparentPage && !scrolled;
 
+  // Logo pour la navbar (blanc pour fond transparent, noir pour fond scrollé)
+  const logoSrc = floating ? "/images/logo-fblanc.png" : "/images/logo-fnoir.png";
+
   return (
     <div className="min-h-screen" style={{ fontFamily: "'Jost', sans-serif", background: "#F5EFE4" }}>
       <nav
@@ -42,22 +45,12 @@ export function Layout() {
         }}
       >
         <div className="max-w-[1500px] mx-auto px-8 md:px-14 h-[68px] flex items-center justify-between">
-          <NavLink to="/" className="flex flex-col leading-none">
-            <span
-              className="text-[11px] tracking-[0.38em] uppercase font-semibold transition-colors duration-400"
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                color: floating ? "#F5EFE4" : "#1C1814",
-              }}
-            >
-              RG Équitation & Éducation Équine
-            </span>
-            <span
-              className="text-[8px] tracking-[0.32em] uppercase mt-0.5 transition-colors duration-400"
-              style={{ color: floating ? "rgba(245,239,228,0.5)" : "#C09A3C" }}
-            >
-              Coaching cavalier & accompagnement du cheval
-            </span>
+          <NavLink to="/" className="flex items-center">
+            <img
+              src={logoSrc}
+              alt="RG Équitation & Éducation Équine"
+              className="h-10 w-auto object-contain"
+            />
           </NavLink>
 
           <div className="hidden md:flex items-center gap-9">
@@ -83,7 +76,7 @@ export function Layout() {
                 className="text-[10px] tracking-[0.28em] uppercase px-5 py-2 transition-all duration-300"
                 style={{
                   border: `1px solid ${floating ? "rgba(245,239,228,0.3)" : "rgba(192,154,60,0.4)"}`,
-                  color: floating ? "#000000ff" : "#C09A3C",
+                  color: floating ? "#FFFFFF" : "#C09A3C",
                 }}
               >
                 Mon compte
@@ -144,25 +137,39 @@ export function Layout() {
       <main><Outlet /></main>
 
       <footer style={{ background: "#1C1814", borderTop: "1px solid rgba(192,154,60,0.15)" }}>
-        <div className="max-w-[1500px] mx-auto px-8 md:px-14 py-14 flex flex-col md:flex-row items-center justify-between gap-8">
-          <div>
-            <p className="text-[12px] tracking-[0.32em] uppercase" style={{ fontFamily: "'Playfair Display', serif", color: "#C09A3C" }}>
-              RG Connexion Équine
-            </p>
-            <p className="text-[9px] tracking-[0.25em] uppercase mt-1" style={{ color: "rgba(245,239,228,0.3)" }}>
-              Monitrice Équestre Diplômée d'État
-            </p>
-          </div>
-          <div className="flex gap-8">
-            {links.map((l) => (
-              <NavLink key={l.to} to={l.to} className="text-[9px] tracking-[0.22em] uppercase transition-colors" style={{ color: "rgba(245,239,228,0.25)" }}>
-                {l.label}
-              </NavLink>
-            ))}
-          </div>
-          <p className="text-[9px] tracking-wider" style={{ color: "rgba(245,239,228,0.2)" }}>
+        <div className="max-w-[1500px] mx-auto px-8 md:px-14 py-14 flex flex-col items-center gap-6">
+          {/* Logo */}
+          <img
+            src="/images/logo-fnoir.png"
+            alt="RG Connexion Équine"
+            className="h-12 w-auto object-contain"
+          />
+
+          {/* SIRET */}
+          <p className="text-[11px] tracking-wider" style={{ color: "rgba(245,239,228,0.4)" }}>
+            SIRET 978 982 866 00011
+          </p>
+
+          {/* Année */}
+          <p className="text-[10px] tracking-wider" style={{ color: "rgba(245,239,228,0.25)" }}>
             © 2024 RG Équitation & Éducation Équine
           </p>
+
+          {/* Crédit photo + Instagram */}
+          <div className="text-center mt-2">
+            <p className="text-[9px] tracking-wider" style={{ color: "rgba(245,239,228,0.2)" }}>
+              Crédit photo : <span className="text-[#C09A3C]/60">Kelline</span>
+            </p>
+            <a
+              href="https://www.instagram.com/kelline"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[9px] tracking-wider hover:text-[#C09A3C] transition-colors"
+              style={{ color: "rgba(245,239,228,0.3)" }}
+            >
+              @kelline
+            </a>
+          </div>
         </div>
       </footer>
     </div>

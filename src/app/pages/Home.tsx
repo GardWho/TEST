@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";  // ← Ajout de useRef, useEffect
 
 const I = {
   hero:    "/images/acceuil/acceuil.png",
@@ -63,6 +63,21 @@ const services = [
 
 export function Home() {
   const [imgLoaded, setImgLoaded] = useState(false);
+  const quoteRef = useRef<HTMLDivElement>(null);
+  const [offset, setOffset] = useState(0);
+
+  // Effet parallaxe pour la section citation (déplacement de l'image)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (quoteRef.current) {
+        const rect = quoteRef.current.getBoundingClientRect();
+        const scrollProgress = 1 - (rect.top + rect.height / 2) / window.innerHeight;
+        setOffset(scrollProgress * 40); // Déplacement de 40px max
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
     <div style={{ background: "#F5EFE4" }}>
@@ -119,7 +134,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* ── PRESTATIONS (sans "Nos" et sans chiffres) ── */}
+      {/* ── PRESTATIONS ── */}
       <section className="bg-white border-y border-[#C09A3C]/15 py-24">
         <div className="max-w-[1400px] mx-auto px-8 md:px-16">
           <div className="text-center mb-16">
@@ -161,7 +176,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* ── À PROPOS ACCUEIL (nouveau texte) ── */}
+      {/* ── À PROPOS ACCUEIL ── */}
       <section className="bg-[#EDE4D3] py-32">
         <div className="max-w-[1400px] mx-auto px-8 md:px-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-center">
@@ -179,17 +194,17 @@ export function Home() {
                 className="text-4xl md:text-5xl font-normal leading-[1.08] mb-8 text-[#1C1814]"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                Parce qu’une véritable progression commence par la compréhension.
+                Parce qu'une véritable progression commence par la compréhension.
               </h2>
               <div className="space-y-4 text-[15px] text-[#1C1814]/70 leading-relaxed font-light">
                 <p>
                   Chaque cheval a son histoire, son fonctionnement et ses propres difficultés. Chaque cavalier arrive également avec son expérience, ses habitudes, ses ressentis et ses objectifs. Mon travail commence par observer le cheval, écouter le cavalier et comprendre leur fonctionnement, afin de proposer un accompagnement adapté à chacun.
                 </p>
                 <p>
-                  Mon approche s’appuie notamment sur l’éthologie, en tant que science du comportement, associée à l’éducation et à un travail technique respectueux de la biomécanique. À pied comme monté, je cherche à construire des bases solides : un cheval disponible, équilibré et capable de comprendre ce qui lui est demandé, mais aussi un cavalier qui apprend à mieux lire son cheval, à affiner ses aides et à gagner en précision.
+                  Mon approche s'appuie notamment sur l'éthologie, en tant que science du comportement, associée à l'éducation et à un travail technique respectueux de la biomécanique. À pied comme monté, je cherche à construire des bases solides : un cheval disponible, équilibré et capable de comprendre ce qui lui est demandé, mais aussi un cavalier qui apprend à mieux lire son cheval, à affiner ses aides et à gagner en précision.
                 </p>
                 <p>
-                  Du jeune cheval au cheval rencontrant des difficultés, chaque séance s’inscrit dans une progression adaptée au couple. L’objectif : améliorer la communication, préserver l’équilibre physique et émotionnel du cheval et permettre au cavalier de progresser avec lui, du loisir à la compétition.
+                  Du jeune cheval au cheval rencontrant des difficultés, chaque séance s'inscrit dans une progression adaptée au couple. L'objectif : améliorer la communication, préserver l'équilibre physique et émotionnel du cheval et permettre au cavalier de progresser avec lui, du loisir à la compétition.
                 </p>
               </div>
               <Link
@@ -203,21 +218,21 @@ export function Home() {
         </div>
       </section>
 
-      {/* ── QUOTE BANNER avec fond et parallaxe ── */}
-      <section className="relative py-28 text-center px-8 overflow-hidden bg-[#2A2318]">
+      {/* ── QUOTE BANNER avec parallaxe (image plus claire) ── */}
+      <section ref={quoteRef} className="relative py-28 text-center px-8 overflow-hidden bg-[#2A2318]">
         {/* Image de fond avec parallaxe */}
         <div className="absolute inset-0">
           <img
             src={I.quote}
             alt="Cheval au coucher du soleil"
-            className="w-full h-full object-cover"
-            style={{ 
-              transform: "scale(1.1)",
-              opacity: 0.35,
-              filter: "sepia(30%) saturate(0.8)"
+            className="w-full h-full object-cover transition-transform duration-100"
+            style={{
+              transform: `translateY(${offset}px) scale(1.1)`,
+              opacity: 0.55, // Augmenté de 0.35 à 0.55 pour plus de visibilité
+              filter: "sepia(20%) saturate(0.9)"
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1C1814]/90 via-[#1C1814]/60 to-[#1C1814]/70" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1C1814]/70 via-[#1C1814]/30 to-[#1C1814]/50" />
         </div>
         
         <div className="relative z-10 max-w-3xl mx-auto">
@@ -226,7 +241,7 @@ export function Home() {
             className="text-3xl md:text-4xl font-normal italic text-[#F5EFE4] leading-[1.2] mb-10"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            « L’équitation est une danse d’équilibre qui se construit ensemble. »
+            « L'équitation est une danse d'équilibre qui se construit ensemble. »
           </blockquote>
           <div className="w-px h-12 bg-[#C09A3C]/50 mx-auto mb-8" />
           <Link
@@ -239,25 +254,30 @@ export function Home() {
         </div>
       </section>
 
-      {/* ── ZONES D'INTERVENTION ── */}
-      <section className="pb-32 px-8 md:px-16 max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-3 gap-4 items-end">
-          <div className="col-span-2 bg-[#E8DDD0] h-[320px] md:h-[420px]">
+      {/* ── ZONES D'INTERVENTION (centrée, avec acceuil4.jpg) ── */}
+      <section className="py-32 px-8 md:px-16 max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          {/* Image (acceuil4.jpg) */}
+          <div className="relative h-[400px] md:h-[500px] overflow-hidden rounded-sm">
             <img
               src={I.golden}
-              alt="Cavalière et cheval"
+              alt="Zones d'intervention"
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="flex flex-col justify-end gap-4">
-            <div className="bg-[#EDE4D3] p-8 md:p-10">
-              <p className="text-[9px] tracking-[0.4em] uppercase text-[#C09A3C] mb-4">Zones d'intervention</p>
-              <p className="text-[13px] text-[#1C1814]/60 leading-relaxed font-light">
-                sur votre lieu d'équitation - Bordeaux et alentours (15 premiers km inclus).
+
+          {/* Contenu centré */}
+          <div className="flex flex-col items-center text-center">
+            <p className="text-[9px] tracking-[0.4em] uppercase text-[#C09A3C] mb-4">
+              Zones d'intervention
+            </p>
+            <p className="text-[15px] text-[#1C1814]/60 leading-relaxed font-light max-w-md">
+              sur votre lieu d'équitation - Bordeaux et alentours (15 premiers km inclus).
+            </p>
+            <div className="mt-6 border border-[#C09A3C]/25 p-6 w-full max-w-md">
+              <p className="text-[9px] tracking-[0.4em] uppercase text-[#C09A3C] mb-2">
+                Niveaux accueillis
               </p>
-            </div>
-            <div className="border border-[#C09A3C]/25 p-8 md:p-10">
-              <p className="text-[9px] tracking-[0.4em] uppercase text-[#C09A3C] mb-4">Niveaux accueillis</p>
               <p className="text-[13px] text-[#1C1814]/60 leading-relaxed font-light">
                 Du premier contact avec le cheval jusqu'à la préparation à la haute compétition.
               </p>
@@ -265,6 +285,7 @@ export function Home() {
           </div>
         </div>
       </section>
+
     </div>
   );
 }
