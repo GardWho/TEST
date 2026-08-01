@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 
 const I = {
-  hero:    "/images/accueil/accueil.png",
+  hero:    "/images/acceuil/acceuil.png",
   golden:  "https://images.unsplash.com/photo-1777133025718-ca8a34cdcd7d?w=1200&h=1600&fit=crop&auto=format&q=85",
   sunset:  "https://images.unsplash.com/photo-1772902540156-e298bcc8e3cc?w=900&h=1200&fit=crop&auto=format&q=85",
   riding:  "https://images.unsplash.com/photo-1567454931110-f321b2795990?w=800&h=1100&fit=crop&auto=format&q=85",
