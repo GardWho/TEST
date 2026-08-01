@@ -62,18 +62,33 @@ export function Home() {
   const [imgLoaded, setImgLoaded] = useState(false);
   const quoteRef = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return; // Pas de parallaxe sur mobile
+
+    let ticking = false;
     const handleScroll = () => {
-      if (quoteRef.current) {
-        const rect = quoteRef.current.getBoundingClientRect();
-        const scrollProgress = 1 - (rect.top + rect.height / 2) / window.innerHeight;
-        setOffset(scrollProgress * 40);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          if (quoteRef.current) {
+            const rect = quoteRef.current.getBoundingClientRect();
+            const scrollProgress = 1 - (rect.top + rect.height / 2) / window.innerHeight;
+            setOffset(Math.max(0, Math.min(scrollProgress * 30, 30)));
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
-    window.addEventListener("scroll", handleScroll);
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isMobile]);
 
   return (
     <div style={{ background: "#F5EFE4" }}>
@@ -84,7 +99,7 @@ export function Home() {
           src={I.hero}
           alt="Cavalière dans la forêt"
           onLoad={() => setImgLoaded(true)}
-          className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000"
+          className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700"
           style={{ opacity: imgLoaded ? 0.72 : 0, filter: "sepia(18%) saturate(1.1)" }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1C1814]/80 via-transparent to-[#1C1814]/20" />
@@ -214,16 +229,18 @@ export function Home() {
         </div>
       </section>
 
-      {/* ── QUOTE BANNER ── */}
+      {/* ── QUOTE BANNER (parallaxe optimisé) ── */}
       <section ref={quoteRef} className="relative py-20 text-center px-8 overflow-hidden bg-[#2A2318]">
+        <div className="absolute inset-0 bg-[#2A2318]" /> {/* Fallback */}
         <div className="absolute inset-0">
           <img
             src={I.quote}
             alt="Cheval au coucher du soleil"
-            className="w-full h-full object-cover transition-transform duration-100"
+            loading="eager"
+            className="w-full h-full object-cover transition-transform duration-200 will-change-transform"
             style={{
-              transform: `translateY(${offset}px) scale(1.1)`,
-              opacity: 0.55,
+              transform: `translateY(${offset}px) scale(1.05)`,
+              opacity: 0.6,
               filter: "sepia(20%) saturate(0.9)"
             }}
           />

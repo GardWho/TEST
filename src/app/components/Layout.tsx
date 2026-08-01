@@ -31,7 +31,6 @@ export function Layout() {
 
   const floating = isTransparentPage && !scrolled;
 
-  // ✅ LOGO FIXE : toujours le blanc (même en défilant)
   const logoSrc = "/images/logo-fblanc.png";
 
   return (
@@ -136,38 +135,38 @@ export function Layout() {
 
       <main><Outlet /></main>
 
-      {/* ✅ FOOTER HORIZONTAL avec gauche/centre/droite */}
+      {/* ✅ FOOTER AGRANDI */}
       <footer style={{ background: "#1C1814", borderTop: "1px solid rgba(192,154,60,0.15)" }}>
-        <div className="max-w-[1500px] mx-auto px-8 md:px-14 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-[1500px] mx-auto px-8 md:px-14 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Gauche : Logo */}
           <div className="flex items-center">
             <img
               src="/images/logo-fnoir.png"
               alt="RG Connexion Équine"
-              className="h-10 w-auto object-contain"
+              className="h-12 w-auto object-contain"
             />
           </div>
 
           {/* Centre : Année + SIRET */}
           <div className="text-center">
-            <p className="text-[10px] tracking-wider" style={{ color: "rgba(245,239,228,0.25)" }}>
+            <p className="text-[12px] tracking-wider" style={{ color: "rgba(245,239,228,0.3)" }}>
               © 2024 RG Équitation & Éducation Équine
             </p>
-            <p className="text-[10px] tracking-wider" style={{ color: "rgba(245,239,228,0.3)" }}>
+            <p className="text-[11px] tracking-wider mt-1" style={{ color: "rgba(245,239,228,0.35)" }}>
               SIRET 978 982 866 00011
             </p>
           </div>
 
           {/* Droite : Crédit photo + Instagram */}
           <div className="text-right">
-            <p className="text-[9px] tracking-wider" style={{ color: "rgba(245,239,228,0.2)" }}>
+            <p className="text-[10px] tracking-wider" style={{ color: "rgba(245,239,228,0.25)" }}>
               Crédit photo : <span className="text-[#C09A3C]/60">Kelline</span>
             </p>
             <a
               href="https://www.instagram.com/kelline"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[9px] tracking-wider hover:text-[#C09A3C] transition-colors"
+              className="text-[10px] tracking-wider hover:text-[#C09A3C] transition-colors"
               style={{ color: "rgba(245,239,228,0.3)" }}
             >
               @kelline

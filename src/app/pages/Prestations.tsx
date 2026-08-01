@@ -8,25 +8,25 @@ const services = [
   {
     title: "Cours",
     sub: "Cours particuliers et collectifs, du loisir à la compétition, adaptés à vos objectifs et à votre niveau.",
-    img: "/images/cours part/cours part.jpg",
+    img: "/images/cours-part/cours-part.jpg",
     link: "/cours",
   },
   {
     title: "Travail du cheval",
     sub: "Travail monté ou à pied, préparation physique et mentale de votre cheval.",
-    img: "/images/travail cheval/travail cheval2.jpg",
+    img: "/images/travail-cheval/travail-cheval2.jpg",
     link: "/travail-cheval",
   },
   {
     title: "Rééducation",
     sub: "Résolution des troubles comportementaux, remise en confiance et travail de fond.",
-    img: "/images/travail cheval/travail cheval.jpg",
+    img: "/images/travail-cheval/travail-cheval.jpg",
     link: "/reeducation",
   },
   {
     title: "Éducation équine",
     sub: "Débourrage et éducation du jeune cheval dans le respect de ses capacités et de son rythme.",
-    img: "/images/débourage education/débourage education.jpg",
+    img: "/images/debourrage-education/debourrage-education.jpg",
     link: "/education-equine",
   },
 ];
@@ -57,32 +57,35 @@ export function Prestations() {
         </div>
       </div>
 
-      {/* ── SERVICES ── */}
-      <section className="bg-[#EDE4D0] py-20">
+      {/* ── SERVICES (4 cartes agrandies) ── */}
+      <section className="bg-[#EDE4D0] py-24">
         <div className="max-w-[1400px] mx-auto px-8 md:px-14">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {services.map((s, index) => (
               <Link
                 key={index}
                 to={s.link}
-                className="group bg-[#F8F3EC] overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col"
+                className="group bg-[#F8F3EC] overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col rounded-sm"
               >
-                <div className="relative h-64 overflow-hidden bg-[#D4C9B8]">
+                <div className="relative h-72 overflow-hidden bg-[#D4C9B8]">
                   <img
                     src={s.img}
                     alt={s.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     style={{ filter: "sepia(12%)" }}
+                    onError={(e) => {
+                      e.currentTarget.src = "/images/fallback.jpg";
+                    }}
                   />
                 </div>
-                <div className="p-6 flex flex-col items-center text-center flex-1 justify-center">
+                <div className="p-8 flex flex-col items-center text-center flex-1 justify-center">
                   <h3
-                    className="text-xl font-normal text-[#1C1814] mb-2"
+                    className="text-2xl font-normal text-[#1C1814] mb-3"
                     style={{ fontFamily: "'Playfair Display', serif" }}
                   >
                     {s.title}
                   </h3>
-                  <p className="text-[13px] text-[#1C1814]/60 leading-relaxed font-light">{s.sub}</p>
+                  <p className="text-[14px] text-[#1C1814]/60 leading-relaxed font-light">{s.sub}</p>
                   <div className="mt-4 flex items-center gap-1 text-[9px] tracking-[0.25em] uppercase text-[#C09A3C] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     Découvrir <ArrowRight size={9} />
                   </div>
@@ -93,32 +96,32 @@ export function Prestations() {
         </div>
       </section>
 
-      {/* ── SECTION PROFESSIONNELS ── */}
-      <section className="py-24 text-center px-8 bg-[#FDFAF5] border-y border-[#C09A3C]/15">
+      {/* ── SECTION PROFESSIONNELS (réduite) ── */}
+      <section className="py-16 text-center px-8 bg-[#FDFAF5] border-y border-[#C09A3C]/15">
         <div className="max-w-3xl mx-auto">
-          <p className="text-[10px] tracking-[0.45em] uppercase text-[#C09A3C] mb-6">
+          <p className="text-[10px] tracking-[0.45em] uppercase text-[#C09A3C] mb-4">
             Pour les professionnels
           </p>
           <h2
-            className="text-4xl md:text-5xl font-normal leading-[1.1] text-[#1C1814] mb-6"
+            className="text-3xl md:text-4xl font-normal leading-[1.1] text-[#1C1814] mb-4"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
             Un accompagnement<br />
             <em>sur mesure pour vos structures</em>
           </h2>
-          <p className="text-[15px] text-[#1C1814]/60 leading-relaxed font-light mb-10">
+          <p className="text-[14px] text-[#1C1814]/60 leading-relaxed font-light mb-6">
             Que vous soyez centre équestre, éleveur ou cavalier professionnel, je propose
             des prestations adaptées à vos besoins spécifiques : formation des cavaliers,
             travail des jeunes chevaux, rééducation, suivi en compétition, ou
             accompagnement pédagogique de vos équipes.
           </p>
-          <p className="text-[15px] text-[#1C1814]/60 leading-relaxed font-light mb-12">
+          <p className="text-[14px] text-[#1C1814]/60 leading-relaxed font-light mb-8">
             Contactez‑moi pour discuter de votre projet et construire ensemble une
             solution sur mesure.
           </p>
           <Link
             to="/contact"
-            className="group inline-flex items-center gap-3 px-10 py-4 bg-[#C09A3C] text-[#FDFAF5] text-[11px] tracking-[0.25em] uppercase hover:bg-[#1C1814] transition-colors duration-300"
+            className="group inline-flex items-center gap-3 px-8 py-3 bg-[#C09A3C] text-[#FDFAF5] text-[11px] tracking-[0.25em] uppercase hover:bg-[#1C1814] transition-colors duration-300"
           >
             Prendre contact
             <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />

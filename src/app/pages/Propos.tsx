@@ -2,32 +2,31 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const HERO_IMG = "/images/cours/cours.jpg";
+const HERO_IMG = "https://images.unsplash.com/photo-1777133025718-ca8a34cdcd7d?w=1400&h=1800&fit=crop&auto=format&q=85";
 
-// Images de la galerie
-const GALLERY_IMGS = {
-  coaching: "https://images.unsplash.com/photo-1600715151005-e6d44b9ef840?w=1400&h=900&fit=crop&auto=format&q=85",
-  misty:    "https://images.unsplash.com/photo-1759323200025-c5d3e68a77d7?w=900&h=700&fit=crop&auto=format&q=85",
-  golden:   "https://images.unsplash.com/photo-1777133025718-ca8a34cdcd7d?w=1200&h=1600&fit=crop&auto=format&q=85",
-  sunset:   "https://images.unsplash.com/photo-1772902540156-e298bcc8e3cc?w=900&h=1200&fit=crop&auto=format&q=85",
-  arena:    "https://images.unsplash.com/photo-1726209431921-71cb661b4dbf?w=1400&h=900&fit=crop&auto=format&q=85",
-};
+// Images de la galerie (1 à 15)
+const galerieImages = Array.from({ length: 15 }, (_, i) => ({
+  src: `/images/galerie/galerie${i + 1}.jpg`,
+  alt: `Galerie ${i + 1}`,
+}));
 
-// Liste des images pour le carrousel (5 images)
-const carouselImages = [
-  GALLERY_IMGS.coaching,
-  GALLERY_IMGS.misty,
-  GALLERY_IMGS.golden,
-  GALLERY_IMGS.sunset,
-  GALLERY_IMGS.arena,
-];
-
-const carouselAlts = [
-  "Coaching en action",
-  "Cheval dans la brume",
-  "Cheval au pré",
-  "Chevaux au coucher du soleil",
-  "Carrière d'équitation",
+// On garde 5 images pour l'affichage (on peut en afficher plus si besoin)
+const displayImages = [
+  galerieImages[0],  // galerie1
+  galerieImages[1],  // galerie2
+  galerieImages[2],  // galerie3
+  galerieImages[3],  // galerie4
+  galerieImages[4],  // galerie5
+  galerieImages[5],  // galerie6
+  galerieImages[6],  // galerie7
+  galerieImages[7],  // galerie8
+  galerieImages[8],  // galerie9
+  galerieImages[9],  // galerie10
+  galerieImages[10], // galerie11
+  galerieImages[11], // galerie12
+  galerieImages[12], // galerie13
+  galerieImages[13], // galerie14
+  galerieImages[14], // galerie15
 ];
 
 export function Propos() {
@@ -36,9 +35,8 @@ export function Propos() {
   // Défilement automatique toutes les 5 secondes
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % carouselImages.length);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % displayImages.length);
     }, 5000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -47,7 +45,6 @@ export function Propos() {
 
       {/* ── HERO split‑screen ── */}
       <section className="min-h-screen grid grid-cols-1 md:grid-cols-2">
-        {/* Colonne gauche : texte */}
         <div className="flex flex-col justify-center px-10 md:px-20 lg:px-28 pb-20 md:pb-0 pt-24 md:pt-28 order-2 md:order-1">
           <div className="max-w-lg">
             <p className="text-[10px] tracking-[0.45em] uppercase text-[#C09A3C] mb-10">
@@ -75,11 +72,13 @@ export function Propos() {
               <p>
                 À travers mes cours, je souhaite transmettre bien plus qu'une technique : une philosophie de l'équitation qui replace le cheval en tant que partenaire sensible, dans une recherche constante de légèreté et d'harmonie.
               </p>
+              <p className="text-[#C09A3C] font-medium italic" style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.1em" }}>
+                — Roxane
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Colonne droite : image pleine hauteur */}
         <div className="relative min-h-[60vw] md:min-h-screen order-1 md:order-2 bg-[#E8DDD0]">
           <img
             src={HERO_IMG}
@@ -88,11 +87,12 @@ export function Propos() {
           />
           <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#F8F3EC]/20" />
           <div className="absolute bottom-8 left-8 text-[10px] tracking-[0.35em] uppercase text-white/60">
+            RG Connexion Équine
           </div>
         </div>
       </section>
 
-      {/* ── NOUVELLE SECTION : Approche de l'éducation et de la rééducation ── */}
+      {/* ── NOUVELLE SECTION : Approche ── */}
       <section className="py-24 px-8 md:px-20 max-w-[1400px] mx-auto">
         <div className="max-w-4xl mx-auto">
           <p className="text-[10px] tracking-[0.45em] uppercase text-[#C09A3C] mb-6">
@@ -120,31 +120,27 @@ export function Propos() {
             <p className="text-[#C09A3C] font-light italic">
               La légèreté, la cohérence et la progressivité restent au cœur de chaque accompagnement.
             </p>
-                          <p className="text-[#C09A3C] font-medium italic" style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.1em" }}>
-                — Roxane
-              </p>
           </div>
         </div>
       </section>
 
-      {/* ── GALERIE avec carrousel automatique ── */}
+      {/* ── GALERIE avec images galerie1 à galerie15 ── */}
       <section className="py-24 px-8 md:px-14 max-w-[1500px] mx-auto">
         <div className="grid grid-cols-4 gap-3 items-end">
-          {/* Grande image (colspan 2) qui change toutes les 5 secondes */}
+          {/* Grande image (colspan 2) qui change */}
           <div className="col-span-2 h-[340px] overflow-hidden bg-[#D4C9B8] group relative">
             <img
-              src={carouselImages[currentIndex]}
-              alt={carouselAlts[currentIndex]}
+              src={displayImages[currentIndex].src}
+              alt={displayImages[currentIndex].alt}
               className="w-full h-full object-cover transition-opacity duration-1000"
               style={{ filter: "sepia(12%)" }}
             />
-            {/* Indicateur de progression */}
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-              {carouselImages.map((_, index) => (
+              {displayImages.slice(0, 5).map((_, index) => (
                 <div
                   key={index}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
-                    index === currentIndex ? "w-6 bg-[#C09A3C]" : "w-1.5 bg-white/50"
+                    index === currentIndex % 5 ? "w-6 bg-[#C09A3C]" : "w-1.5 bg-white/50"
                   }`}
                 />
               ))}
@@ -152,16 +148,16 @@ export function Propos() {
           </div>
           <div className="h-[220px] overflow-hidden bg-[#D4C9B8] group">
             <img
-              src={carouselImages[(currentIndex + 1) % carouselImages.length]}
-              alt={carouselAlts[(currentIndex + 1) % carouselImages.length]}
+              src={displayImages[(currentIndex + 1) % displayImages.length].src}
+              alt={displayImages[(currentIndex + 1) % displayImages.length].alt}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               style={{ filter: "sepia(18%)" }}
             />
           </div>
           <div className="h-[280px] overflow-hidden bg-[#D4C9B8] group">
             <img
-              src={carouselImages[(currentIndex + 2) % carouselImages.length]}
-              alt={carouselAlts[(currentIndex + 2) % carouselImages.length]}
+              src={displayImages[(currentIndex + 2) % displayImages.length].src}
+              alt={displayImages[(currentIndex + 2) % displayImages.length].alt}
               className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
               style={{ filter: "sepia(14%)" }}
             />
@@ -170,8 +166,8 @@ export function Propos() {
         <div className="grid grid-cols-4 gap-3 mt-3">
           <div className="h-[200px] overflow-hidden bg-[#D4C9B8] group">
             <img
-              src={carouselImages[(currentIndex + 3) % carouselImages.length]}
-              alt={carouselAlts[(currentIndex + 3) % carouselImages.length]}
+              src={displayImages[(currentIndex + 3) % displayImages.length].src}
+              alt={displayImages[(currentIndex + 3) % displayImages.length].alt}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               style={{ filter: "sepia(16%)" }}
             />
@@ -184,8 +180,8 @@ export function Propos() {
           </div>
           <div className="h-[200px] overflow-hidden bg-[#D4C9B8] group">
             <img
-              src={carouselImages[(currentIndex + 4) % carouselImages.length]}
-              alt={carouselAlts[(currentIndex + 4) % carouselImages.length]}
+              src={displayImages[(currentIndex + 4) % displayImages.length].src}
+              alt={displayImages[(currentIndex + 4) % displayImages.length].alt}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               style={{ filter: "sepia(10%)" }}
             />
