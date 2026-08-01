@@ -31,8 +31,8 @@ export function Layout() {
 
   const floating = isTransparentPage && !scrolled;
 
-  // Logo pour la navbar (blanc pour fond transparent, noir pour fond scrollé)
-  const logoSrc = floating ? "/images/logo-fblanc.png" : "/images/logo-fnoir.png";
+  // ✅ LOGO FIXE : toujours le blanc (même en défilant)
+  const logoSrc = "/images/logo-fblanc.png";
 
   return (
     <div className="min-h-screen" style={{ fontFamily: "'Jost', sans-serif", background: "#F5EFE4" }}>
@@ -136,27 +136,30 @@ export function Layout() {
 
       <main><Outlet /></main>
 
+      {/* ✅ FOOTER HORIZONTAL avec gauche/centre/droite */}
       <footer style={{ background: "#1C1814", borderTop: "1px solid rgba(192,154,60,0.15)" }}>
-        <div className="max-w-[1500px] mx-auto px-8 md:px-14 py-14 flex flex-col items-center gap-6">
-          {/* Logo */}
-          <img
-            src="/images/logo-fnoir.png"
-            alt="RG Connexion Équine"
-            className="h-12 w-auto object-contain"
-          />
+        <div className="max-w-[1500px] mx-auto px-8 md:px-14 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          {/* Gauche : Logo */}
+          <div className="flex items-center">
+            <img
+              src="/images/logo-fnoir.png"
+              alt="RG Connexion Équine"
+              className="h-10 w-auto object-contain"
+            />
+          </div>
 
-          {/* SIRET */}
-          <p className="text-[11px] tracking-wider" style={{ color: "rgba(245,239,228,0.4)" }}>
-            SIRET 978 982 866 00011
-          </p>
+          {/* Centre : Année + SIRET */}
+          <div className="text-center">
+            <p className="text-[10px] tracking-wider" style={{ color: "rgba(245,239,228,0.25)" }}>
+              © 2024 RG Équitation & Éducation Équine
+            </p>
+            <p className="text-[10px] tracking-wider" style={{ color: "rgba(245,239,228,0.3)" }}>
+              SIRET 978 982 866 00011
+            </p>
+          </div>
 
-          {/* Année */}
-          <p className="text-[10px] tracking-wider" style={{ color: "rgba(245,239,228,0.25)" }}>
-            © 2024 RG Équitation & Éducation Équine
-          </p>
-
-          {/* Crédit photo + Instagram */}
-          <div className="text-center mt-2">
+          {/* Droite : Crédit photo + Instagram */}
+          <div className="text-right">
             <p className="text-[9px] tracking-wider" style={{ color: "rgba(245,239,228,0.2)" }}>
               Crédit photo : <span className="text-[#C09A3C]/60">Kelline</span>
             </p>

@@ -14,19 +14,19 @@ const services = [
   {
     title: "Travail du cheval",
     sub: "Travail monté ou à pied, préparation physique et mentale de votre cheval.",
-    img: "images/travail cheval/travail cheval2.jpg",
+    img: "/images/travail cheval/travail cheval2.jpg",
     link: "/travail-cheval",
   },
   {
     title: "Rééducation",
     sub: "Résolution des troubles comportementaux, remise en confiance et travail de fond.",
-    img: "images/travail cheval/travail cheval.jpg",
+    img: "/images/travail cheval/travail cheval.jpg",
     link: "/reeducation",
   },
   {
     title: "Éducation équine",
     sub: "Débourrage et éducation du jeune cheval dans le respect de ses capacités et de son rythme.",
-    img: "images/débourage education/débourage education.jpg",
+    img: "/images/débourage education/débourage education.jpg",
     link: "/education-equine",
   },
 ];
@@ -57,7 +57,7 @@ export function Prestations() {
         </div>
       </div>
 
-      {/* ── SERVICES (4 cartes sans chiffres) ── */}
+      {/* ── SERVICES ── */}
       <section className="bg-[#EDE4D0] py-20">
         <div className="max-w-[1400px] mx-auto px-8 md:px-14">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
