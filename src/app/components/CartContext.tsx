@@ -68,7 +68,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const clearCart = () => setItems([]);
 
   const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const deliveryFees = deliveryKm > 15 ? (deliveryKm - 15) * 0.35 : 0;
+  const deliveryFees = deliveryKm > 15 ? (deliveryKm - 15) * 0.50 : 0;
   const totalWithDelivery = total + deliveryFees;
 
   const toggleCart = () => setIsOpen((prev) => !prev);
@@ -87,7 +87,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     setLoading(true);
     try {
-      const response = await fetch("https://r-g-equitation-et-education-equine.onrender.com/api/create-checkout-session", {
+      // ✅ Utilisation d'une URL relative (pas de Netlify/Render)
+      const response = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -13,33 +13,60 @@ const __dirname = dirname(__filename);
 const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-app.use(cors());
+// ✅ CORS local uniquement (pas besoin d'URL externes)
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://rg-equitation-education-equine.fr",
+  "http://rg-equitation-education-equine.fr",
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log("❌ CORS bloqué pour :", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"],
+}));
+
 app.use(express.json());
 
-// En production, servir les fichiers du frontend
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(join(__dirname, "dist")));
-  app.get("*", (req, res) => {
-    res.sendFile(join(__dirname, "dist", "index.html"));
-  });
-}
+// ✅ Servir le frontend buildé
+app.use(express.static(join(__dirname, "dist")));
 
-// Route API
+// ✅ Toutes les routes non-API → index.html (SPA)
+app.get("*", (req, res) => {
+  if (req.path.startsWith("/api")) return;
+  res.sendFile(join(__dirname, "dist", "index.html"));
+});
+
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { items, deliveryKm, userId, userEmail } = req.body;
 
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: "Panier vide" });
+    }
+
     const lineItems = items.map((item) => ({
       price_data: {
         currency: "eur",
-        product_data: { name: item.label },
+        product_data: { 
+          name: item.label,
+          metadata: { serviceType: item.serviceType || "prestation" }
+        },
         unit_amount: Math.round(item.price * 100),
       },
-      quantity: item.quantity,
+      quantity: item.quantity || 1,
     }));
 
     if (deliveryKm > 15) {
-      const fees = (deliveryKm - 15) * 0.35;
+      const fees = (deliveryKm - 15) * 0.50;
       lineItems.push({
         price_data: {
           currency: "eur",
@@ -54,20 +81,20 @@ app.post("/api/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
       line_items: lineItems,
       mode: "payment",
-      success_url: `${process.env.CLIENT_URL || "https://votre-domaine.com"}/compte?success=true`,
-      cancel_url: `${process.env.CLIENT_URL || "https://votre-domaine.com"}/panier?canceled=true`,
+      success_url: `${process.env.CLIENT_URL || "https://rg-equitation-education-equine.fr"}/compte?success=true`,
+      cancel_url: `${process.env.CLIENT_URL || "https://rg-equitation-education-equine.fr"}/panier?canceled=true`,
       metadata: {
-        userId,
-        userEmail,
-        deliveryKm: String(deliveryKm),
-        items: JSON.stringify(items.map((i) => ({ label: i.label, quantity: i.quantity }))),
+        userId: userId || "guest",
+        userEmail: userEmail || "guest@email.com",
+        deliveryKm: String(deliveryKm || 0),
+        items: JSON.stringify(items.map((i) => ({ label: i.label, quantity: i.quantity || 1 }))),
       },
     });
 
     res.json({ id: session.id });
   } catch (error) {
-    console.error("Erreur Stripe :", error);
-    res.status(500).json({ error: error.message });
+    console.error("❌ Erreur Stripe :", error);
+    res.status(500).json({ error: error.message || "Erreur interne" });
   }
 });
 
