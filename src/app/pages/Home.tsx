@@ -69,8 +69,7 @@ export function Home() {
   }, []);
 
   useEffect(() => {
-    if (isMobile) return; // Pas de parallaxe sur mobile
-
+    if (isMobile) return;
     let ticking = false;
     const handleScroll = () => {
       if (!ticking) {
@@ -85,7 +84,6 @@ export function Home() {
         ticking = true;
       }
     };
-
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isMobile]);
@@ -229,9 +227,9 @@ export function Home() {
         </div>
       </section>
 
-      {/* ── QUOTE BANNER (parallaxe optimisé) ── */}
+      {/* ── QUOTE BANNER ── */}
       <section ref={quoteRef} className="relative py-20 text-center px-8 overflow-hidden bg-[#2A2318]">
-        <div className="absolute inset-0 bg-[#2A2318]" /> {/* Fallback */}
+        <div className="absolute inset-0 bg-[#2A2318]" />
         <div className="absolute inset-0">
           <img
             src={I.quote}
@@ -266,7 +264,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* ── ZONES D'INTERVENTION ── */}
+      {/* ── ZONES D'INTERVENTION avec Instagram ── */}
       <section className="py-20 px-8 md:px-16 max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="relative h-[320px] md:h-[400px] overflow-hidden rounded-sm">
@@ -284,13 +282,20 @@ export function Home() {
             <p className="text-[14px] text-[#1C1814]/60 leading-relaxed font-light max-w-md">
               sur votre lieu d'équitation - Bordeaux et alentours (15 premiers km inclus).
             </p>
-            <div className="mt-4 border border-[#C09A3C]/25 p-5 w-full max-w-md">
+
+            {/* ✅ Remplacé par Instagram */}
+            <div className="mt-6 border border-[#C09A3C]/25 p-5 w-full max-w-md">
               <p className="text-[9px] tracking-[0.4em] uppercase text-[#C09A3C] mb-2">
-                Niveaux accueillis
+                Suivez-nous sur Instagram
               </p>
-              <p className="text-[13px] text-[#1C1814]/60 leading-relaxed font-light">
-                Du premier contact avec le cheval jusqu'à la préparation à la haute compétition.
-              </p>
+              <a
+                href="https://www.instagram.com/VOTRE_PSEUDO"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[14px] font-light text-[#1C1814]/60 hover:text-[#C09A3C] transition-colors"
+              >
+                @VOTRE_PSEUDO
+              </a>
             </div>
           </div>
         </div>
