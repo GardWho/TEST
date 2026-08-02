@@ -163,7 +163,7 @@ export function Layout() {
               Crédit photo : <span className="text-[#C09A3C]/60">Kelline</span>
             </p>
             <a
-              href="https://www.instagram.com/kelline"
+              href="https://www.instagram.com/photographies_kp/"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[10px] tracking-wider hover:text-[#C09A3C] transition-colors"
