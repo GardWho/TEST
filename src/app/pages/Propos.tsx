@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const HERO_IMG = "https://images.unsplash.com/photo-1777133025718-ca8a34cdcd7d?w=1400&h=1800&fit=crop&auto=format&q=85";
+const HERO_IMG = "images/professionnels/professionnels.jpg";
 
 // Images de la galerie (1 à 15)
 const galerieImages = Array.from({ length: 15 }, (_, i) => ({
@@ -72,9 +72,6 @@ export function Propos() {
               <p>
                 À travers mes cours, je souhaite transmettre bien plus qu'une technique : une philosophie de l'équitation qui replace le cheval en tant que partenaire sensible, dans une recherche constante de légèreté et d'harmonie.
               </p>
-              <p className="text-[#C09A3C] font-medium italic" style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.1em" }}>
-                — Roxane
-              </p>
             </div>
           </div>
         </div>
@@ -87,7 +84,6 @@ export function Propos() {
           />
           <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#F8F3EC]/20" />
           <div className="absolute bottom-8 left-8 text-[10px] tracking-[0.35em] uppercase text-white/60">
-            RG Connexion Équine
           </div>
         </div>
       </section>
@@ -120,6 +116,9 @@ export function Propos() {
             <p className="text-[#C09A3C] font-light italic">
               La légèreté, la cohérence et la progressivité restent au cœur de chaque accompagnement.
             </p>
+              <p className="text-[#C09A3C] font-medium italic" style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.1em" }}>
+                — Roxane
+              </p> 
           </div>
         </div>
       </section>

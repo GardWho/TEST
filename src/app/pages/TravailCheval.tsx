@@ -1,7 +1,7 @@
 import { useCart } from "../components/CartContext";
 
 const heroImg =
-  "/images/travail cheval/travail cheval.jpg";
+  "/images/travail-cheval/travail-cheval.jpg";
 
 // Nouveaux tarifs
 const items = [
@@ -38,9 +38,6 @@ export function TravailChevalPage() {
 
       <div className="max-w-[1400px] mx-auto px-8 md:px-14 py-16">
         <section>
-          <p className="text-[10px] tracking-[0.45em] uppercase text-[#C09A3C] mb-3">
-            Travail du cheval (monté et à pied)
-          </p>
           <h2
             className="text-3xl md:text-4xl font-normal text-[#C09A3C] mb-6"
             style={{ fontFamily: "'Playfair Display', serif" }}

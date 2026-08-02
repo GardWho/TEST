@@ -26,7 +26,7 @@ const services = [
   {
     title: "Éducation équine",
     sub: "Débourrage et éducation du jeune cheval dans le respect de ses capacités et de son rythme.",
-    img: "/images/debourrage-education/debourrage-education.jpg",
+    img: "/images/debourage-education/debourage-education.jpg",
     link: "/education-equine",
   },
 ];

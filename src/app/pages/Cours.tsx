@@ -3,7 +3,7 @@ import { useCart } from "../components/CartContext";
 import { useState } from "react";
 
 const heroImg =
-  "/images/cours collectifs/cours collectifs.png";
+  "/images/cours-collectifs/cours-collectifs.png";
 
 // Nouveaux tarifs cours particuliers (uniquement 1h)
 const coursParticuliers = [
@@ -57,9 +57,6 @@ export function CoursPage() {
       <div className="max-w-[1400px] mx-auto px-8 md:px-14 py-16 space-y-16">
         {/* Cours particuliers */}
         <section>
-          <p className="text-[10px] tracking-[0.45em] uppercase text-[#C09A3C] mb-3">
-            Cours particuliers
-          </p>
           <h2
             className="text-3xl md:text-4xl font-normal text-[#C09A3C] mb-6"
             style={{ fontFamily: "'Playfair Display', serif" }}
