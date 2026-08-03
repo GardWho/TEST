@@ -4,6 +4,7 @@ import Stripe from "stripe";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import nodemailer from "nodemailer";
 
 dotenv.config();
 
@@ -13,7 +14,7 @@ const __dirname = dirname(__filename);
 const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// ✅ CORS local uniquement (pas besoin d'URL externes)
+// ✅ CORS
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
@@ -36,15 +37,53 @@ app.use(cors({
 
 app.use(express.json());
 
-// ✅ Servir le frontend buildé
-app.use(express.static(join(__dirname, "dist")));
-
-// ✅ Toutes les routes non-API → index.html (SPA)
-app.get("*", (req, res) => {
-  if (req.path.startsWith("/api")) return;
-  res.sendFile(join(__dirname, "dist", "index.html"));
+// ✅ Configuration SMTP IONOS
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.ionos.fr",
+  port: parseInt(process.env.SMTP_PORT || "587"),
+  secure: false, // true pour 465, false pour 587
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
+// ✅ Route d'envoi d'email (IONOS)
+app.post("/api/send-email", async (req, res) => {
+  try {
+    const { nom, prenom, telephone, categorie, message } = req.body;
+
+    const mailOptions = {
+      from: process.env.SMTP_USER,
+      to: process.env.SMTP_USER, // Envoi à la même adresse
+      subject: `Nouveau message depuis le site RG Connexion Équine - ${categorie}`,
+      replyTo: process.env.SMTP_USER,
+      html: `
+        <h2>Nouveau message de contact</h2>
+        <p><strong>Nom :</strong> ${nom}</p>
+        <p><strong>Prénom :</strong> ${prenom}</p>
+        <p><strong>Téléphone :</strong> ${telephone}</p>
+        <p><strong>Catégorie :</strong> ${categorie}</p>
+        <p><strong>Message :</strong></p>
+        <p>${message.replace(/\n/g, "<br>")}</p>
+        <hr>
+        <p style="color: #888; font-size: 12px;">Message envoyé depuis le site RG Connexion Équine</p>
+      `,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ Email envoyé :", info.messageId);
+    res.json({ success: true, messageId: info.messageId });
+  } catch (error) {
+    console.error("❌ Erreur envoi email :", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ✅ Route Stripe
 app.post("/api/create-checkout-session", async (req, res) => {
   try {
     const { items, deliveryKm, userId, userEmail } = req.body;
@@ -56,7 +95,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
     const lineItems = items.map((item) => ({
       price_data: {
         currency: "eur",
-        product_data: { 
+        product_data: {
           name: item.label,
           metadata: { serviceType: item.serviceType || "prestation" }
         },
@@ -96,6 +135,14 @@ app.post("/api/create-checkout-session", async (req, res) => {
     console.error("❌ Erreur Stripe :", error);
     res.status(500).json({ error: error.message || "Erreur interne" });
   }
+});
+
+// ✅ Servir le frontend
+app.use(express.static(join(__dirname, "dist")));
+
+app.get("*", (req, res) => {
+  if (req.path.startsWith("/api")) return;
+  res.sendFile(join(__dirname, "dist", "index.html"));
 });
 
 const PORT = process.env.PORT || 3000;

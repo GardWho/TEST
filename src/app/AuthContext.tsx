@@ -1,13 +1,11 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createClient, User, Session } from "@supabase/supabase-js";
 
-type User = {
-  id: string;
-  email: string;
-  name: string;
-  credits: number;
-  purchases: Purchase[];
-  bookings: Booking[];
-};
+// ✅ Initialisation Supabase
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
 
 type Purchase = {
   id: string;
@@ -25,10 +23,20 @@ type Booking = {
   usedCredits: number;
 };
 
+type AppUser = {
+  id: string;
+  email: string;
+  name: string;
+  credits: number;
+  purchases: Purchase[];
+  bookings: Booking[];
+};
+
 type AuthContextType = {
-  user: User | null;
+  user: AppUser | null;
+  session: Session | null;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   addCredits: (amount: number) => void;
   useCredits: (amount: number) => boolean;
@@ -40,64 +48,94 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Simule une base de données utilisateurs (localStorage)
-const STORAGE_KEY = "users_db";
-const getUsers = (): Record<string, { password: string; user: User }> => {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  return raw ? JSON.parse(raw) : {};
-};
-const saveUsers = (users: Record<string, { password: string; user: User }>) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(users));
-};
+const USER_DATA_KEY = "user_data";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const login = async (email: string, password: string) => {
-    const users = getUsers();
-    const record = users[email];
-    if (!record || record.password !== password) {
-      throw new Error("Email ou mot de passe incorrect");
-    }
-    setUser(record.user);
-    localStorage.setItem(`current_user`, JSON.stringify(record.user));
+  const getUserData = (userId: string): AppUser | null => {
+    const raw = localStorage.getItem(`${USER_DATA_KEY}_${userId}`);
+    return raw ? JSON.parse(raw) : null;
   };
 
-  const logout = () => {
+  const saveUserData = (userData: AppUser) => {
+    localStorage.setItem(`${USER_DATA_KEY}_${userData.id}`, JSON.stringify(userData));
+  };
+
+  const createUserData = (user: User): AppUser => ({
+    id: user.id,
+    email: user.email || "",
+    name: user.user_metadata?.name || "Utilisateur",
+    credits: 0,
+    purchases: [],
+    bookings: [],
+  });
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session?.user) {
+        const userData = getUserData(session.user.id) || createUserData(session.user);
+        setUser(userData);
+      }
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        setSession(session);
+        if (session?.user) {
+          const userData = getUserData(session.user.id) || createUserData(session.user);
+          setUser(userData);
+        } else {
+          setUser(null);
+        }
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw new Error(error.message);
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
-    localStorage.removeItem("current_user");
+    setSession(null);
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const users = getUsers();
-    if (users[email]) throw new Error("Cet email est déjà utilisé");
-    const newUser: User = {
-      id: email,
+    const { data, error } = await supabase.auth.signUp({
       email,
-      name,
-      credits: 0,
-      purchases: [],
-      bookings: [],
-    };
-    users[email] = { password, user: newUser };
-    saveUsers(users);
-    setUser(newUser);
-    localStorage.setItem(`current_user`, JSON.stringify(newUser));
+      password,
+      options: {
+        data: { name },
+      },
+    });
+    if (error) throw new Error(error.message);
   };
 
   const addCredits = (amount: number) => {
     if (!user) return;
     const updated = { ...user, credits: user.credits + amount };
     setUser(updated);
-    updateUserInStorage(updated);
+    saveUserData(updated);
   };
 
   const useCredits = (amount: number): boolean => {
     if (!user || user.credits < amount) return false;
     const updated = { ...user, credits: user.credits - amount };
     setUser(updated);
-    updateUserInStorage(updated);
+    saveUserData(updated);
     return true;
   };
 
@@ -106,7 +144,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const newPurchase: Purchase = { ...purchase, id: `p-${Date.now()}` };
     const updated = { ...user, purchases: [...user.purchases, newPurchase] };
     setUser(updated);
-    updateUserInStorage(updated);
+    saveUserData(updated);
   };
 
   const addBooking = (booking: Omit<Booking, "id">) => {
@@ -114,28 +152,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const newBooking: Booking = { ...booking, id: `b-${Date.now()}` };
     const updated = { ...user, bookings: [...user.bookings, newBooking] };
     setUser(updated);
-    updateUserInStorage(updated);
+    saveUserData(updated);
   };
-
-  const updateUserInStorage = (updatedUser: User) => {
-    const users = getUsers();
-    if (users[updatedUser.email]) {
-      users[updatedUser.email].user = updatedUser;
-      saveUsers(users);
-      localStorage.setItem(`current_user`, JSON.stringify(updatedUser));
-    }
-  };
-
-  // Restaurer la session au chargement
-  useState(() => {
-    const saved = localStorage.getItem("current_user");
-    if (saved) setUser(JSON.parse(saved));
-  });
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        session,
         login,
         logout,
         register,

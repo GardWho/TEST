@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Phone, Mail, ArrowRight, Check } from "lucide-react";
 
-const HERO_IMG = "images/contact/contact.jpg";
+const HERO_IMG = "/images/contact/contact.jpg";
 
 const contacts = [
   { Icon: Phone, label: "Téléphone", val: "+33 6 52 05 37 78" },
-  { Icon: Mail, label: "Email", val: "r.g.connexionequine@gmail.com" },
+  { Icon: Mail, label: "Email", val: "contact@rg-equitation-education-equine.fr" },
 ];
 
 const categories = [
@@ -30,7 +30,8 @@ export function Contact() {
     setError("");
 
     try {
-      const response = await fetch("https://formspree.io/f/mwvjaobj", {
+      // ✅ Appel vers le backend SMTP IONOS
+      const response = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -39,14 +40,14 @@ export function Contact() {
           telephone: form.telephone,
           categorie: form.categorie,
           message: form.message,
-          _subject: "Nouveau message depuis le site RG Connexion Équine",
         }),
       });
 
       if (response.ok) {
         setSent(true);
       } else {
-        setError("Une erreur est survenue. Veuillez réessayer.");
+        const data = await response.json();
+        setError(data.error || "Une erreur est survenue. Veuillez réessayer.");
       }
     } catch {
       setError("Une erreur est survenue. Veuillez réessayer.");
