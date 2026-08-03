@@ -24,7 +24,7 @@ const services = [
     link: "/reeducation",
   },
   {
-    title: "Éducation équine",
+    title: "Débourrage & éducation",
     sub: "Débourrage et éducation du jeune cheval dans le respect de ses capacités et de son rythme.",
     img: "/images/debourage-education/debourage-education.jpg",
     link: "/education-equine",
@@ -96,7 +96,7 @@ export function Prestations() {
         </div>
       </section>
 
-      {/* ── SECTION PROFESSIONNELS (réduite) ── */}
+      {/* ── SECTION PROFESSIONNELS ── */}
       <section className="py-16 text-center px-8 bg-[#FDFAF5] border-y border-[#C09A3C]/15">
         <div className="max-w-3xl mx-auto">
           <p className="text-[10px] tracking-[0.45em] uppercase text-[#C09A3C] mb-4">

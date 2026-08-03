@@ -11,7 +11,7 @@ const I = {
   arena:   "https://images.unsplash.com/photo-1726209431921-71cb661b4dbf?w=1400&h=900&fit=crop&auto=format&q=85",
   field:   "https://images.unsplash.com/photo-1778652688765-dd2d6c028854?w=1600&h=700&fit=crop&auto=format&q=85",
   misty:   "https://images.unsplash.com/photo-1759323200025-c5d3e68a77d7?w=900&h=700&fit=crop&auto=format&q=85",
-  quote:   "/images/acceuil/acceuil2.png",
+  quote:   "/images/bannières/banniere-05.webp", // ✅ Nouvelle bannière
 };
 
 const LogoCoaching = "/images/logo-prestations/coaching-cavalier.png";
@@ -37,7 +37,7 @@ const services = [
   },
   {
     id: "education",
-    title: "Éducation équine",
+    title: "Débourrage & éducation",
     desc: "Mise en place des bases solides dans le respect du cheval.",
     link: "/education-equine",
     icon: LogoEducation,
@@ -106,7 +106,7 @@ export function Home() {
         <div className="relative z-10 h-full flex flex-col justify-end px-10 md:px-20 pb-16 md:pb-20">
           <div className="max-w-[680px]">
             <p className="text-[9px] tracking-[0.5em] uppercase mb-6" style={{ color: "#C09A3C" }}>
-              Monitrice Équestre Diplômée d'État
+              Enseignante Équestre Diplômée d'État
             </p>
             <h1
               className="font-normal leading-[0.96] mb-6"
@@ -264,7 +264,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* ── ZONES D'INTERVENTION avec Instagram ── */}
+      {/* ── ZONES D'INTERVENTION avec "RELATION • LÉGÈRETÉ • PERFORMANCE" ── */}
       <section className="py-20 px-8 md:px-16 max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="relative h-[320px] md:h-[400px] overflow-hidden rounded-sm">
@@ -276,6 +276,14 @@ export function Home() {
           </div>
 
           <div className="flex flex-col items-center text-center">
+            {/* ✅ Nouveau slogan */}
+            <p className="text-[11px] tracking-[0.35em] uppercase text-[#C09A3C] mb-1">
+              RELATION • LÉGÈRETÉ • PERFORMANCE
+            </p>
+            <p className="text-[13px] text-[#1C1814]/50 font-light italic mb-4">
+              Du comportement à la performance
+            </p>
+
             <p className="text-[9px] tracking-[0.4em] uppercase text-[#C09A3C] mb-3">
               Zones d'intervention
             </p>
@@ -283,10 +291,10 @@ export function Home() {
               sur votre lieu d'équitation - Bordeaux et alentours (15 premiers km inclus).
             </p>
 
-            {/* ✅ Remplacé par Instagram */}
+            {/* ✅ Instagram */}
             <div className="mt-6 border border-[#C09A3C]/25 p-5 w-full max-w-md">
               <p className="text-[9px] tracking-[0.4em] uppercase text-[#C09A3C] mb-2">
-                Suivez-nous sur Instagram
+                SUIVEZ-NOUS SUR INSTAGRAM
               </p>
               <a
                 href="https://www.instagram.com/VOTRE_PSEUDO"

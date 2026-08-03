@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 
-// ✅ Image recadrée pour cacher la tête (object-[center_20%])
+// ✅ Image recadrée pour cacher la tête
 const HERO_IMG = "/images/professionnels/professionnels.jpg";
 
 // Images de la galerie (1 à 15)
@@ -30,7 +30,7 @@ export function Propos() {
       <section className="min-h-screen grid grid-cols-1 md:grid-cols-2">
         <div className="flex flex-col justify-center px-10 md:px-20 lg:px-28 pb-20 md:pb-0 pt-24 md:pt-28 order-2 md:order-1">
           <div className="max-w-lg">
-            {/* ✅ PARCOURS en ligne avec police plus petite */}
+            {/* ✅ PARCOURS en ligne - sans "Approche" doré */}
             <p className="text-[9px] tracking-[0.35em] uppercase text-[#C09A3C] mb-10 flex flex-wrap gap-2">
               <span>Parcours</span>
               <span className="text-[#C09A3C]/40">·</span>
@@ -82,12 +82,9 @@ export function Propos() {
         </div>
       </section>
 
-      {/* ── NOUVELLE SECTION : Approche ── */}
+      {/* ── SECTION : Approche (sans le texte "Approche" doré) ── */}
       <section className="py-24 px-8 md:px-20 max-w-[1400px] mx-auto">
         <div className="max-w-4xl mx-auto">
-          <p className="text-[10px] tracking-[0.45em] uppercase text-[#C09A3C] mb-6">
-            Approche
-          </p>
           <h2
             className="text-4xl md:text-5xl font-normal leading-[1.08] mb-8 text-[#1C1814]"
             style={{ fontFamily: "'Playfair Display', serif" }}

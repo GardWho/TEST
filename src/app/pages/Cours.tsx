@@ -17,7 +17,7 @@ const coursParticuliers = [
 const getPriceByCavaliers = (count: number): number => {
   if (count <= 3) return 35;
   if (count <= 6) return 30;
-  if (count <= 8) return 25;
+  if (count <= 10) return 25;
   return 25;
 };
 
@@ -33,12 +33,19 @@ export function CoursPage() {
 
   const adjustCount = (delta: number) => {
     const newCount = cavalierCount + delta;
-    if (newCount >= 1 && newCount <= 8) {
+    if (newCount >= 1 && newCount <= 10) {
       setCavalierCount(newCount);
     }
   };
 
   const currentPrice = getPriceByCavaliers(cavalierCount);
+
+  // ✅ Les 3 paliers pour les cartes
+  const paliers = [
+    { label: "2-3 cavaliers", price: 35 },
+    { label: "4-6 cavaliers", price: 30 },
+    { label: "7-10 cavaliers", price: 25 },
+  ];
 
   return (
     <div className="bg-[#F5EFE4] min-h-screen">
@@ -114,66 +121,68 @@ export function CoursPage() {
         </section>
 
         {/* ============================================================ */}
-        {/* SECTION : COURS COLLECTIFS (sélecteur individuel) */}
+        {/* SECTION : COURS COLLECTIFS (centré) */}
         {/* ============================================================ */}
-        <section>
+        <section className="text-center">
           <h2 className="text-3xl md:text-4xl font-normal text-[#1C1814] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
             Cours collectifs
           </h2>
-          <p className="text-[15px] text-[#1C1814]/60 leading-relaxed font-light mb-6 max-w-2xl">
+          <p className="text-[15px] text-[#1C1814]/60 leading-relaxed font-light mb-6 max-w-2xl mx-auto">
             Monitrice indépendante, je me déplace dans votre écurie pour assurer des cours collectifs adaptés au niveau et aux objectifs de chacun. Réunissez votre groupe, et contactez-moi pour organiser un cours collectif sur votre structure.
           </p>
 
-          {/* Sélecteur individuel */}
-          <div className="bg-[#EDE4D0] p-6 rounded-sm mb-6 max-w-md">
-            <p className="text-[10px] tracking-[0.3em] uppercase text-[#1C1814]/60 mb-4">
+          {/* Sélecteur individuel (plus petit) */}
+          <div className="bg-[#EDE4D0] p-4 rounded-sm mb-6 max-w-sm mx-auto">
+            <p className="text-[9px] tracking-[0.3em] uppercase text-[#1C1814]/60 mb-3">
               Nombre de cavaliers
             </p>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => adjustCount(-1)}
-                  disabled={cavalierCount <= 1}
-                  className="w-8 h-8 rounded-full bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
-                >
-                  <Minus size={14} />
-                </button>
-                <span className="text-2xl font-medium text-[#1C1814] w-8 text-center">
-                  {cavalierCount}
-                </span>
-                <button
-                  onClick={() => adjustCount(1)}
-                  disabled={cavalierCount >= 8}
-                  className="w-8 h-8 rounded-full bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
-                >
-                  <Plus size={14} />
-                </button>
-              </div>
-              <div className="flex-1 text-right">
-                <span className="text-[14px] font-medium text-[#C09A3C]">
-                  {currentPrice}€ / personne
-                </span>
-              </div>
-            </div>
-            <div className="flex gap-2 mt-4 text-[10px] text-[#1C1814]/40">
-              <span>1-3 pers: 35€</span>
-              <span>•</span>
-              <span>4-6 pers: 30€</span>
-              <span>•</span>
-              <span>7-8 pers: 25€</span>
+            <div className="flex items-center justify-center gap-4">
+              <button
+                onClick={() => adjustCount(-1)}
+                disabled={cavalierCount <= 1}
+                className="w-7 h-7 rounded-full bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                <Minus size={12} />
+              </button>
+              <span className="text-xl font-medium text-[#1C1814] w-6 text-center">
+                {cavalierCount}
+              </span>
+              <button
+                onClick={() => adjustCount(1)}
+                disabled={cavalierCount >= 10}
+                className="w-7 h-7 rounded-full bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                <Plus size={12} />
+              </button>
+              <span className="text-[13px] font-medium text-[#C09A3C] ml-2">
+                {currentPrice}€ / pers
+              </span>
             </div>
           </div>
 
           <button
             onClick={handleAddToCart}
-            className="px-8 py-3 text-[10px] tracking-[0.2em] uppercase bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors"
+            className="px-6 py-2.5 text-[10px] tracking-[0.2em] uppercase bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors"
           >
             Ajouter au panier ({currentPrice}€/pers × {cavalierCount} pers = {currentPrice * cavalierCount}€)
           </button>
+
+          {/* 3 cartes en dessous */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+            {paliers.map((palier) => (
+              <div
+                key={palier.label}
+                className="bg-[#EDE4D0] p-4 rounded-sm text-center hover:bg-[#E8DDD0] transition-colors"
+              >
+                <span className="text-[14px] text-[#1C1814] font-light block">{palier.label}</span>
+                <span className="text-[18px] font-medium text-[#C09A3C]">{palier.price}€/personne</span>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* ============================================================ */}
-        {/* BANNIÈRE IMAGE (entre cours collectifs et sections suivantes) */}
+        {/* BANNIÈRE IMAGE */}
         {/* ============================================================ */}
         <div className="relative h-[200px] md:h-[300px] overflow-hidden rounded-sm bg-[#D4C9B8]">
           <img
@@ -224,7 +233,7 @@ export function CoursPage() {
 
         {/* ─── DÉPLACEMENT ─── */}
         <p className="text-[11px] text-[#1C1814]/40 font-light italic border-t pt-6 border-[#C09A3C]/15">
-          Déplacement inclus dans les 15 premiers kilomètres · Au-delà : 0,35 € par kilomètre (calcul automatique dans le panier)
+          Déplacement inclus dans les 15 premiers kilomètres · Au-delà : 0,50 € par kilomètre (calcul automatique dans le panier)
         </p>
 
       </div>

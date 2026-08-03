@@ -4,6 +4,7 @@ import { Menu, X, ShoppingCart, ChevronDown } from "lucide-react";
 import { useAuth } from "../AuthContext";
 import { useCart } from "./CartContext";
 
+// ✅ Contact dans la navbar
 const links = [
   { to: "/", label: "Accueil" },
   { to: "/a-propos", label: "À Propos" },
@@ -11,11 +12,12 @@ const links = [
   { to: "/contact", label: "Contact" },
 ];
 
+// ✅ Sous-menus pour Prestations (au survol)
 const prestationsSubMenu = [
   { to: "/cours", label: "Cours" },
   { to: "/travail-cheval", label: "Travail du cheval" },
   { to: "/reeducation", label: "Rééducation" },
-  { to: "/education-equine", label: "Éducation équine" },
+  { to: "/education-equine", label: "Débourrage & éducation" },
 ];
 
 export function Layout() {
@@ -65,6 +67,7 @@ export function Layout() {
 
           <div className="hidden md:flex items-center gap-9">
             {links.map((l) => {
+              // ✅ Menu déroulant pour Prestations (au survol)
               if (l.to === "/prestations") {
                 return (
                   <div
@@ -86,8 +89,13 @@ export function Layout() {
                       {l.label}
                       <ChevronDown size={12} />
                     </NavLink>
+                    {/* Dropdown qui reste ouvert au survol */}
                     {dropdownOpen && (
-                      <div className="absolute top-full left-0 mt-1 bg-[#F5EFE4] shadow-lg border border-[#C09A3C]/15 rounded-sm min-w-[180px] py-1">
+                      <div
+                        className="absolute top-full left-0 mt-1 bg-[#F5EFE4] shadow-lg border border-[#C09A3C]/15 rounded-sm min-w-[200px] py-1"
+                        onMouseEnter={() => setDropdownOpen(true)}
+                        onMouseLeave={() => setDropdownOpen(false)}
+                      >
                         {prestationsSubMenu.map((sub) => (
                           <NavLink
                             key={sub.to}
@@ -126,7 +134,7 @@ export function Layout() {
               );
             })}
 
-            {/* ✅ Panier dans la navbar */}
+            {/* ✅ Panier dans la navbar (pas de widget flottant) */}
             <button
               onClick={toggleCart}
               className={`text-[10px] tracking-[0.28em] uppercase transition-all duration-300 flex items-center gap-2 ${
@@ -251,18 +259,19 @@ export function Layout() {
 
       <main><Outlet /></main>
 
+      {/* ✅ FOOTER AVEC "KP Photographies" et "R.G. ÉQUITATION & ÉDUCATION ÉQUINE" */}
       <footer style={{ background: "#1C1814", borderTop: "1px solid rgba(192,154,60,0.15)" }}>
         <div className="max-w-[1500px] mx-auto px-8 md:px-14 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center">
             <img
               src="/images/logo-fnoir.png"
-              alt="RG Connexion Équine"
+              alt="R.G. ÉQUITATION & ÉDUCATION ÉQUINE"
               className="h-12 w-auto object-contain"
             />
           </div>
           <div className="text-center">
             <p className="text-[12px] tracking-wider" style={{ color: "rgba(245,239,228,0.3)" }}>
-              © 2024 RG Équitation & Éducation Équine
+              © 2024 R.G. ÉQUITATION & ÉDUCATION ÉQUINE
             </p>
             <p className="text-[11px] tracking-wider mt-1" style={{ color: "rgba(245,239,228,0.35)" }}>
               SIRET 978 982 866 00011
@@ -270,7 +279,7 @@ export function Layout() {
           </div>
           <div className="text-right">
             <p className="text-[10px] tracking-wider" style={{ color: "rgba(245,239,228,0.25)" }}>
-              Crédit photo : <span className="text-[#C09A3C]/60">Kelline</span>
+              Crédit photo : <span className="text-[#C09A3C]/60">KP Photographies</span>
             </p>
             <a
               href="https://www.instagram.com/photographies_kp/"
@@ -279,7 +288,7 @@ export function Layout() {
               className="text-[10px] tracking-wider hover:text-[#C09A3C] transition-colors"
               style={{ color: "rgba(245,239,228,0.3)" }}
             >
-              @kelline
+              @photographies_kp
             </a>
           </div>
         </div>
