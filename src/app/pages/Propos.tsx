@@ -58,11 +58,8 @@ export function Propos() {
                 Je crois profondément qu'un cheval ne doit jamais être contraint mais compris. C'est pourquoi je place la relation, la confiance et le respect au cœur de mon travail.
               </p>
               {/* ✅ Deuxième paragraphe centré */}
-              <p className="text-center text-[#C09A3C] font-medium italic" style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.1em" }}>
+              <p>
                 À travers mes cours, je souhaite transmettre bien plus qu'une technique : une philosophie de l'équitation qui replace le cheval en tant que partenaire sensible, dans une recherche constante de légèreté et d'harmonie.
-              </p>
-              <p className="text-[#C09A3C] font-medium italic text-center" style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.1em" }}>
-                — Roxane
               </p>
             </div>
           </div>
@@ -106,6 +103,9 @@ export function Propos() {
             </p>
             <p className="text-[#C09A3C] font-light italic">
               La légèreté, la cohérence et la progressivité restent au cœur de chaque accompagnement.
+            </p>
+            <p className="text-[#C09A3C] font-medium italic text-center" style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.1em" }}>
+                — Roxane
             </p>
           </div>
         </div>

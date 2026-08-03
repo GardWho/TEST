@@ -74,7 +74,12 @@ export function Layout() {
                     key={l.to}
                     className="relative"
                     onMouseEnter={() => setDropdownOpen(true)}
-                    onMouseLeave={() => setDropdownOpen(false)}
+                    onMouseLeave={() => {
+                      // Petit délai pour permettre à la souris d'atteindre le dropdown
+                      setTimeout(() => {
+                        setDropdownOpen(false);
+                      }, 200);
+                    }}
                   >
                     <NavLink
                       to={l.to}
@@ -89,7 +94,6 @@ export function Layout() {
                       {l.label}
                       <ChevronDown size={12} />
                     </NavLink>
-                    {/* Dropdown qui reste ouvert au survol */}
                     {dropdownOpen && (
                       <div
                         className="absolute top-full left-0 mt-1 bg-[#F5EFE4] shadow-lg border border-[#C09A3C]/15 rounded-sm min-w-[200px] py-1"
