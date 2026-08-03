@@ -3,10 +3,10 @@ import { ArrowRight } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 const I = {
-  hero:    "/images/acceuil/acceuil.png",
+  hero:    "/images/acceuil/acceuil3.jpg",
   golden:  "/images/acceuil/acceuil4.jpg",
   sunset:  "https://images.unsplash.com/photo-1772902540156-e298bcc8e3cc?w=900&h=1200&fit=crop&auto=format&q=85",
-  riding:  "/images/acceuil/acceuil3.jpg",
+  riding:  "/images/acceuil/acceuil.jpg",
   coaching:"https://images.unsplash.com/photo-1600715151005-e6d44b9ef840?w=1400&h=900&fit=crop&auto=format&q=85",
   arena:   "https://images.unsplash.com/photo-1726209431921-71cb661b4dbf?w=1400&h=900&fit=crop&auto=format&q=85",
   field:   "https://images.unsplash.com/photo-1778652688765-dd2d6c028854?w=1600&h=700&fit=crop&auto=format&q=85",
