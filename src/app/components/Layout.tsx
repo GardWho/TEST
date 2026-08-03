@@ -4,7 +4,6 @@ import { Menu, X, ShoppingCart, ChevronDown } from "lucide-react";
 import { useAuth } from "../AuthContext";
 import { useCart } from "./CartContext";
 
-// ✅ Contact dans la navbar
 const links = [
   { to: "/", label: "Accueil" },
   { to: "/a-propos", label: "À Propos" },
@@ -12,7 +11,6 @@ const links = [
   { to: "/contact", label: "Contact" },
 ];
 
-// ✅ Sous-menus pour Prestations (au survol)
 const prestationsSubMenu = [
   { to: "/cours", label: "Cours" },
   { to: "/travail-cheval", label: "Travail du cheval" },
@@ -67,18 +65,19 @@ export function Layout() {
 
           <div className="hidden md:flex items-center gap-9">
             {links.map((l) => {
-              // ✅ Menu déroulant pour Prestations (au survol)
+              // ✅ Dropdown Prestations avec délai
               if (l.to === "/prestations") {
                 return (
                   <div
                     key={l.to}
                     className="relative"
-                    onMouseEnter={() => setDropdownOpen(true)}
+                    onMouseEnter={() => {
+                      setDropdownOpen(true);
+                    }}
                     onMouseLeave={() => {
-                      // Petit délai pour permettre à la souris d'atteindre le dropdown
                       setTimeout(() => {
                         setDropdownOpen(false);
-                      }, 200);
+                      }, 300);
                     }}
                   >
                     <NavLink
@@ -97,8 +96,12 @@ export function Layout() {
                     {dropdownOpen && (
                       <div
                         className="absolute top-full left-0 mt-1 bg-[#F5EFE4] shadow-lg border border-[#C09A3C]/15 rounded-sm min-w-[200px] py-1"
-                        onMouseEnter={() => setDropdownOpen(true)}
-                        onMouseLeave={() => setDropdownOpen(false)}
+                        onMouseEnter={() => {
+                          setDropdownOpen(true);
+                        }}
+                        onMouseLeave={() => {
+                          setDropdownOpen(false);
+                        }}
                       >
                         {prestationsSubMenu.map((sub) => (
                           <NavLink
@@ -138,7 +141,7 @@ export function Layout() {
               );
             })}
 
-            {/* ✅ Panier dans la navbar (pas de widget flottant) */}
+            {/* ✅ Panier dans la navbar */}
             <button
               onClick={toggleCart}
               className={`text-[10px] tracking-[0.28em] uppercase transition-all duration-300 flex items-center gap-2 ${
@@ -263,7 +266,6 @@ export function Layout() {
 
       <main><Outlet /></main>
 
-      {/* ✅ FOOTER AVEC "KP Photographies" et "R.G. ÉQUITATION & ÉDUCATION ÉQUINE" */}
       <footer style={{ background: "#1C1814", borderTop: "1px solid rgba(192,154,60,0.15)" }}>
         <div className="max-w-[1500px] mx-auto px-8 md:px-14 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center">

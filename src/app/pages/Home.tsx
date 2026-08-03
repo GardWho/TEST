@@ -91,57 +91,57 @@ export function Home() {
   return (
     <div style={{ background: "#F5EFE4" }}>
 
-      {/* ── HERO ── */}
-      <section className="relative h-[90vh] min-h-[600px] overflow-hidden bg-[#2A2318]">
-        <img
-          src={I.hero}
-          alt="Cavalière dans la forêt"
-          onLoad={() => setImgLoaded(true)}
-          className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700"
-          style={{ opacity: imgLoaded ? 0.72 : 0, filter: "sepia(18%) saturate(1.1)" }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1C1814]/80 via-transparent to-[#1C1814]/20" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1C1814]/40 to-transparent" />
+{/* ── HERO ── */}
+<section className="relative h-[90vh] min-h-[600px] overflow-hidden bg-[#2A2318]">
+  <img
+    src={I.hero}
+    alt="Cavalière dans la forêt"
+    onLoad={() => setImgLoaded(true)}
+    className="absolute inset-0 w-full h-full object-cover object-[center_15%] transition-opacity duration-700"
+    style={{ opacity: imgLoaded ? 0.72 : 0, filter: "sepia(18%) saturate(1.1)" }}
+  />
+  <div className="absolute inset-0 bg-gradient-to-t from-[#1C1814]/80 via-transparent to-[#1C1814]/20" />
+  <div className="absolute inset-0 bg-gradient-to-r from-[#1C1814]/40 to-transparent" />
 
-        <div className="relative z-10 h-full flex flex-col justify-end px-10 md:px-20 pb-16 md:pb-20">
-          <div className="max-w-[680px]">
-            <p className="text-[9px] tracking-[0.5em] uppercase mb-6" style={{ color: "#C09A3C" }}>
-              Enseignante Équestre Diplômée d'État
-            </p>
-            <h1
-              className="font-normal leading-[0.96] mb-6"
-              style={{
-                fontFamily: "'Playfair Display', serif",
-                fontSize: "clamp(28px, 4vw, 56px)",
-                color: "#F5EFE4",
-              }}
-            >
-              R.G EQUITATION ET EDUCATION EQUINE
-            </h1>
+  <div className="relative z-10 h-full flex flex-col justify-end px-10 md:px-20 pb-16 md:pb-20">
+    <div className="max-w-[680px]">
+      <p className="text-[9px] tracking-[0.5em] uppercase mb-6" style={{ color: "#C09A3C" }}>
+        Enseignante Équestre Diplômée d'État
+      </p>
+      <h1
+        className="font-normal leading-[0.96] mb-6"
+        style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: "clamp(28px, 4vw, 56px)",
+          color: "#F5EFE4",
+        }}
+      >
+        R.G EQUITATION ET EDUCATION EQUINE
+      </h1>
 
-            <div className="flex items-center gap-6 flex-wrap">
-              <Link
-                to="/prestations"
-                className="group flex items-center gap-3 text-[10px] tracking-[0.28em] uppercase px-7 py-3 transition-all duration-300 hover:gap-4"
-                style={{ background: "#C09A3C", color: "#F5EFE4" }}
-              >
-                Découvrir les prestations <ArrowRight size={11} className="group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                to="/a-propos"
-                className="text-[10px] tracking-[0.28em] uppercase text-white/50 hover:text-white/80 transition-colors border-b border-white/20 pb-0.5"
-              >
-                En savoir plus
-              </Link>
-            </div>
-          </div>
-        </div>
+      <div className="flex items-center gap-6 flex-wrap">
+        <Link
+          to="/prestations"
+          className="group flex items-center gap-3 text-[10px] tracking-[0.28em] uppercase px-7 py-3 transition-all duration-300 hover:gap-4"
+          style={{ background: "#C09A3C", color: "#F5EFE4" }}
+        >
+          Découvrir les prestations <ArrowRight size={11} className="group-hover:translate-x-1 transition-transform" />
+        </Link>
+        <Link
+          to="/a-propos"
+          className="text-[10px] tracking-[0.28em] uppercase text-white/50 hover:text-white/80 transition-colors border-b border-white/20 pb-0.5"
+        >
+          En savoir plus
+        </Link>
+      </div>
+    </div>
+  </div>
 
-        <div className="absolute bottom-6 right-10 flex flex-col items-center gap-2">
-          <span className="text-[8px] tracking-[0.4em] uppercase" style={{ color: "rgba(192,154,60,0.5)", writingMode: "vertical-rl" }}>Scroll</span>
-          <div className="w-px h-10 bg-gradient-to-b from-[#C09A3C]/40 to-transparent" />
-        </div>
-      </section>
+  <div className="absolute bottom-6 right-10 flex flex-col items-center gap-2">
+    <span className="text-[8px] tracking-[0.4em] uppercase" style={{ color: "rgba(192,154,60,0.5)", writingMode: "vertical-rl" }}>Scroll</span>
+    <div className="w-px h-10 bg-gradient-to-b from-[#C09A3C]/40 to-transparent" />
+  </div>
+</section>
 
       {/* ── PRESTATIONS ── */}
       <section className="bg-white border-y border-[#C09A3C]/15 py-16">
