@@ -60,7 +60,7 @@ export function CoursPage() {
 
         {/* ── COURS PARTICULIERS ── */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
-          <div className="flex flex-col">
+          <div className="flex flex-col justify-center">
             <h2 className="text-3xl md:text-4xl font-normal text-[#1C1814] mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Cours particuliers</h2>
             <p className="text-[15px] text-[#1C1814]/60 leading-relaxed font-light mb-2">Des séances adaptées à votre niveau, à votre cheval et à vos objectifs, du loisir à la compétition. Travail monté ou à pied, technique, légèreté et résolution de difficultés spécifiques.</p>
             <p className="text-[13px] text-[#C09A3C] font-light italic mb-6">Cartes valables 1 an à partir de la date d'achat.</p>
