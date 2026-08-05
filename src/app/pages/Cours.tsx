@@ -65,17 +65,25 @@ export function CoursPage() {
             <p className="text-[15px] text-[#1C1814]/60 leading-relaxed font-light mb-2">Des séances adaptées à votre niveau, à votre cheval et à vos objectifs, du loisir à la compétition. Travail monté ou à pied, technique, légèreté et résolution de difficultés spécifiques.</p>
             <p className="text-[13px] text-[#C09A3C] font-light italic mb-6">Cartes valables 1 an à partir de la date d'achat.</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1 items-stretch">
-              {coursParticuliers.map((item) => (
-                <div key={item.label} className="bg-[#EDE4D0] p-4 rounded-sm hover:bg-[#E8DDD0] transition-colors text-center flex flex-col">
-                  <h3 className="text-sm font-normal text-[#1C1814] mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>{item.label}</h3>
-                  <p className="text-2xl font-medium text-[#C09A3C] mb-3">{item.price} €</p>
-                  <button onClick={() => addItem(item.label, item.price, "cours")} className="w-full py-2 text-[10px] tracking-[0.2em] uppercase bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors mt-auto">
-                    RÉSERVER
-                  </button>
-                </div>
-              ))}
-            </div>
+<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+  {coursParticuliers.map((item) => (
+    <div
+      key={item.label}
+      className="bg-[#EDE4D0] p-4 rounded-sm hover:bg-[#E8DDD0] transition-colors text-center flex flex-col justify-center min-h-[180px]"
+    >
+      <h3 className="text-sm font-normal text-[#1C1814] mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+        {item.label}
+      </h3>
+      <p className="text-2xl font-medium text-[#C09A3C] mb-3">{item.price} €</p>
+      <button
+        onClick={() => addItem(item.label, item.price, "cours")}
+        className="w-full py-2 text-[10px] tracking-[0.2em] uppercase bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors"
+      >
+        RÉSERVER
+      </button>
+    </div>
+  ))}
+</div>
           </div>
 
           {/* Image à droite (pleine hauteur) */}

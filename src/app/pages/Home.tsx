@@ -4,12 +4,7 @@ import { useState, useRef, useEffect } from "react";
 const I = {
   hero:    "/images/acceuil/acceuil3.jpg",
   golden:  "/images/acceuil/acceuil4.jpg",
-  sunset:  "https://images.unsplash.com/photo-1772902540156-e298bcc8e3cc?w=900&h=1200&fit=crop&auto=format&q=85",
   riding:  "/images/professionnels/professionnels3.jpg",
-  coaching:"https://images.unsplash.com/photo-1600715151005-e6d44b9ef840?w=1400&h=900&fit=crop&auto=format&q=85",
-  arena:   "https://images.unsplash.com/photo-1726209431921-71cb661b4dbf?w=1400&h=900&fit=crop&auto=format&q=85",
-  field:   "https://images.unsplash.com/photo-1778652688765-dd2d6c028854?w=1600&h=700&fit=crop&auto=format&q=85",
-  misty:   "https://images.unsplash.com/photo-1759323200025-c5d3e68a77d7?w=900&h=700&fit=crop&auto=format&q=85",
   quote:   "/images/bannières/banniere-05.webp",
 };
 
@@ -96,7 +91,7 @@ export function Home() {
           src={I.hero}
           alt="Cavalière dans la forêt"
           onLoad={() => setImgLoaded(true)}
-          className="absolute inset-0 w-full h-full object-cover object-[center_25%] transition-opacity duration-700"
+          className="absolute inset-0 w-full h-full object-cover object-[center_15%] transition-opacity duration-700"
           style={{ opacity: imgLoaded ? 0.72 : 0, filter: "sepia(18%) saturate(1.1)" }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#1C1814]/80 via-transparent to-[#1C1814]/20" />
