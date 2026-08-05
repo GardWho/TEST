@@ -109,27 +109,51 @@ export function CoursPage() {
               ))}
             </div>
 
-            {/* Droite : Sélecteur */}
-            <div className="bg-[#EDE4D0] p-6 rounded-sm">
-              <p className="text-[9px] tracking-[0.3em] uppercase text-[#1C1814]/60 mb-3 text-center">Nombre de cavaliers</p>
-              <div className="flex items-center justify-center gap-4">
-                <button onClick={() => adjustCount(-1)} disabled={cavalierCount <= 1} className="w-7 h-7 rounded-full bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-sm">-</button>
-                <span className="text-xl font-medium text-[#1C1814] w-6 text-center">{cavalierCount}</span>
-                <button onClick={() => adjustCount(1)} disabled={cavalierCount >= 10} className="w-7 h-7 rounded-full bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-sm">+</button>
-                <span className="text-[13px] font-medium text-[#C09A3C] ml-2">{currentPrice}€ / pers</span>
-              </div>
-              <button onClick={handleAddToCart} className="w-full mt-4 px-6 py-2.5 text-[10px] tracking-[0.2em] uppercase bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors">
-                Ajouter au panier ({currentPrice}€/pers × {cavalierCount} pers)
-              </button>
-            </div>
+{/* Droite : Sélecteur */}
+<div className="bg-[#EDE4D0] p-6 rounded-sm flex flex-col items-center justify-center">
+  <p className="text-[9px] tracking-[0.3em] uppercase text-[#1C1814]/60 mb-3">
+    Nombre de cavaliers
+  </p>
+  <div className="flex items-center justify-center gap-4">
+    <button
+      onClick={() => adjustCount(-1)}
+      disabled={cavalierCount <= 1}
+      className="w-7 h-7 rounded-full bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-sm"
+    >
+      -
+    </button>
+    <span className="text-xl font-medium text-[#1C1814] w-6 text-center">
+      {cavalierCount}
+    </span>
+    <button
+      onClick={() => adjustCount(1)}
+      disabled={cavalierCount >= 10}
+      className="w-7 h-7 rounded-full bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-sm"
+    >
+      +
+    </button>
+    <span className="text-[13px] font-medium text-[#C09A3C] ml-2">
+      {currentPrice}€ / pers
+    </span>
+  </div>
+  <button
+    onClick={handleAddToCart}
+    className="w-full mt-4 px-6 py-2.5 text-[10px] tracking-[0.2em] uppercase bg-[#C09A3C] text-white hover:bg-[#1C1814] transition-colors"
+  >
+    Ajouter au panier ({currentPrice}€/pers × {cavalierCount} pers)
+  </button>
+</div>
           </div>
         </section>
+        </div>
 
         {/* ── BANNIÈRE IMAGE (pleine largeur) ── */}
         <div className="relative h-[200px] md:h-[300px] overflow-hidden rounded-sm bg-[#D4C9B8] w-full">
           <img src={bannerImg} alt="Bannière" className="w-full h-full object-cover" style={{ filter: "sepia(12%)" }} />
         </div>
 
+<div className="max-w-[1400px] mx-auto px-8 md:px-14 py-16 space-y-16">
+  
         {/* ── EXAMENS FÉDÉRAUX + VISIO ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-[#C09A3C]/15">
           <div className="bg-[#EDE4D0] p-8 rounded-sm hover:bg-[#E8DDD0] transition-colors">

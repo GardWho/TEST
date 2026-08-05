@@ -74,10 +74,18 @@ export function Layout() {
   const logoSrc = floating ? "/images/logo-fblanc.png" : "/images/logo-fnoir.png";
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
 
+  // ✅ Nouvelle logique de couleur
   const getTextColor = (isActive: boolean) => {
-    if (isActive) return isDarkTextPage ? "text-[#1C1814]" : "text-[#C09A3C]";
+    // Si le lien est actif → toujours doré
+    if (isActive) return "text-[#C09A3C]";
+    
+    // Si on est sur une page "texte noir" (À propos ou Contact)
+    if (isDarkTextPage) {
+      return floating ? "text-white/70 hover:text-white" : "text-[#1C1814]/70 hover:text-[#1C1814]";
+    }
+    
+    // Comportement normal
     if (floating) return "text-white/45 hover:text-white/80";
-    if (isDarkTextPage) return "text-[#1C1814]/60 hover:text-[#1C1814]/80";
     return "text-[#1C1814]/40 hover:text-[#1C1814]/80";
   };
 
@@ -105,9 +113,10 @@ export function Layout() {
                     className="relative"
                     onMouseEnter={() => setDropdownOpen(true)}
                     onMouseLeave={() => {
+                      // ✅ Augmenté à 800ms pour que le dropdown reste plus longtemps
                       setTimeout(() => {
                         setDropdownOpen(false);
-                      }, 500);
+                      }, 800);
                     }}
                   >
                     <NavLink
@@ -133,6 +142,8 @@ export function Layout() {
                               `block px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition-colors hover:bg-[#EDE4D0] ${
                                 isActive
                                   ? "text-[#C09A3C] bg-[#EDE4D0]"
+                                  : isDarkTextPage
+                                  ? "text-[#1C1814]/70 hover:text-[#1C1814]"
                                   : "text-[#1C1814]/60 hover:text-[#1C1814]"
                               }`
                             }
@@ -214,20 +225,26 @@ export function Layout() {
               if (l.to === "/prestations") {
                 return (
                   <div key={l.to} className="flex flex-col gap-3">
-                    <NavLink to={l.to} className={({ isActive }) => `text-[10px] tracking-[0.32em] uppercase ${isActive ? "text-[#C09A3C]" : "text-[#1C1814]/40"}`}>{l.label}</NavLink>
+                    <NavLink to={l.to} className={({ isActive }) => `text-[10px] tracking-[0.32em] uppercase ${isActive ? "text-[#C09A3C]" : isDarkTextPage ? "text-[#1C1814]/70" : "text-[#1C1814]/40"}`}>
+                      {l.label}
+                    </NavLink>
                     <div className="flex flex-col gap-2 pl-4 border-l-2 border-[#C09A3C]/20">
                       {prestationsSubMenu.map((sub) => (
-                        <NavLink key={sub.to} to={sub.to} className={({ isActive }) => `text-[9px] tracking-[0.25em] uppercase ${isActive ? "text-[#C09A3C]" : "text-[#1C1814]/40"}`}>{sub.label}</NavLink>
+                        <NavLink key={sub.to} to={sub.to} className={({ isActive }) => `text-[9px] tracking-[0.25em] uppercase ${isActive ? "text-[#C09A3C]" : isDarkTextPage ? "text-[#1C1814]/70" : "text-[#1C1814]/40"}`}>
+                          {sub.label}
+                        </NavLink>
                       ))}
                     </div>
                   </div>
                 );
               }
               return (
-                <NavLink key={l.to} to={l.to} end={l.to === "/"} className={({ isActive }) => `text-[10px] tracking-[0.32em] uppercase ${isActive ? "text-[#C09A3C]" : "text-[#1C1814]/40"}`}>{l.label}</NavLink>
+                <NavLink key={l.to} to={l.to} end={l.to === "/"} className={({ isActive }) => `text-[10px] tracking-[0.32em] uppercase ${isActive ? "text-[#C09A3C]" : isDarkTextPage ? "text-[#1C1814]/70" : "text-[#1C1814]/40"}`}>
+                  {l.label}
+                </NavLink>
               );
             })}
-            <NavLink to="/panier" className={({ isActive }) => `text-[10px] tracking-[0.32em] uppercase flex items-center gap-2 ${isActive ? "text-[#C09A3C]" : "text-[#1C1814]/40"}`}>
+            <NavLink to="/panier" className={({ isActive }) => `text-[10px] tracking-[0.32em] uppercase flex items-center gap-2 ${isActive ? "text-[#C09A3C]" : isDarkTextPage ? "text-[#1C1814]/70" : "text-[#1C1814]/40"}`}>
               <CartIcon /> Panier
               {totalItems > 0 && <span className="bg-[#C09A3C] text-white text-[9px] font-bold w-5 h-5 rounded-full flex items-center justify-center">{totalItems}</span>}
             </NavLink>
