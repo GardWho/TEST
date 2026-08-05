@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { createClient, User, Session } from "@supabase/supabase-js";
 
-// ✅ Initialisation Supabase
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY

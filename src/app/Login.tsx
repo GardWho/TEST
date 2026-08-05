@@ -8,23 +8,29 @@ export function LoginPage() {
   const [name, setName] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
     try {
       if (isRegistering) {
         await register(name, email, password);
-        alert("Inscription réussie ! Veuillez confirmer votre email pour vous connecter.");
+        alert("Inscription réussie ! Vous pouvez maintenant vous connecter.");
         setIsRegistering(false);
+        setLoading(false);
+        return;
       } else {
         await login(email, password);
         navigate("/compte");
       }
     } catch (err: any) {
       setError(err.message || "Erreur d'authentification");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -72,9 +78,10 @@ export function LoginPage() {
           </div>
           <button
             type="submit"
-            className="w-full py-3 bg-[#C09A3C] text-white text-[11px] tracking-[0.25em] uppercase hover:bg-[#1C1814] transition-colors"
+            disabled={loading}
+            className="w-full py-3 bg-[#C09A3C] text-white text-[11px] tracking-[0.25em] uppercase hover:bg-[#1C1814] transition-colors disabled:opacity-50"
           >
-            {isRegistering ? "S'inscrire" : "Se connecter"}
+            {loading ? "Chargement..." : (isRegistering ? "S'inscrire" : "Se connecter")}
           </button>
         </form>
         <p className="text-center text-[12px] text-[#1C1814]/40 mt-4">

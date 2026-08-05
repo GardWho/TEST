@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
-import { Menu, X, ShoppingCart, ChevronDown } from "lucide-react";
 import { useAuth } from "../AuthContext";
 import { useCart } from "./CartContext";
 
@@ -17,6 +16,36 @@ const prestationsSubMenu = [
   { to: "/reeducation", label: "Rééducation" },
   { to: "/education-equine", label: "Débourrage & éducation" },
 ];
+
+// ✅ Icônes SVG inline
+const MenuIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="4" x2="20" y1="6" y2="6" />
+    <line x1="4" x2="20" y1="12" y2="12" />
+    <line x1="4" x2="20" y1="18" y2="18" />
+  </svg>
+);
+
+const XIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" x2="6" y1="6" y2="18" />
+    <line x1="6" x2="18" y1="6" y2="18" />
+  </svg>
+);
+
+const CartIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="8" cy="21" r="1" />
+    <circle cx="19" cy="21" r="1" />
+    <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+  </svg>
+);
+
+const ChevronDownIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 12 15 18 9" />
+  </svg>
+);
 
 export function Layout() {
   const [open, setOpen] = useState(false);
@@ -65,19 +94,14 @@ export function Layout() {
 
           <div className="hidden md:flex items-center gap-9">
             {links.map((l) => {
-              // ✅ Dropdown Prestations avec délai
               if (l.to === "/prestations") {
                 return (
                   <div
                     key={l.to}
                     className="relative"
-                    onMouseEnter={() => {
-                      setDropdownOpen(true);
-                    }}
+                    onMouseEnter={() => setDropdownOpen(true)}
                     onMouseLeave={() => {
-                      setTimeout(() => {
-                        setDropdownOpen(false);
-                      }, 300);
+                      setTimeout(() => setDropdownOpen(false), 300);
                     }}
                   >
                     <NavLink
@@ -91,17 +115,13 @@ export function Layout() {
                       }
                     >
                       {l.label}
-                      <ChevronDown size={12} />
+                      <ChevronDownIcon />
                     </NavLink>
                     {dropdownOpen && (
                       <div
                         className="absolute top-full left-0 mt-1 bg-[#F5EFE4] shadow-lg border border-[#C09A3C]/15 rounded-sm min-w-[200px] py-1"
-                        onMouseEnter={() => {
-                          setDropdownOpen(true);
-                        }}
-                        onMouseLeave={() => {
-                          setDropdownOpen(false);
-                        }}
+                        onMouseEnter={() => setDropdownOpen(true)}
+                        onMouseLeave={() => setDropdownOpen(false)}
                       >
                         {prestationsSubMenu.map((sub) => (
                           <NavLink
@@ -141,7 +161,6 @@ export function Layout() {
               );
             })}
 
-            {/* ✅ Panier dans la navbar */}
             <button
               onClick={toggleCart}
               className={`text-[10px] tracking-[0.28em] uppercase transition-all duration-300 flex items-center gap-2 ${
@@ -150,7 +169,7 @@ export function Layout() {
                   : "text-[#1C1814]/40 hover:text-[#1C1814]/80"
               }`}
             >
-              <ShoppingCart size={16} />
+              <CartIcon />
               Panier
               {totalItems > 0 && (
                 <span className="bg-[#C09A3C] text-white text-[9px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
@@ -189,7 +208,7 @@ export function Layout() {
             style={{ color: floating ? "#F5EFE4" : "#1C1814" }}
             onClick={() => setOpen(!open)}
           >
-            {open ? <X size={20} /> : <Menu size={20} />}
+            {open ? <XIcon /> : <MenuIcon />}
           </button>
         </div>
 
@@ -243,7 +262,7 @@ export function Layout() {
               onClick={toggleCart}
               className="text-[10px] tracking-[0.32em] uppercase text-[#1C1814]/40 flex items-center gap-2"
             >
-              <ShoppingCart size={16} />
+              <CartIcon />
               Panier
               {totalItems > 0 && (
                 <span className="bg-[#C09A3C] text-white text-[9px] font-bold w-5 h-5 rounded-full flex items-center justify-center">

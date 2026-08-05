@@ -87,7 +87,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     setLoading(true);
     try {
-      // ✅ Utilisation d'une URL relative (pas de Netlify/Render)
       const response = await fetch("/api/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

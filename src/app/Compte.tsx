@@ -1,15 +1,13 @@
 import { useState } from "react";
 import { useAuth } from "./AuthContext";
 import { Link } from "react-router-dom";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
 
 type Tab = "profil" | "historique" | "credits" | "planning";
 
 export function ComptePage() {
   const { user, logout, useCredits, addBooking } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("profil");
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("09:00");
   const [selectedService, setSelectedService] = useState("Cours particulier");
 
@@ -27,13 +25,16 @@ export function ComptePage() {
   }
 
   const handleBooking = () => {
-    const dateStr = selectedDate.toISOString().split("T")[0];
+    if (!selectedDate) {
+      alert("Veuillez sélectionner une date.");
+      return;
+    }
     const success = useCredits(1);
     if (!success) {
       alert("Crédits insuffisants. Veuillez acheter des séances.");
       return;
     }
-    addBooking({ date: dateStr, time: selectedTime, service: selectedService, usedCredits: 1 });
+    addBooking({ date: selectedDate, time: selectedTime, service: selectedService, usedCredits: 1 });
     alert("Créneau réservé !");
   };
 
@@ -105,12 +106,19 @@ export function ComptePage() {
               <h2 className="text-2xl font-normal mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>Réserver un créneau</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <Calendar onChange={(date) => setSelectedDate(date as Date)} value={selectedDate} minDate={new Date()} className="border-0 shadow-sm" />
+                  <label className="text-[10px] tracking-[0.3em] uppercase text-[#1C1814]/40 block mb-2">Date</label>
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    min={new Date().toISOString().split("T")[0]}
+                    className="w-full border border-[#C09A3C]/20 rounded-sm px-4 py-2 text-[14px] outline-none focus:border-[#C09A3C] transition-colors bg-[#F8F3EC]"
+                  />
                 </div>
                 <div>
                   <div className="mb-4">
                     <label className="text-[10px] tracking-[0.3em] uppercase text-[#1C1814]/40">Horaire</label>
-                    <select value={selectedTime} onChange={(e) => setSelectedTime(e.target.value)} className="w-full border-b border-[#1C1814]/15 py-2 text-[14px] outline-none focus:border-[#C09A3C] transition-colors">
+                    <select value={selectedTime} onChange={(e) => setSelectedTime(e.target.value)} className="w-full border-b border-[#C09A3C]/15 py-2 text-[14px] outline-none focus:border-[#C09A3C] transition-colors">
                       <option value="09:00">09:00</option>
                       <option value="10:00">10:00</option>
                       <option value="11:00">11:00</option>
@@ -121,7 +129,7 @@ export function ComptePage() {
                   </div>
                   <div className="mb-4">
                     <label className="text-[10px] tracking-[0.3em] uppercase text-[#1C1814]/40">Service</label>
-                    <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)} className="w-full border-b border-[#1C1814]/15 py-2 text-[14px] outline-none focus:border-[#C09A3C] transition-colors">
+                    <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)} className="w-full border-b border-[#C09A3C]/15 py-2 text-[14px] outline-none focus:border-[#C09A3C] transition-colors">
                       <option>Cours particulier</option>
                       <option>Cours collectif</option>
                       <option>Travail du cheval</option>
