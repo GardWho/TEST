@@ -17,7 +17,7 @@ const prestationsSubMenu = [
   { to: "/education-equine", label: "Débourrage & éducation" },
 ];
 
-// ✅ Icônes SVG inline
+// Icônes SVG inline
 const MenuIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="4" x2="20" y1="6" y2="6" />
@@ -53,9 +53,10 @@ export function Layout() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const location = useLocation();
   const { user } = useAuth();
-  const { toggleCart, items } = useCart();
+  const { items } = useCart();
 
-  const isTransparentPage = !["/login", "/compte"].includes(location.pathname);
+  const isTransparentPage = !["/login", "/compte", "/panier"].includes(location.pathname);
+  const isDarkTextPage = ["/a-propos", "/contact"].includes(location.pathname);
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 80);
@@ -70,8 +71,15 @@ export function Layout() {
   }, [location.pathname]);
 
   const floating = isTransparentPage && !scrolled;
-  const logoSrc = "/images/logo-fblanc.png";
+  const logoSrc = floating ? "/images/logo-fblanc.png" : "/images/logo-fnoir.png";
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
+
+  const getTextColor = (isActive: boolean) => {
+    if (isActive) return isDarkTextPage ? "text-[#1C1814]" : "text-[#C09A3C]";
+    if (floating) return "text-white/45 hover:text-white/80";
+    if (isDarkTextPage) return "text-[#1C1814]/60 hover:text-[#1C1814]/80";
+    return "text-[#1C1814]/40 hover:text-[#1C1814]/80";
+  };
 
   return (
     <div className="min-h-screen" style={{ fontFamily: "'Jost', sans-serif", background: "#F5EFE4" }}>
@@ -85,11 +93,7 @@ export function Layout() {
       >
         <div className="max-w-[1500px] mx-auto px-8 md:px-14 h-[68px] flex items-center justify-between">
           <NavLink to="/" className="flex items-center">
-            <img
-              src={logoSrc}
-              alt="RG Équitation & Éducation Équine"
-              className="h-10 w-auto object-contain"
-            />
+            <img src={logoSrc} alt="RG Équitation & Éducation Équine" className="h-10 w-auto object-contain" />
           </NavLink>
 
           <div className="hidden md:flex items-center gap-9">
@@ -101,17 +105,15 @@ export function Layout() {
                     className="relative"
                     onMouseEnter={() => setDropdownOpen(true)}
                     onMouseLeave={() => {
-                      setTimeout(() => setDropdownOpen(false), 300);
+                      setTimeout(() => {
+                        setDropdownOpen(false);
+                      }, 500);
                     }}
                   >
                     <NavLink
                       to={l.to}
                       className={({ isActive }) =>
-                        `text-[10px] tracking-[0.28em] uppercase transition-all duration-300 flex items-center gap-1 ${
-                          floating
-                            ? isActive ? "text-white" : "text-white/45 hover:text-white/80"
-                            : isActive ? "text-[#C09A3C]" : "text-[#1C1814]/40 hover:text-[#1C1814]/80"
-                        }`
+                        `text-[10px] tracking-[0.28em] uppercase transition-all duration-300 flex items-center gap-1 ${getTextColor(isActive)}`
                       }
                     >
                       {l.label}
@@ -119,7 +121,7 @@ export function Layout() {
                     </NavLink>
                     {dropdownOpen && (
                       <div
-                        className="absolute top-full left-0 mt-1 bg-[#F5EFE4] shadow-lg border border-[#C09A3C]/15 rounded-sm min-w-[200px] py-1"
+                        className="absolute top-full left-0 mt-1 bg-[#F5EFE4] shadow-lg border border-[#C09A3C]/15 rounded-sm min-w-[200px] py-1 z-50"
                         onMouseEnter={() => setDropdownOpen(true)}
                         onMouseLeave={() => setDropdownOpen(false)}
                       >
@@ -128,10 +130,10 @@ export function Layout() {
                             key={sub.to}
                             to={sub.to}
                             className={({ isActive }) =>
-                              `block px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition-colors ${
+                              `block px-4 py-2 text-[11px] tracking-[0.2em] uppercase transition-colors hover:bg-[#EDE4D0] ${
                                 isActive
                                   ? "text-[#C09A3C] bg-[#EDE4D0]"
-                                  : "text-[#1C1814]/60 hover:text-[#1C1814] hover:bg-[#EDE4D0]/50"
+                                  : "text-[#1C1814]/60 hover:text-[#1C1814]"
                               }`
                             }
                           >
@@ -149,11 +151,7 @@ export function Layout() {
                   to={l.to}
                   end={l.to === "/"}
                   className={({ isActive }) =>
-                    `text-[10px] tracking-[0.28em] uppercase transition-all duration-300 ${
-                      floating
-                        ? isActive ? "text-white" : "text-white/45 hover:text-white/80"
-                        : isActive ? "text-[#C09A3C]" : "text-[#1C1814]/40 hover:text-[#1C1814]/80"
-                    }`
+                    `text-[10px] tracking-[0.28em] uppercase transition-all duration-300 ${getTextColor(isActive)}`
                   }
                 >
                   {l.label}
@@ -161,13 +159,11 @@ export function Layout() {
               );
             })}
 
-            <button
-              onClick={toggleCart}
-              className={`text-[10px] tracking-[0.28em] uppercase transition-all duration-300 flex items-center gap-2 ${
-                floating
-                  ? "text-white/45 hover:text-white/80"
-                  : "text-[#1C1814]/40 hover:text-[#1C1814]/80"
-              }`}
+            <NavLink
+              to="/panier"
+              className={({ isActive }) =>
+                `text-[10px] tracking-[0.28em] uppercase transition-all duration-300 flex items-center gap-2 ${getTextColor(isActive)}`
+              }
             >
               <CartIcon />
               Panier
@@ -176,27 +172,27 @@ export function Layout() {
                   {totalItems}
                 </span>
               )}
-            </button>
+            </NavLink>
 
             {user ? (
               <NavLink
                 to="/compte"
-                className="text-[10px] tracking-[0.28em] uppercase px-5 py-2 transition-all duration-300"
-                style={{
-                  border: `1px solid ${floating ? "rgba(245,239,228,0.3)" : "rgba(192,154,60,0.4)"}`,
-                  color: floating ? "#FFFFFF" : "#C09A3C",
-                }}
+                className={({ isActive }) =>
+                  `text-[10px] tracking-[0.28em] uppercase px-5 py-2 transition-all duration-300 border ${
+                    isActive ? "border-[#C09A3C] text-[#C09A3C]" : `border-[#C09A3C]/40 ${getTextColor(false)}`
+                  }`
+                }
               >
                 Mon compte
               </NavLink>
             ) : (
               <NavLink
                 to="/login"
-                className="text-[10px] tracking-[0.28em] uppercase px-5 py-2 transition-all duration-300"
-                style={{
-                  border: `1px solid ${floating ? "rgba(245,239,228,0.3)" : "rgba(192,154,60,0.4)"}`,
-                  color: floating ? "#F5EFE4" : "#C09A3C",
-                }}
+                className={({ isActive }) =>
+                  `text-[10px] tracking-[0.28em] uppercase px-5 py-2 transition-all duration-300 border ${
+                    isActive ? "border-[#C09A3C] text-[#C09A3C]" : `border-[#C09A3C]/40 ${getTextColor(false)}`
+                  }`
+                }
               >
                 Connexion
               </NavLink>
@@ -213,71 +209,32 @@ export function Layout() {
         </div>
 
         {open && (
-          <div
-            className="md:hidden px-8 py-8 flex flex-col gap-7 border-t"
-            style={{ background: "#F5EFE4", borderColor: "rgba(192,154,60,0.12)" }}
-          >
+          <div className="md:hidden px-8 py-8 flex flex-col gap-7 border-t" style={{ background: "#F5EFE4", borderColor: "rgba(192,154,60,0.12)" }}>
             {links.map((l) => {
               if (l.to === "/prestations") {
                 return (
                   <div key={l.to} className="flex flex-col gap-3">
-                    <NavLink
-                      to={l.to}
-                      className={({ isActive }) =>
-                        `text-[10px] tracking-[0.32em] uppercase ${isActive ? "text-[#C09A3C]" : "text-[#1C1814]/40"}`
-                      }
-                    >
-                      {l.label}
-                    </NavLink>
+                    <NavLink to={l.to} className={({ isActive }) => `text-[10px] tracking-[0.32em] uppercase ${isActive ? "text-[#C09A3C]" : "text-[#1C1814]/40"}`}>{l.label}</NavLink>
                     <div className="flex flex-col gap-2 pl-4 border-l-2 border-[#C09A3C]/20">
                       {prestationsSubMenu.map((sub) => (
-                        <NavLink
-                          key={sub.to}
-                          to={sub.to}
-                          className={({ isActive }) =>
-                            `text-[9px] tracking-[0.25em] uppercase ${isActive ? "text-[#C09A3C]" : "text-[#1C1814]/40"}`
-                          }
-                        >
-                          {sub.label}
-                        </NavLink>
+                        <NavLink key={sub.to} to={sub.to} className={({ isActive }) => `text-[9px] tracking-[0.25em] uppercase ${isActive ? "text-[#C09A3C]" : "text-[#1C1814]/40"}`}>{sub.label}</NavLink>
                       ))}
                     </div>
                   </div>
                 );
               }
               return (
-                <NavLink
-                  key={l.to}
-                  to={l.to}
-                  end={l.to === "/"}
-                  className={({ isActive }) =>
-                    `text-[10px] tracking-[0.32em] uppercase ${isActive ? "text-[#C09A3C]" : "text-[#1C1814]/40"}`
-                  }
-                >
-                  {l.label}
-                </NavLink>
+                <NavLink key={l.to} to={l.to} end={l.to === "/"} className={({ isActive }) => `text-[10px] tracking-[0.32em] uppercase ${isActive ? "text-[#C09A3C]" : "text-[#1C1814]/40"}`}>{l.label}</NavLink>
               );
             })}
-            <button
-              onClick={toggleCart}
-              className="text-[10px] tracking-[0.32em] uppercase text-[#1C1814]/40 flex items-center gap-2"
-            >
-              <CartIcon />
-              Panier
-              {totalItems > 0 && (
-                <span className="bg-[#C09A3C] text-white text-[9px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                  {totalItems}
-                </span>
-              )}
-            </button>
+            <NavLink to="/panier" className={({ isActive }) => `text-[10px] tracking-[0.32em] uppercase flex items-center gap-2 ${isActive ? "text-[#C09A3C]" : "text-[#1C1814]/40"}`}>
+              <CartIcon /> Panier
+              {totalItems > 0 && <span className="bg-[#C09A3C] text-white text-[9px] font-bold w-5 h-5 rounded-full flex items-center justify-center">{totalItems}</span>}
+            </NavLink>
             {user ? (
-              <NavLink to="/compte" className="text-[10px] tracking-[0.32em] uppercase text-[#C09A3C]">
-                Mon compte
-              </NavLink>
+              <NavLink to="/compte" className="text-[10px] tracking-[0.32em] uppercase text-[#C09A3C]">Mon compte</NavLink>
             ) : (
-              <NavLink to="/login" className="text-[10px] tracking-[0.32em] uppercase text-[#C09A3C]">
-                Connexion
-              </NavLink>
+              <NavLink to="/login" className="text-[10px] tracking-[0.32em] uppercase text-[#C09A3C]">Connexion</NavLink>
             )}
           </div>
         )}
@@ -288,33 +245,15 @@ export function Layout() {
       <footer style={{ background: "#1C1814", borderTop: "1px solid rgba(192,154,60,0.15)" }}>
         <div className="max-w-[1500px] mx-auto px-8 md:px-14 py-10 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center">
-            <img
-              src="/images/logo-fnoir.png"
-              alt="R.G. ÉQUITATION & ÉDUCATION ÉQUINE"
-              className="h-12 w-auto object-contain"
-            />
+            <img src="/images/logo-fnoir.png" alt="R.G. ÉQUITATION & ÉDUCATION ÉQUINE" className="h-12 w-auto object-contain" />
           </div>
           <div className="text-center">
-            <p className="text-[12px] tracking-wider" style={{ color: "rgba(245,239,228,0.3)" }}>
-              © 2024 R.G. ÉQUITATION & ÉDUCATION ÉQUINE
-            </p>
-            <p className="text-[11px] tracking-wider mt-1" style={{ color: "rgba(245,239,228,0.35)" }}>
-              SIRET 978 982 866 00011
-            </p>
+            <p className="text-[12px] tracking-wider" style={{ color: "rgba(245,239,228,0.3)" }}>© 2024 R.G. ÉQUITATION & ÉDUCATION ÉQUINE</p>
+            <p className="text-[11px] tracking-wider mt-1" style={{ color: "rgba(245,239,228,0.35)" }}>SIRET 978 982 866 00011</p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] tracking-wider" style={{ color: "rgba(245,239,228,0.25)" }}>
-              Crédit photo : <span className="text-[#C09A3C]/60">KP Photographies</span>
-            </p>
-            <a
-              href="https://www.instagram.com/photographies_kp/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[10px] tracking-wider hover:text-[#C09A3C] transition-colors"
-              style={{ color: "rgba(245,239,228,0.3)" }}
-            >
-              @photographies_kp
-            </a>
+            <p className="text-[10px] tracking-wider" style={{ color: "rgba(245,239,228,0.25)" }}>Crédit photo : <span className="text-[#C09A3C]/60">KP Photographies</span></p>
+            <a href="https://www.instagram.com/photographies_kp/" target="_blank" rel="noopener noreferrer" className="text-[10px] tracking-wider hover:text-[#C09A3C] transition-colors" style={{ color: "rgba(245,239,228,0.3)" }}>@photographies_kp</a>
           </div>
         </div>
       </footer>

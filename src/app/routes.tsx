@@ -10,6 +10,7 @@ import { CoursPage } from "./pages/Cours";
 import { TravailChevalPage } from "./pages/TravailCheval";
 import { ReeducationPage } from "./pages/Reeducation";
 import { EducationEquinePage } from "./pages/EducationEquine";
+import { PanierPage } from "./pages/Panier"; // ✅ Ajout
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
       { path: "contact", element: <Contact /> },
       { path: "login", element: <LoginPage /> },
       { path: "compte", element: <ComptePage /> },
+      { path: "panier", element: <PanierPage /> }, // ✅ Nouvelle route
       { path: "cours", element: <CoursPage /> },
       { path: "travail-cheval", element: <TravailChevalPage /> },
       { path: "reeducation", element: <ReeducationPage /> },
