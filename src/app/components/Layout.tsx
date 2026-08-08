@@ -81,8 +81,10 @@ export function Layout() {
     
     // Si on est sur une page "texte noir" (À propos ou Contact)
     if (isDarkTextPage) {
-      return floating ? "text-white/70 hover:text-white" : "text-[#1C1814]/70 hover:text-[#1C1814]";
-    }
+    // TOUJOURS noir, même quand floating (fond transparent)
+    return "text-[#1C1814]/70 hover:text-[#1C1814]";
+  }
+  
     
     // Comportement normal
     if (floating) return "text-white/45 hover:text-white/80";
