@@ -87,7 +87,7 @@ export function Contact() {
         <div className="relative min-h-[60vw] md:min-h-screen order-1 md:order-2 bg-[#E8DDD0]">
           <img src={HERO_IMG} alt="Cavalière et son cheval — RG Connexion Équine" className="absolute inset-0 w-full h-full object-cover object-center" />
           <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#F8F3EC]/20" />
-          <div className="absolute bottom-8 left-8 text-[10px] tracking-[0.35em] uppercase text-white/60">RG Connexion Équine</div>
+          <div className="absolute bottom-8 left-8 text-[10px] tracking-[0.35em] uppercase text-white/60"></div>
         </div>
       </section>
 
