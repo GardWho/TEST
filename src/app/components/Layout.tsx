@@ -110,17 +110,18 @@ export function Layout() {
             {links.map((l) => {
               if (l.to === "/prestations") {
                 return (
-                  <div
-                    key={l.to}
-                    className="relative"
-                    onMouseEnter={() => setDropdownOpen(true)}
-                    onMouseLeave={() => {
-                      // ✅ Augmenté à 800ms pour que le dropdown reste plus longtemps
-                      setTimeout(() => {
-                        setDropdownOpen(false);
-                      }, 800);
-                    }}
-                  >
+// ✅ Augmenter le délai de fermeture du dropdown
+<div
+  key={l.to}
+  className="relative"
+  onMouseEnter={() => setDropdownOpen(true)}
+  onMouseLeave={() => {
+    // ✅ Augmenté à 1200ms pour que le dropdown reste plus longtemps
+    setTimeout(() => {
+      setDropdownOpen(false);
+    }, 1200);
+  }}
+>
                     <NavLink
                       to={l.to}
                       className={({ isActive }) =>
