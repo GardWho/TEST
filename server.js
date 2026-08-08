@@ -1,149 +1,170 @@
-import express from "express";
-import cors from "cors";
-import Stripe from "stripe";
-import dotenv from "dotenv";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
-import nodemailer from "nodemailer";
-
-dotenv.config();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const express = require('express');
+const cors = require('cors');
+const Stripe = require('stripe');
+require('dotenv').config();
 
 const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// ✅ CORS
-const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "https://rg-equitation-education-equine.fr",
-  "http://rg-equitation-education-equine.fr",
-];
-
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log("❌ CORS bloqué pour :", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type"],
-}));
-
+// Middleware
+app.use(cors());
 app.use(express.json());
 
-// ✅ Configuration SMTP IONOS
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.ionos.fr",
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: false, // true pour 465, false pour 587
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
+// ============================================
+// ROUTE : Créer une session de paiement Stripe
+// ============================================
+app.post('/api/create-checkout-session', async (req, res) => {
+  const { items, deliveryKm, userId, userEmail } = req.body;
 
-// ✅ Route d'envoi d'email (IONOS)
-app.post("/api/send-email", async (req, res) => {
-  try {
-    const { nom, prenom, telephone, categorie, message } = req.body;
-
-    const mailOptions = {
-      from: process.env.SMTP_USER,
-      to: process.env.SMTP_USER, // Envoi à la même adresse
-      subject: `Nouveau message depuis le site RG Connexion Équine - ${categorie}`,
-      replyTo: process.env.SMTP_USER,
-      html: `
-        <h2>Nouveau message de contact</h2>
-        <p><strong>Nom :</strong> ${nom}</p>
-        <p><strong>Prénom :</strong> ${prenom}</p>
-        <p><strong>Téléphone :</strong> ${telephone}</p>
-        <p><strong>Catégorie :</strong> ${categorie}</p>
-        <p><strong>Message :</strong></p>
-        <p>${message.replace(/\n/g, "<br>")}</p>
-        <hr>
-        <p style="color: #888; font-size: 12px;">Message envoyé depuis le site RG Connexion Équine</p>
-      `,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log("✅ Email envoyé :", info.messageId);
-    res.json({ success: true, messageId: info.messageId });
-  } catch (error) {
-    console.error("❌ Erreur envoi email :", error);
-    res.status(500).json({ error: error.message });
+  if (!items || items.length === 0) {
+    return res.status(400).json({ error: 'Panier vide' });
   }
-});
 
-// ✅ Route Stripe
-app.post("/api/create-checkout-session", async (req, res) => {
   try {
-    const { items, deliveryKm, userId, userEmail } = req.body;
-
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ error: "Panier vide" });
-    }
-
+    // Construction des line_items pour Stripe
     const lineItems = items.map((item) => ({
       price_data: {
-        currency: "eur",
+        currency: 'eur',
         product_data: {
           name: item.label,
-          metadata: { serviceType: item.serviceType || "prestation" }
         },
-        unit_amount: Math.round(item.price * 100),
+        unit_amount: Math.round(item.price * 100), // Stripe utilise les centimes
       },
-      quantity: item.quantity || 1,
+      quantity: item.quantity,
     }));
 
+    // Ajouter les frais de déplacement si > 15 km
+    let deliveryFee = 0;
     if (deliveryKm > 15) {
-      const fees = (deliveryKm - 15) * 0.50;
+      deliveryFee = (deliveryKm - 15) * 0.50;
       lineItems.push({
         price_data: {
-          currency: "eur",
-          product_data: { name: `Frais de déplacement (${deliveryKm} km)` },
-          unit_amount: Math.round(fees * 100),
+          currency: 'eur',
+          product_data: {
+            name: `Frais de déplacement (${deliveryKm} km)`,
+          },
+          unit_amount: Math.round(deliveryFee * 100),
         },
         quantity: 1,
       });
     }
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
+      payment_method_types: ['card'],
       line_items: lineItems,
-      mode: "payment",
-      success_url: `${process.env.CLIENT_URL || "https://rg-equitation-education-equine.fr"}/compte?success=true`,
-      cancel_url: `${process.env.CLIENT_URL || "https://rg-equitation-education-equine.fr"}/panier?canceled=true`,
+      mode: 'payment',
+      success_url: `${process.env.FRONTEND_URL || 'https://rg-equitation-education-equine.fr'}/compte?success=true`,
+      cancel_url: `${process.env.FRONTEND_URL || 'https://rg-equitation-education-equine.fr'}/panier?canceled=true`,
+      customer_email: userEmail,
       metadata: {
-        userId: userId || "guest",
-        userEmail: userEmail || "guest@email.com",
-        deliveryKm: String(deliveryKm || 0),
-        items: JSON.stringify(items.map((i) => ({ label: i.label, quantity: i.quantity || 1 }))),
+        userId: userId,
+        deliveryKm: deliveryKm.toString(),
+        items: JSON.stringify(items.map(i => ({ label: i.label, quantity: i.quantity, serviceType: i.serviceType })))
       },
     });
 
     res.json({ id: session.id });
   } catch (error) {
-    console.error("❌ Erreur Stripe :", error);
-    res.status(500).json({ error: error.message || "Erreur interne" });
+    console.error('Erreur Stripe:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// ✅ Servir le frontend
-app.use(express.static(join(__dirname, "dist")));
+// ============================================
+// ROUTE : Calculer la distance réelle
+// ============================================
+app.post('/api/calculate-distance', async (req, res) => {
+  const { address } = req.body;
+  
+  if (!address || address.length < 5) {
+    return res.status(400).json({ error: 'Adresse invalide' });
+  }
 
-app.get("*", (req, res) => {
-  if (req.path.startsWith("/api")) return;
-  res.sendFile(join(__dirname, "dist", "index.html"));
+  const instructorAddress = '24 rue Minvielle, Bordeaux, France';
+  
+  try {
+    // 1. Géocoder l'adresse utilisateur
+    const geoUserResponse = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`,
+      { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
+    );
+    const userData = await geoUserResponse.json();
+
+    if (!userData || userData.length === 0) {
+      return res.status(404).json({ error: 'Adresse utilisateur non trouvée. Vérifiez votre saisie.' });
+    }
+
+    const userLat = parseFloat(userData[0].lat);
+    const userLon = parseFloat(userData[0].lon);
+
+    // 2. Géocoder l'adresse du moniteur
+    const geoInstructorResponse = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(instructorAddress)}&format=json&limit=1`,
+      { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
+    );
+    const instructorData = await geoInstructorResponse.json();
+
+    if (!instructorData || instructorData.length === 0) {
+      return res.status(404).json({ error: 'Adresse du moniteur non trouvée.' });
+    }
+
+    const instructorLat = parseFloat(instructorData[0].lat);
+    const instructorLon = parseFloat(instructorData[0].lon);
+
+    // 3. Calculer la distance avec OSRM (route réelle)
+    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLon},${userLat};${instructorLon},${instructorLat}?overview=false`;
+    const osrmResponse = await fetch(osrmUrl);
+    const osrmData = await osrmResponse.json();
+
+    if (!osrmData.routes || osrmData.routes.length === 0) {
+      return res.status(404).json({ error: 'Impossible de calculer l\'itinéraire.' });
+    }
+
+    const distanceMeters = osrmData.routes[0].distance;
+    const distanceKm = Math.round(distanceMeters / 1000);
+
+    res.json({ 
+      distanceKm, 
+      address: userData[0].display_name,
+      instructorAddress: instructorData[0].display_name
+    });
+
+  } catch (error) {
+    console.error('Erreur calcul distance:', error);
+    res.status(500).json({ error: 'Erreur lors du calcul de la distance.' });
+  }
 });
 
+// ============================================
+// ROUTE : Webhook Stripe (optionnel)
+// ============================================
+app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  } catch (err) {
+    console.error('Webhook error:', err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  // Gérer les événements
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    console.log('Paiement réussi pour:', session.customer_email);
+    // Ici tu peux ajouter des crédits à l'utilisateur, etc.
+  }
+
+  res.json({ received: true });
+});
+
+// ============================================
+// Démarrer le serveur
+// ============================================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`✅ Serveur démarré sur le port ${PORT}`);
+});
