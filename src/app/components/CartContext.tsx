@@ -36,18 +36,26 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [deliveryKm, setDeliveryKm] = useState<number>(0);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState<string | null>(null);
   const { user, addCredits, addPurchase } = useAuth();
+
+  const showNotification = (msg: string) => {
+    setNotification(msg);
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const addItem = (label: string, price: number, serviceType: CartItem["serviceType"]) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.label === label && i.price === price && i.serviceType === serviceType);
       if (existing) {
+        showNotification(`"${label}" (x${existing.quantity + 1})`);
         return prev.map((i) =>
           i.label === label && i.price === price && i.serviceType === serviceType
             ? { ...i, quantity: i.quantity + 1 }
             : i
         );
       }
+      showNotification(`"${label}" ajouté au panier`);
       return [
         ...prev,
         {
@@ -76,7 +84,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const closeCart = () => setIsOpen(false);
 
   const proceedToCheckout = async () => {
-    // ✅ L'utilisateur DOIT être connecté
     if (!user) {
       alert("Veuillez vous connecter pour passer commande.");
       return;
@@ -92,11 +99,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items: items.map((i) => ({ 
-            label: i.label, 
-            price: i.price, 
-            quantity: i.quantity, 
-            serviceType: i.serviceType 
+          items: items.map((i) => ({
+            label: i.label,
+            price: i.price,
+            quantity: i.quantity,
+            serviceType: i.serviceType,
           })),
           deliveryKm,
           userId: user.id,
@@ -143,6 +150,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         loading,
       }}
     >
+      {/* ✅ Toast intégré directement ici - pas besoin de fichier séparé */}
+      {notification && (
+        <div className="fixed bottom-8 right-8 z-50 animate-slide-up">
+          <div className="bg-[#1C1814] text-[#F5EFE4] px-6 py-4 rounded-sm shadow-lg flex items-center gap-3 border-l-4 border-[#C09A3C]">
+            <span className="text-[13px] tracking-wide">✓ {notification}</span>
+            <button
+              onClick={() => setNotification(null)}
+              className="text-[#F5EFE4]/50 hover:text-[#F5EFE4] transition-colors"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
       {children}
     </CartContext.Provider>
   );
