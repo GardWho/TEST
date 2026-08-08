@@ -46,7 +46,7 @@ export function Propos() {
             </h1>
             <div className="space-y-6 text-[15px] text-[#1C1814]/60 leading-relaxed font-light">
               <p>
-                Avec plus de <strong>25 ans d'expérience</strong> dans le milieu équestre, j'ai développé une approche globale du cheval, alliant technique, bien-être et compréhension mutuelle.
+                Avec plus de 25 ans d'expérience dans le milieu équestre, j'ai développé une approche globale du cheval, alliant technique, bien-être et compréhension mutuelle.
               </p>
               <p>
                 Mon parcours m'a menée à travailler auprès de nombreux cavaliers, du loisir à la compétition, en passant par l'éducation du jeune cheval et la rééducation des chevaux difficiles.
@@ -74,7 +74,6 @@ export function Propos() {
           />
           <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#F8F3EC]/20" />
           <div className="absolute bottom-8 left-8 text-[10px] tracking-[0.35em] uppercase text-white/60">
-            RG Connexion Équine
           </div>
         </div>
       </section>
