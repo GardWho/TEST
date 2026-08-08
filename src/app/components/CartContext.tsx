@@ -76,6 +76,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const closeCart = () => setIsOpen(false);
 
   const proceedToCheckout = async () => {
+    // ✅ L'utilisateur DOIT être connecté
     if (!user) {
       alert("Veuillez vous connecter pour passer commande.");
       return;
@@ -91,7 +92,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items: items.map((i) => ({ label: i.label, price: i.price, quantity: i.quantity, serviceType: i.serviceType })),
+          items: items.map((i) => ({ 
+            label: i.label, 
+            price: i.price, 
+            quantity: i.quantity, 
+            serviceType: i.serviceType 
+          })),
           deliveryKm,
           userId: user.id,
           userEmail: user.email,
@@ -111,6 +117,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const { error } = await stripe.redirectToCheckout({ sessionId: session.id });
       if (error) throw new Error(error.message);
     } catch (err: any) {
+      console.error("Erreur paiement :", err);
       alert(err.message || "Une erreur est survenue lors du paiement.");
     } finally {
       setLoading(false);
