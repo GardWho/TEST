@@ -1,6 +1,6 @@
 import { RouterProvider } from "react-router-dom";
 import { router } from "./routes";
-import { AuthProvider } from "./AuthContext";
+import { AuthProvider } from "../AuthContext";
 import { CartProvider } from "./components/CartContext";
 
 export default function App() {
