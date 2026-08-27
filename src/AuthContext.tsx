@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { createClient, User, Session } from "@supabase/supabase-js";
-import { config } from "../config.ts";
+import { config } from "./config.ts";
 
 // ✅ Utilisation des valeurs depuis config.ts (généré automatiquement)
 const supabase = createClient(
