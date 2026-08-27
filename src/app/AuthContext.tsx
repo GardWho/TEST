@@ -66,7 +66,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const createUserData = (user: User): AppUser => ({
     id: user.id,
     email: user.email || "",
-    name: user.user_metadata?.name || "Utilisateur",
+    // ✅ MODIFICATION ICI : récupère full_name OU name en fallback
+    name: user.user_metadata?.full_name || user.user_metadata?.name || "Utilisateur",
     credits: 0,
     purchases: [],
     bookings: [],
@@ -117,7 +118,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       email,
       password,
       options: {
-        data: { name },
+        // ✅ MODIFICATION ICI : on envoie "full_name" comme attendu par le trigger
+        data: { full_name: name },
       },
     });
     if (error) throw new Error(error.message);
