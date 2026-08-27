@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { useAuth } from "../../AuthContext";
 import { loadStripe } from "@stripe/stripe-js";
+import { config } from "../../config"; // ✅ Import du fichier config généré
 
 export type CartItem = {
   id: string;
@@ -29,7 +30,8 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+// ✅ Utilisation de config.stripePublishableKey
+const stripePromise = loadStripe(config.stripePublishableKey);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([]);
@@ -150,7 +152,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         loading,
       }}
     >
-      {/* ✅ Toast intégré directement ici - pas besoin de fichier séparé */}
       {notification && (
         <div className="fixed bottom-8 right-8 z-50 animate-slide-up">
           <div className="bg-[#1C1814] text-[#F5EFE4] px-6 py-4 rounded-sm shadow-lg flex items-center gap-3 border-l-4 border-[#C09A3C]">
