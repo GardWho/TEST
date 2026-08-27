@@ -6,7 +6,7 @@ import path from "path";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
-  // ✅ Générer un fichier de configuration qui sera inclus dans le build
+  // Génère src/config.ts avec les variables du .env
   const configContent = `
 // Ce fichier est généré automatiquement par Vite
 export const config = {
@@ -16,10 +16,9 @@ export const config = {
 };
 `;
 
-  // Écrire le fichier dans src/config.ts (ou .js)
   const configPath = path.resolve(process.cwd(), "src/config.ts");
   fs.writeFileSync(configPath, configContent);
-  console.log(`✅ Fichier config.ts généré avec succès !`);
+  console.log("✅ Fichier config.ts généré avec succès !");
 
   return {
     plugins: [react()],
