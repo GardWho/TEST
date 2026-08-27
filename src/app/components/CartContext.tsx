@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../../AuthContext";
 import { loadStripe } from "@stripe/stripe-js";
 
 export type CartItem = {
