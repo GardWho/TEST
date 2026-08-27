@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { createClient, User, Session } from "@supabase/supabase-js";
+import { config } from "../config.ts"; // ✅ Import du fichier généré
 
+// ✅ Utilisation des valeurs depuis le fichier config.ts
 const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
+  config.supabaseUrl,
+  config.supabaseAnonKey
 );
 
 type Purchase = {
@@ -66,7 +68,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const createUserData = (user: User): AppUser => ({
     id: user.id,
     email: user.email || "",
-    // ✅ MODIFICATION ICI : récupère full_name OU name en fallback
     name: user.user_metadata?.full_name || user.user_metadata?.name || "Utilisateur",
     credits: 0,
     purchases: [],
@@ -118,7 +119,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       email,
       password,
       options: {
-        // ✅ MODIFICATION ICI : on envoie "full_name" comme attendu par le trigger
         data: { full_name: name },
       },
     });
