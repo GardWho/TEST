@@ -5,7 +5,7 @@ const I = {
   hero:    "/images/acceuil/acceuil3.jpg",
   golden:  "/images/acceuil/acceuil4.jpg",
   riding:  "/images/professionnels/professionnels3.jpg",
-  quote:   "/images/bannières/banniere-05.webp",
+  quote:   "/images/bannières/banniere-04.webp",
 };
 
 const LogoCoaching = "/images/logo-prestations/coaching-cavalier.png";
@@ -91,9 +91,10 @@ export function Home() {
           src={I.hero}
           alt="Cavalière dans la forêt"
           onLoad={() => setImgLoaded(true)}
-          className="absolute inset-0 w-full h-full object-cover object-[center_15%] transition-opacity duration-700"
+          className="absolute inset-0 w-full h-full object-cover object-[center_50%] transition-opacity duration-700"
           style={{ opacity: imgLoaded ? 0.72 : 0, filter: "sepia(18%) saturate(1.1)" }}
         />
+
         <div className="absolute inset-0 bg-gradient-to-t from-[#1C1814]/80 via-transparent to-[#1C1814]/20" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#1C1814]/40 to-transparent" />
 
@@ -110,7 +111,7 @@ export function Home() {
                 color: "#F5EFE4",
               }}
             >
-              R.G EQUITATION ET EDUCATION EQUINE
+              R.G. ÉQUITATION & ÉDUCATION ÉQUINE
             </h1>
 
             <div className="flex items-center gap-6 flex-wrap">
@@ -215,7 +216,7 @@ export function Home() {
         <div className="relative z-10 max-w-3xl mx-auto">
           <div className="w-px h-10 bg-[#C09A3C]/50 mx-auto mb-8" />
           <blockquote className="text-2xl md:text-3xl font-normal italic text-[#F5EFE4] leading-[1.2] mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>
-            « L'équitation est une danse d'équilibre qui se construit ensemble. »
+            « L'équitation est une danse d'équilibre qui se construit entre le cheval et le cavalier. »
           </blockquote>
           <div className="w-px h-10 bg-[#C09A3C]/50 mx-auto mb-6" />
           <Link to="/contact" className="group inline-flex items-center gap-3 px-8 py-3 bg-[#C09A3C] text-[#FDFAF5] text-[11px] tracking-[0.25em] uppercase hover:bg-[#F5EFE4] hover:text-[#1C1814] transition-colors duration-300">

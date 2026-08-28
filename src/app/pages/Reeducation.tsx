@@ -15,8 +15,9 @@ export function ReeducationPage() {
           src={heroImg}
           alt="Rééducation équine"
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: "sepia(18%) saturate(0.9)", opacity: 0.6 }}
+          style={{ filter: "sepia(18%) saturate(0.9)", opacity: 0.6, objectPosition: "center top" }}
         />
+        
         <div className="absolute inset-0 bg-gradient-to-t from-[#1C1814]/70 via-transparent to-[#1C1814]/30" />
         <div className="relative z-10 h-full flex flex-col justify-end px-10 md:px-20 pb-10">
           <p className="text-[9px] tracking-[0.48em] uppercase mb-3" style={{ color: "#C09A3C" }}>

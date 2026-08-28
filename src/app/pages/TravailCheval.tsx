@@ -1,7 +1,7 @@
 import { useCart } from "../components/CartContext";
 
 const heroImg =
-  "/images/travail-cheval/travail-cheval.jpg";
+  "/images/bannières/banniere-06.webp";
 
 // Nouveaux tarifs
 const items = [

@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import { useCart } from "../components/CartContext";
 import { useState } from "react";
 
-const heroImg = "/images/cours-collectifs/cours-collectifs.png";
+const heroImg = "/images/bannières/banniere-01.webp";
 const coursPartImg = "/images/cours-part/cours-part.jpg";
-const bannerImg = "/images/cours-collectifs/cours-collectifs2.JPG";
+const bannerImg = "/images/cours-collectifs/cours-collectifs.png";
 
 const coursParticuliers = [
   { label: "Cours 1h", price: 65 },

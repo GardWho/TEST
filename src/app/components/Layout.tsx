@@ -268,6 +268,10 @@ export function Layout() {
             <img src="/images/logo-fnoir.png" alt="R.G. ÉQUITATION & ÉDUCATION ÉQUINE" className="h-12 w-auto object-contain" />
           </div>
           <div className="text-center">
+            <p className="text-[12px] tracking-wider" style={{ color: "rgba(245,239,228,0.3)" }}>SUIVEZ-NOUS SUR INSTAGRAM</p>
+              <a href="https://www.instagram.com/rgequitationeducationequine" target="_blank" rel="noopener noreferrer" className="text-[14px] font-light text-[#1C1814]/60 hover:text-[#C09A3C] transition-colors">
+                @rgequitationeducationequine
+              </a>
             <p className="text-[12px] tracking-wider" style={{ color: "rgba(245,239,228,0.3)" }}>© 2023 R.G. ÉQUITATION & ÉDUCATION ÉQUINE</p>
             <p className="text-[11px] tracking-wider mt-1" style={{ color: "rgba(245,239,228,0.35)" }}>SIRET 978 982 866 00011</p>
           </div>
