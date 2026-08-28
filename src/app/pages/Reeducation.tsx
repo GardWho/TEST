@@ -15,7 +15,7 @@ export function ReeducationPage() {
           src={heroImg}
           alt="Rééducation équine"
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ filter: "sepia(18%) saturate(0.9)", opacity: 0.6, objectPosition: "center 10%" }}
+          style={{ filter: "sepia(18%) saturate(0.9)", opacity: 0.6, objectPosition: "center 30%" }}
         />
         
         <div className="absolute inset-0 bg-gradient-to-t from-[#1C1814]/70 via-transparent to-[#1C1814]/30" />
