@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const Stripe = require('stripe');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const app = express();
@@ -21,19 +22,17 @@ app.post('/api/create-checkout-session', async (req, res) => {
   }
 
   try {
-    // Construction des line_items pour Stripe
     const lineItems = items.map((item) => ({
       price_data: {
         currency: 'eur',
         product_data: {
           name: item.label,
         },
-        unit_amount: Math.round(item.price * 100), // Stripe utilise les centimes
+        unit_amount: Math.round(item.price * 100),
       },
       quantity: item.quantity,
     }));
 
-    // Ajouter les frais de déplacement si > 15 km
     let deliveryFee = 0;
     if (deliveryKm > 15) {
       deliveryFee = (deliveryKm - 15) * 0.50;
@@ -83,7 +82,6 @@ app.post('/api/calculate-distance', async (req, res) => {
   const instructorAddress = '24 rue Minvielle, Bordeaux, France';
   
   try {
-    // 1. Géocoder l'adresse utilisateur
     const geoUserResponse = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`,
       { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
@@ -97,7 +95,6 @@ app.post('/api/calculate-distance', async (req, res) => {
     const userLat = parseFloat(userData[0].lat);
     const userLon = parseFloat(userData[0].lon);
 
-    // 2. Géocoder l'adresse du moniteur
     const geoInstructorResponse = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(instructorAddress)}&format=json&limit=1`,
       { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
@@ -111,7 +108,6 @@ app.post('/api/calculate-distance', async (req, res) => {
     const instructorLat = parseFloat(instructorData[0].lat);
     const instructorLon = parseFloat(instructorData[0].lon);
 
-    // 3. Calculer la distance avec OSRM (route réelle)
     const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLon},${userLat};${instructorLon},${instructorLat}?overview=false`;
     const osrmResponse = await fetch(osrmUrl);
     const osrmData = await osrmResponse.json();
@@ -136,6 +132,64 @@ app.post('/api/calculate-distance', async (req, res) => {
 });
 
 // ============================================
+// ROUTE : Envoyer un email de contact (SMTP IONOS)
+// ============================================
+app.post('/api/send-email', async (req, res) => {
+  const { nom, prenom, telephone, categorie, message } = req.body;
+
+  // Validation des champs obligatoires
+  if (!nom || !prenom || !telephone || !message) {
+    return res.status(400).json({ error: 'Tous les champs sont requis' });
+  }
+
+  try {
+    // 1. Créer le transporteur SMTP
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST || 'smtp.ionos.fr',
+      port: parseInt(process.env.SMTP_PORT) || 587,
+      secure: false, // true pour 465, false pour 587
+      auth: {
+        user: process.env.SMTP_USER || 'contact@rg-equitation-education-equine.fr',
+        pass: process.env.SMTP_PASSWORD,
+      },
+    });
+
+    // 2. Préparer le contenu de l'email
+    const mailOptions = {
+      from: `"Formulaire de contact" <${process.env.SMTP_USER}>`,
+      to: 'contact@rg-equitation-education-equine.fr',
+      subject: `Nouveau message de ${prenom} ${nom}`,
+      text: `
+Nom : ${nom}
+Prénom : ${prenom}
+Téléphone : ${telephone}
+Catégorie : ${categorie || 'Non précisée'}
+
+Message :
+${message}
+      `,
+      html: `
+<h2>Nouveau message de contact</h2>
+<p><strong>Nom :</strong> ${nom}</p>
+<p><strong>Prénom :</strong> ${prenom}</p>
+<p><strong>Téléphone :</strong> ${telephone}</p>
+<p><strong>Catégorie :</strong> ${categorie || 'Non précisée'}</p>
+<p><strong>Message :</strong></p>
+<p>${message.replace(/\n/g, '<br>')}</p>
+      `,
+    };
+
+    // 3. Envoyer l'email
+    await transporter.sendMail(mailOptions);
+    res.status(200).json({ success: true, message: 'Email envoyé avec succès' });
+
+  } catch (error) {
+    console.error('Erreur SMTP:', error);
+    res.status(500).json({ error: 'Erreur lors de l\'envoi de l\'email. Vérifiez vos identifiants SMTP.' });
+  }
+});
+
+// ============================================
 // ROUTE : Webhook Stripe (optionnel)
 // ============================================
 app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
@@ -151,11 +205,9 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  // Gérer les événements
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     console.log('Paiement réussi pour:', session.customer_email);
-    // Ici tu peux ajouter des crédits à l'utilisateur, etc.
   }
 
   res.json({ received: true });
