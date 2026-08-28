@@ -3,7 +3,7 @@
 @import './theme.css';
 
 p {
-  font-size: 1.1rem;      /* ajuste la valeur selon ton besoin */
+  font-size: 1 rem;      /* ajuste la valeur selon ton besoin */
   line-height: 1.7;       /* espacement des lignes */
 }
 

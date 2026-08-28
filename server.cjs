@@ -70,24 +70,44 @@ app.post('/api/create-checkout-session', async (req, res) => {
 });
 
 // ============================================
-// ROUTE : Calculer la distance (à vol d'oiseau)
+// ROUTE : Calculer la distance (CORRIGÉE)
 // ============================================
 app.post('/api/calculate-distance', async (req, res) => {
   const { address } = req.body;
-  
+
   if (!address || address.length < 5) {
     return res.status(400).json({ error: 'Adresse invalide' });
   }
 
   const instructorAddress = '24 rue Minvielle, Bordeaux, France';
-  
+
   try {
-    // Géocodage utilisateur
-    const geoUserResponse = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`,
-      { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
-    );
-    const userData = await geoUserResponse.json();
+    // 1. Géocodage de l'adresse utilisateur
+    const geoUserUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=jsonv2&limit=1`;
+    console.log('🔍 Requête utilisateur:', geoUserUrl);
+
+    const geoUserResponse = await fetch(geoUserUrl, {
+      headers: {
+        'User-Agent': 'RG-EQUITATION/1.0',
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!geoUserResponse.ok) {
+      const text = await geoUserResponse.text();
+      console.error('Erreur Nominatim utilisateur:', text);
+      return res.status(500).json({ error: 'Erreur lors du géocodage de votre adresse.' });
+    }
+
+    let userData;
+    try {
+      userData = await geoUserResponse.json();
+    } catch (parseError) {
+      console.error('Erreur de parsing JSON utilisateur:', parseError);
+      const text = await geoUserResponse.text();
+      console.error('Réponse brute:', text);
+      return res.status(500).json({ error: 'Réponse inattendue du service de géocodage.' });
+    }
 
     if (!userData || userData.length === 0) {
       return res.status(404).json({ error: 'Adresse utilisateur non trouvée. Vérifiez votre saisie.' });
@@ -96,12 +116,32 @@ app.post('/api/calculate-distance', async (req, res) => {
     const userLat = parseFloat(userData[0].lat);
     const userLon = parseFloat(userData[0].lon);
 
-    // Géocodage moniteur
-    const geoInstructorResponse = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(instructorAddress)}&format=json&limit=1`,
-      { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
-    );
-    const instructorData = await geoInstructorResponse.json();
+    // 2. Géocodage de l'adresse du moniteur
+    const geoInstructorUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(instructorAddress)}&format=jsonv2&limit=1`;
+    console.log('🔍 Requête moniteur:', geoInstructorUrl);
+
+    const geoInstructorResponse = await fetch(geoInstructorUrl, {
+      headers: {
+        'User-Agent': 'RG-EQUITATION/1.0',
+        'Accept': 'application/json',
+      },
+    });
+
+    if (!geoInstructorResponse.ok) {
+      const text = await geoInstructorResponse.text();
+      console.error('Erreur Nominatim moniteur:', text);
+      return res.status(500).json({ error: 'Erreur lors du géocodage de l\'adresse du moniteur.' });
+    }
+
+    let instructorData;
+    try {
+      instructorData = await geoInstructorResponse.json();
+    } catch (parseError) {
+      console.error('Erreur de parsing JSON moniteur:', parseError);
+      const text = await geoInstructorResponse.text();
+      console.error('Réponse brute:', text);
+      return res.status(500).json({ error: 'Réponse inattendue du service de géocodage.' });
+    }
 
     if (!instructorData || instructorData.length === 0) {
       return res.status(404).json({ error: 'Adresse du moniteur non trouvée.' });
@@ -110,22 +150,23 @@ app.post('/api/calculate-distance', async (req, res) => {
     const instructorLat = parseFloat(instructorData[0].lat);
     const instructorLon = parseFloat(instructorData[0].lon);
 
-    // Calcul de la distance à vol d'oiseau (Haversine)
+    // 3. Calcul de la distance (formule de Haversine)
     const toRad = (deg) => deg * Math.PI / 180;
     const R = 6371; // Rayon de la Terre en km
 
     const dLat = toRad(instructorLat - userLat);
     const dLon = toRad(instructorLon - userLon);
 
-    const a = Math.sin(dLat/2) ** 2 +
-              Math.cos(toRad(userLat)) * Math.cos(toRad(instructorLat)) * Math.sin(dLon/2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const a = Math.sin(dLat / 2) ** 2 +
+              Math.cos(toRad(userLat)) * Math.cos(toRad(instructorLat)) *
+              Math.sin(dLon / 2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distanceKm = Math.round(R * c);
 
-    res.json({ 
-      distanceKm, 
+    res.json({
+      distanceKm,
       address: userData[0].display_name,
-      instructorAddress: instructorData[0].display_name
+      instructorAddress: instructorData[0].display_name,
     });
 
   } catch (error) {
