@@ -238,9 +238,9 @@ export function Home() {
             <p className="text-[14px] text-[#1C1814]/60 leading-relaxed font-light max-w-md">sur votre lieu d'équitation - Bordeaux et alentours (15 premiers km inclus).</p>
             <div className="mt-6 border border-[#C09A3C]/25 p-5 w-full max-w-md">
               <p className="text-[9px] tracking-[0.4em] uppercase text-[#C09A3C] mb-2">SUIVEZ-NOUS SUR INSTAGRAM</p>
-              <a href="https://www.instagram.com/rgequitationeducationequine" target="_blank" rel="noopener noreferrer" className="text-[14px] font-light text-[#1C1814]/60 hover:text-[#C09A3C] transition-colors">
-                @rgequitationeducationequine
-              </a>
+<a href="https://www.instagram.com/rgequitationeducationequine" target="_blank" rel="noopener noreferrer" className="text-[14px] font-light text-[#C09A3C]">
+  @rgequitationeducationequine
+</a>
             </div>
           </div>
         </div>
