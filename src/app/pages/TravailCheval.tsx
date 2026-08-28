@@ -70,7 +70,7 @@ export function TravailChevalPage() {
         </section>
 
         <p className="text-[11px] text-[#1C1814]/40 font-light italic border-t pt-6 mt-12 border-[#C09A3C]/15">
-          Déplacement inclus dans les 15 premiers kilomètres · Au-delà : 0,35 € par kilomètre
+          Déplacement inclus dans les 15 premiers kilomètres · Au-delà : 0,50 € par kilomètre
         </p>
       </div>
     </div>
