@@ -100,7 +100,7 @@ export function Home() {
 
         <div className="relative z-10 h-full flex flex-col justify-end px-10 md:px-20 pb-16 md:pb-20">
           <div className="max-w-[680px]">
-            <p className="text-[9px] tracking-[0.5em] uppercase mb-6" style={{ color: "#C09A3C" }}>
+            <p className="text-[8px] tracking-[0.5em] uppercase mb-6" style={{ color: "#C09A3C" }}>
               Enseignante Équestre Diplômée d'État
             </p>
             <h1
