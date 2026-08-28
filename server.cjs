@@ -137,24 +137,21 @@ app.post('/api/calculate-distance', async (req, res) => {
 app.post('/api/send-email', async (req, res) => {
   const { nom, prenom, telephone, categorie, message } = req.body;
 
-  // Validation des champs obligatoires
   if (!nom || !prenom || !telephone || !message) {
     return res.status(400).json({ error: 'Tous les champs sont requis' });
   }
 
   try {
-    // 1. Créer le transporteur SMTP
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.ionos.fr',
       port: parseInt(process.env.SMTP_PORT) || 587,
-      secure: false, // true pour 465, false pour 587
+      secure: false,
       auth: {
         user: process.env.SMTP_USER || 'contact@rg-equitation-education-equine.fr',
         pass: process.env.SMTP_PASSWORD,
       },
     });
 
-    // 2. Préparer le contenu de l'email
     const mailOptions = {
       from: `"Formulaire de contact" <${process.env.SMTP_USER}>`,
       to: 'contact@rg-equitation-education-equine.fr',
@@ -179,7 +176,6 @@ ${message}
       `,
     };
 
-    // 3. Envoyer l'email
     await transporter.sendMail(mailOptions);
     res.status(200).json({ success: true, message: 'Email envoyé avec succès' });
 
