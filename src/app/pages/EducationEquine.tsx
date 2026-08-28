@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 const heroImg = "/images/bannières/banniere-05.webp";
-const sideImg = "/images/débourage-education/débourage-education2.jpg"; // ← image à droite
+const sideImg = "/images/débourage-education/débourage-education2.jpg";
 
 export function EducationEquinePage() {
   return (
