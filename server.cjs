@@ -70,7 +70,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
 });
 
 // ============================================
-// ROUTE : Calculer la distance (CORRIGÉE)
+// ROUTE : Calculer la distance (aller-retour)
 // ============================================
 app.post('/api/calculate-distance', async (req, res) => {
   const { address } = req.body;
@@ -161,10 +161,14 @@ app.post('/api/calculate-distance', async (req, res) => {
               Math.cos(toRad(userLat)) * Math.cos(toRad(instructorLat)) *
               Math.sin(dLon / 2) ** 2;
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distanceKm = Math.round(R * c);
+    const distanceSimple = Math.round(R * c);
+
+    // ✅ Doubler pour l'aller-retour
+    const distanceKm = distanceSimple * 2;
 
     res.json({
-      distanceKm,
+      distanceKm,          // ← Aller-retour (utilisé pour les frais de déplacement)
+      distanceSimple,      // ← Optionnel, pour information
       address: userData[0].display_name,
       instructorAddress: instructorData[0].display_name,
     });
