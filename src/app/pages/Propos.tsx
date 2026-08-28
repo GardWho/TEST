@@ -2,35 +2,36 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 
-// ✅ Image recadrée pour cacher la tête
 const HERO_IMG = "/images/professionnels/professionnels.jpg";
 
-// Images de la galerie (1 à 15)
 const galerieImages = Array.from({ length: 15 }, (_, i) => ({
   src: `/images/galerie/galerie${i + 1}.jpg`,
   alt: `Galerie ${i + 1}`,
 }));
 
-const displayImages = galerieImages;
+// Image de secours si une image est manquante
+const FALLBACK_IMG = "/images/galerie/galerie1.jpg"; // Assure-toi qu'elle existe
 
 export function Propos() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % displayImages.length);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % galerieImages.length);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = FALLBACK_IMG;
+  };
+
   return (
     <div className="bg-[#F8F3EC]">
-
-      {/* ── HERO split‑screen ── */}
+      {/* HERO split-screen */}
       <section className="min-h-screen grid grid-cols-1 md:grid-cols-2">
         <div className="flex flex-col justify-center px-10 md:px-20 lg:px-28 pb-20 md:pb-0 pt-24 md:pt-28 order-2 md:order-1">
           <div className="max-w-lg">
-            {/* ✅ PARCOURS en ligne - sans "Approche" doré */}
             <p className="text-[9px] tracking-[0.35em] uppercase text-[#C09A3C] mb-10 flex flex-wrap gap-2">
               <span>Parcours</span>
               <span className="text-[#C09A3C]/40">·</span>
@@ -57,7 +58,6 @@ export function Propos() {
               <p>
                 Je crois profondément qu'un cheval ne doit jamais être contraint mais compris. C'est pourquoi je place la relation, la confiance et le respect au cœur de mon travail.
               </p>
-              {/* ✅ Deuxième paragraphe centré */}
               <p>
                 À travers mes cours, je souhaite transmettre bien plus qu'une technique : une philosophie de l'équitation qui replace le cheval en tant que partenaire sensible, dans une recherche constante de légèreté et d'harmonie.
               </p>
@@ -65,20 +65,19 @@ export function Propos() {
           </div>
         </div>
 
-        {/* ✅ Colonne droite : image recadrée pour cacher la tête */}
         <div className="relative min-h-[60vw] md:min-h-screen order-1 md:order-2 bg-[#E8DDD0] overflow-hidden">
           <img
             src={HERO_IMG}
             alt="Professionnels — RG Connexion Équine"
             className="absolute inset-0 w-full h-full object-cover object-[center_20%]"
+            onError={handleImageError}
           />
           <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#F8F3EC]/20" />
-          <div className="absolute bottom-8 left-8 text-[10px] tracking-[0.35em] uppercase text-white/60">
-          </div>
+          <div className="absolute bottom-8 left-8 text-[10px] tracking-[0.35em] uppercase text-white/60"></div>
         </div>
       </section>
 
-      {/* ── SECTION : Approche (sans le texte "Approche" doré) ── */}
+      {/* SECTION : Approche */}
       <section className="py-24 px-8 md:px-20 max-w-[1400px] mx-auto">
         <div className="max-w-4xl mx-auto">
           <h2
@@ -110,18 +109,19 @@ export function Propos() {
         </div>
       </section>
 
-      {/* ── GALERIE ── */}
+      {/* GALERIE */}
       <section className="py-24 px-8 md:px-14 max-w-[1500px] mx-auto">
         <div className="grid grid-cols-4 gap-3 items-end">
           <div className="col-span-2 h-[340px] overflow-hidden bg-[#D4C9B8] group relative">
             <img
-              src={displayImages[currentIndex].src}
-              alt={displayImages[currentIndex].alt}
+              src={galerieImages[currentIndex].src}
+              alt={galerieImages[currentIndex].alt}
               className="w-full h-full object-cover transition-opacity duration-1000"
               style={{ filter: "sepia(12%)" }}
+              onError={handleImageError}
             />
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-              {displayImages.slice(0, 5).map((_, index) => (
+              {galerieImages.slice(0, 5).map((_, index) => (
                 <div
                   key={index}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
@@ -133,28 +133,31 @@ export function Propos() {
           </div>
           <div className="h-[220px] overflow-hidden bg-[#D4C9B8] group">
             <img
-              src={displayImages[(currentIndex + 1) % displayImages.length].src}
-              alt={displayImages[(currentIndex + 1) % displayImages.length].alt}
+              src={galerieImages[(currentIndex + 1) % galerieImages.length].src}
+              alt={galerieImages[(currentIndex + 1) % galerieImages.length].alt}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               style={{ filter: "sepia(18%)" }}
+              onError={handleImageError}
             />
           </div>
           <div className="h-[280px] overflow-hidden bg-[#D4C9B8] group">
             <img
-              src={displayImages[(currentIndex + 2) % displayImages.length].src}
-              alt={displayImages[(currentIndex + 2) % displayImages.length].alt}
+              src={galerieImages[(currentIndex + 2) % galerieImages.length].src}
+              alt={galerieImages[(currentIndex + 2) % galerieImages.length].alt}
               className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
               style={{ filter: "sepia(14%)" }}
+              onError={handleImageError}
             />
           </div>
         </div>
         <div className="grid grid-cols-4 gap-3 mt-3">
           <div className="h-[200px] overflow-hidden bg-[#D4C9B8] group">
             <img
-              src={displayImages[(currentIndex + 3) % displayImages.length].src}
-              alt={displayImages[(currentIndex + 3) % displayImages.length].alt}
+              src={galerieImages[(currentIndex + 3) % galerieImages.length].src}
+              alt={galerieImages[(currentIndex + 3) % galerieImages.length].alt}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               style={{ filter: "sepia(16%)" }}
+              onError={handleImageError}
             />
           </div>
           <div className="col-span-2 h-[200px] flex flex-col items-center justify-center text-center px-8" style={{ background: "#EDE4D0" }}>
@@ -165,16 +168,17 @@ export function Propos() {
           </div>
           <div className="h-[200px] overflow-hidden bg-[#D4C9B8] group">
             <img
-              src={displayImages[(currentIndex + 4) % displayImages.length].src}
-              alt={displayImages[(currentIndex + 4) % displayImages.length].alt}
+              src={galerieImages[(currentIndex + 4) % galerieImages.length].src}
+              alt={galerieImages[(currentIndex + 4) % galerieImages.length].alt}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
               style={{ filter: "sepia(10%)" }}
+              onError={handleImageError}
             />
           </div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
+      {/* CTA */}
       <section className="py-24 text-center px-8 border-t" style={{ borderColor: "rgba(192,154,60,0.14)" }}>
         <p className="text-[9px] tracking-[0.48em] uppercase mb-7" style={{ color: "#C09A3C" }}>Commençons ensemble</p>
         <h2

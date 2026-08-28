@@ -2,6 +2,11 @@
 @import './fonts.css';
 @import './theme.css';
 
+p {
+  font-size: 1.1rem;      /* ajuste la valeur selon ton besoin */
+  line-height: 1.7;       /* espacement des lignes */
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;

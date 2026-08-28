@@ -70,7 +70,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
 });
 
 // ============================================
-// ROUTE : Calculer la distance réelle
+// ROUTE : Calculer la distance (à vol d'oiseau)
 // ============================================
 app.post('/api/calculate-distance', async (req, res) => {
   const { address } = req.body;
@@ -82,6 +82,7 @@ app.post('/api/calculate-distance', async (req, res) => {
   const instructorAddress = '24 rue Minvielle, Bordeaux, France';
   
   try {
+    // Géocodage utilisateur
     const geoUserResponse = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`,
       { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
@@ -95,6 +96,7 @@ app.post('/api/calculate-distance', async (req, res) => {
     const userLat = parseFloat(userData[0].lat);
     const userLon = parseFloat(userData[0].lon);
 
+    // Géocodage moniteur
     const geoInstructorResponse = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(instructorAddress)}&format=json&limit=1`,
       { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
@@ -108,16 +110,17 @@ app.post('/api/calculate-distance', async (req, res) => {
     const instructorLat = parseFloat(instructorData[0].lat);
     const instructorLon = parseFloat(instructorData[0].lon);
 
-    const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${userLon},${userLat};${instructorLon},${instructorLat}?overview=false`;
-    const osrmResponse = await fetch(osrmUrl);
-    const osrmData = await osrmResponse.json();
+    // Calcul de la distance à vol d'oiseau (Haversine)
+    const toRad = (deg) => deg * Math.PI / 180;
+    const R = 6371; // Rayon de la Terre en km
 
-    if (!osrmData.routes || osrmData.routes.length === 0) {
-      return res.status(404).json({ error: 'Impossible de calculer l\'itinéraire.' });
-    }
+    const dLat = toRad(instructorLat - userLat);
+    const dLon = toRad(instructorLon - userLon);
 
-    const distanceMeters = osrmData.routes[0].distance;
-    const distanceKm = Math.round(distanceMeters / 1000);
+    const a = Math.sin(dLat/2) ** 2 +
+              Math.cos(toRad(userLat)) * Math.cos(toRad(instructorLat)) * Math.sin(dLon/2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distanceKm = Math.round(R * c);
 
     res.json({ 
       distanceKm, 
