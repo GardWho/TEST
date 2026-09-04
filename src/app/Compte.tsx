@@ -17,8 +17,9 @@ times.push("19:00");
 const getDaysInMonth = (year: number, month: number) =>
   new Date(year, month + 1, 0).getDate();
 
+// ✅ Correction : alignement lundi = 0, mardi = 1, ..., dimanche = 6
 const getFirstDayOfMonth = (year: number, month: number) =>
-  new Date(year, month, 1).getDay();
+  (new Date(year, month, 1).getDay() + 6) % 7;
 
 export function ComptePage() {
   const { user, logout, useCredits, refreshProfile } = useAuth();
