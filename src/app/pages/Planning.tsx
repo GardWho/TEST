@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../AuthContext";
 import { supabase } from "../../lib/supabase";
 
+const HOURS = Array.from({ length: 12 }, (_, i) => i + 7); // 7h à 18h
+
 export function PlanningPage() {
   const { user, useCredits } = useAuth();
   const [bookings, setBookings] = useState<any[]>([]);
@@ -54,6 +56,10 @@ export function PlanningPage() {
     fetchBookings();
   };
 
+  const today = new Date().toISOString().split("T")[0];
+  const upcoming = bookings.filter(b => b.date >= today);
+  const past = bookings.filter(b => b.date < today);
+
   if (!user) {
     return (
       <div className="min-h-screen bg-[#F5EFE4] pt-20 px-8 md:px-14">
@@ -77,9 +83,11 @@ export function PlanningPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <h2 className="text-xl font-normal mb-4">Créneaux réservés</h2>
-          <ul className="space-y-2">
-            {bookings.map((b) => (
-              <li key={b.id} className="bg-white p-3 rounded-sm flex justify-between">
+          <h3 className="text-sm font-medium mb-2 text-[#C09A3C]">À venir</h3>
+          <ul className="space-y-2 mb-6">
+            {upcoming.length === 0 && <li className="text-sm text-gray-500">Aucune réservation à venir.</li>}
+            {upcoming.map((b) => (
+              <li key={b.id} className="bg-white p-3 rounded-sm flex justify-between items-center">
                 <span>{b.date} à {b.time} - {b.service}</span>
                 {b.user_id === user.id && (
                   <button
@@ -92,6 +100,15 @@ export function PlanningPage() {
                     Annuler
                   </button>
                 )}
+              </li>
+            ))}
+          </ul>
+          <h3 className="text-sm font-medium mb-2 text-[#C09A3C]">Passées</h3>
+          <ul className="space-y-2">
+            {past.length === 0 && <li className="text-sm text-gray-500">Aucune réservation passée.</li>}
+            {past.map((b) => (
+              <li key={b.id} className="bg-white p-3 rounded-sm flex justify-between">
+                <span>{b.date} à {b.time} - {b.service}</span>
               </li>
             ))}
           </ul>
@@ -114,9 +131,10 @@ export function PlanningPage() {
             className="w-full border p-2 mb-4"
           >
             <option value="">-- Choisir --</option>
-            {Array.from({ length: 12 }, (_, i) => `${9 + Math.floor(i / 2)}:${i % 2 ? "30" : "00"}`).map((time) => (
-              <option key={time} value={time}>{time}</option>
-            ))}
+            {HOURS.map((h) => {
+              const time = `${h.toString().padStart(2, "0")}:00`;
+              return <option key={time} value={time}>{time}</option>;
+            })}
           </select>
           <label className="block mb-2 text-sm">Service</label>
           <select

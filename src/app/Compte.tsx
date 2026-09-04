@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 
 type Tab = "profil" | "historique" | "credits" | "planning";
 
+const HOURS = Array.from({ length: 12 }, (_, i) => i + 7);
+
 export function ComptePage() {
   const { user, logout, useCredits } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("profil");
@@ -12,6 +14,7 @@ export function ComptePage() {
   const [selectedTime, setSelectedTime] = useState("09:00");
   const [selectedService, setSelectedService] = useState("Cours particulier");
   const [error, setError] = useState("");
+  const [bookings, setBookings] = useState<any[]>([]);
 
   if (!user) {
     return (
@@ -26,12 +29,22 @@ export function ComptePage() {
     );
   }
 
+  const fetchBookings = async () => {
+    const { data } = await supabase.from("bookings").select("*").eq("user_id", user.id);
+    setBookings(data || []);
+  };
+
+  // Charger les réservations quand on ouvre l'onglet planning
+  const handleTabClick = (tab: Tab) => {
+    setActiveTab(tab);
+    if (tab === "planning") fetchBookings();
+  };
+
   const handleBooking = async () => {
     if (!selectedDate) {
       alert("Veuillez sélectionner une date.");
       return;
     }
-    // Vérifier que le créneau n'est pas déjà pris
     const { data: existing } = await supabase
       .from("bookings")
       .select("*")
@@ -58,7 +71,12 @@ export function ComptePage() {
       return;
     }
     alert("Créneau réservé !");
+    fetchBookings();
   };
+
+  const today = new Date().toISOString().split("T")[0];
+  const upcoming = bookings.filter(b => b.date >= today);
+  const past = bookings.filter(b => b.date < today);
 
   return (
     <div className="min-h-screen bg-[#F5EFE4] pt-20 px-8 md:px-14">
@@ -75,7 +93,7 @@ export function ComptePage() {
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as Tab)}
+              onClick={() => handleTabClick(tab.id as Tab)}
               className={`pb-3 text-[11px] tracking-[0.25em] uppercase transition-colors ${
                 activeTab === tab.id ? "text-[#C09A3C] border-b-2 border-[#C09A3C]" : "text-[#1C1814]/40 hover:text-[#1C1814]/80"
               }`}
@@ -141,12 +159,10 @@ export function ComptePage() {
                   <div className="mb-4">
                     <label className="text-[10px] tracking-[0.3em] uppercase text-[#1C1814]/40">Horaire</label>
                     <select value={selectedTime} onChange={(e) => setSelectedTime(e.target.value)} className="w-full border-b border-[#C09A3C]/15 py-2 text-[14px] outline-none focus:border-[#C09A3C] transition-colors">
-                      <option value="09:00">09:00</option>
-                      <option value="10:00">10:00</option>
-                      <option value="11:00">11:00</option>
-                      <option value="14:00">14:00</option>
-                      <option value="15:00">15:00</option>
-                      <option value="16:00">16:00</option>
+                      {HOURS.map((h) => {
+                        const time = `${h.toString().padStart(2, "0")}:00`;
+                        return <option key={time} value={time}>{time}</option>;
+                      })}
                     </select>
                   </div>
                   <div className="mb-4">
@@ -168,6 +184,36 @@ export function ComptePage() {
                   <p className="text-[11px] text-[#1C1814]/40 mt-2">Il vous reste {user.credits} crédits</p>
                   {error && <p className="text-red-500 text-[12px] mt-2">{error}</p>}
                 </div>
+              </div>
+              <div className="mt-8">
+                <h3 className="text-lg font-normal mb-4">Mes réservations</h3>
+                <h4 className="text-sm font-medium mb-2 text-[#C09A3C]">À venir</h4>
+                <ul className="space-y-2">
+                  {upcoming.length === 0 && <li className="text-sm text-gray-500">Aucune réservation à venir.</li>}
+                  {upcoming.map((b) => (
+                    <li key={b.id} className="text-[13px] text-[#1C1814]/60 flex justify-between">
+                      <span>{b.date} à {b.time} · {b.service}</span>
+                      <button
+                        onClick={async () => {
+                          await supabase.from("bookings").delete().eq("id", b.id);
+                          fetchBookings();
+                        }}
+                        className="text-red-500 text-xs"
+                      >
+                        Annuler
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <h4 className="text-sm font-medium mb-2 mt-4 text-[#C09A3C]">Passées</h4>
+                <ul className="space-y-2">
+                  {past.length === 0 && <li className="text-sm text-gray-500">Aucune réservation passée.</li>}
+                  {past.map((b) => (
+                    <li key={b.id} className="text-[13px] text-[#1C1814]/60">
+                      {b.date} à {b.time} · {b.service}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           )}

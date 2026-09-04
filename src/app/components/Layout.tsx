@@ -76,11 +76,7 @@ export function Layout() {
 
   const getTextColor = (isActive: boolean) => {
     if (isActive) return "text-[#C09A3C]";
-    
-    if (isDarkTextPage) {
-      return "text-[#1C1814]/70 hover:text-[#1C1814]";
-    }
-    
+    if (isDarkTextPage) return "text-[#1C1814]/70 hover:text-[#1C1814]";
     if (floating) return "text-white/45 hover:text-white/80";
     return "text-[#1C1814]/40 hover:text-[#1C1814]/80";
   };
@@ -180,15 +176,6 @@ export function Layout() {
               )}
             </NavLink>
 
-            <NavLink
-              to="/planning"
-              className={({ isActive }) =>
-                `text-[10px] tracking-[0.28em] uppercase transition-all duration-300 ${getTextColor(isActive)}`
-              }
-            >
-              Planning
-            </NavLink>
-
             {user?.role === "admin" && (
               <NavLink
                 to="/admin"
@@ -259,7 +246,6 @@ export function Layout() {
                 </NavLink>
               );
             })}
-            <NavLink to="/planning" className="text-[10px] tracking-[0.32em] uppercase text-[#C09A3C]">Planning</NavLink>
             {user?.role === "admin" && (
               <NavLink to="/admin" className="text-[10px] tracking-[0.32em] uppercase text-[#C09A3C]">Admin</NavLink>
             )}
