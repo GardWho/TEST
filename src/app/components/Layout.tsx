@@ -74,19 +74,13 @@ export function Layout() {
   const logoSrc = floating ? "/images/logo-fblanc.png" : "/images/logo-fnoir.png";
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
 
-  // ✅ Nouvelle logique de couleur
   const getTextColor = (isActive: boolean) => {
-    // Si le lien est actif → toujours doré
     if (isActive) return "text-[#C09A3C]";
     
-    // Si on est sur une page "texte noir" (À propos ou Contact)
     if (isDarkTextPage) {
-    // TOUJOURS noir, même quand floating (fond transparent)
-    return "text-[#1C1814]/70 hover:text-[#1C1814]";
-  }
-  
+      return "text-[#1C1814]/70 hover:text-[#1C1814]";
+    }
     
-    // Comportement normal
     if (floating) return "text-white/45 hover:text-white/80";
     return "text-[#1C1814]/40 hover:text-[#1C1814]/80";
   };
@@ -110,18 +104,16 @@ export function Layout() {
             {links.map((l) => {
               if (l.to === "/prestations") {
                 return (
-// ✅ Augmenter le délai de fermeture du dropdown
-<div
-  key={l.to}
-  className="relative"
-  onMouseEnter={() => setDropdownOpen(true)}
-  onMouseLeave={() => {
-    // ✅ Augmenté à 1200ms pour que le dropdown reste plus longtemps
-    setTimeout(() => {
-      setDropdownOpen(false);
-    }, 1200);
-  }}
->
+                  <div
+                    key={l.to}
+                    className="relative"
+                    onMouseEnter={() => setDropdownOpen(true)}
+                    onMouseLeave={() => {
+                      setTimeout(() => {
+                        setDropdownOpen(false);
+                      }, 1200);
+                    }}
+                  >
                     <NavLink
                       to={l.to}
                       className={({ isActive }) =>
@@ -188,6 +180,26 @@ export function Layout() {
               )}
             </NavLink>
 
+            <NavLink
+              to="/planning"
+              className={({ isActive }) =>
+                `text-[10px] tracking-[0.28em] uppercase transition-all duration-300 ${getTextColor(isActive)}`
+              }
+            >
+              Planning
+            </NavLink>
+
+            {user?.role === "admin" && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  `text-[10px] tracking-[0.28em] uppercase transition-all duration-300 ${getTextColor(isActive)}`
+                }
+              >
+                Admin
+              </NavLink>
+            )}
+
             {user ? (
               <NavLink
                 to="/compte"
@@ -247,6 +259,10 @@ export function Layout() {
                 </NavLink>
               );
             })}
+            <NavLink to="/planning" className="text-[10px] tracking-[0.32em] uppercase text-[#C09A3C]">Planning</NavLink>
+            {user?.role === "admin" && (
+              <NavLink to="/admin" className="text-[10px] tracking-[0.32em] uppercase text-[#C09A3C]">Admin</NavLink>
+            )}
             <NavLink to="/panier" className={({ isActive }) => `text-[10px] tracking-[0.32em] uppercase flex items-center gap-2 ${isActive ? "text-[#C09A3C]" : isDarkTextPage ? "text-[#1C1814]/70" : "text-[#1C1814]/40"}`}>
               <CartIcon /> Panier
               {totalItems > 0 && <span className="bg-[#C09A3C] text-white text-[9px] font-bold w-5 h-5 rounded-full flex items-center justify-center">{totalItems}</span>}
@@ -269,9 +285,9 @@ export function Layout() {
           </div>
           <div className="text-center">
             <p className="text-[11px] tracking-wider" style={{ color: "rgba(245,239,228,0.3)" }}>SUIVEZ-NOUS SUR INSTAGRAM</p>
-<a href="https://www.instagram.com/rgequitationeducationequine" target="_blank" rel="noopener noreferrer" className="text-[11px] font-light text-[#C09A3C]">
-  @rgequitationeducationequine
-</a>
+            <a href="https://www.instagram.com/rgequitationeducationequine" target="_blank" rel="noopener noreferrer" className="text-[11px] font-light text-[#C09A3C]">
+              @rgequitationeducationequine
+            </a>
             <p className="text-[11px] tracking-wider" style={{ color: "rgba(245,239,228,0.3)" }}>© 2023 R.G. ÉQUITATION & ÉDUCATION ÉQUINE</p>
             <p className="text-[11px] tracking-wider mt-1" style={{ color: "rgba(245,239,228,0.35)" }}>SIRET 978 982 866 00011</p>
           </div>
