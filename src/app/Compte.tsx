@@ -3,18 +3,14 @@ import { useAuth } from "../AuthContext";
 import { supabase } from "../lib/supabase";
 import { Link } from "react-router-dom";
 
-type Tab = "profil" | "historique" | "credits" | "planning";
-
-const HOURS = Array.from({ length: 12 }, (_, i) => i + 7);
+type Tab = "profil" | "historique" | "credits" | "reservations";
 
 export function ComptePage() {
-  const { user, logout, useCredits } = useAuth();
+  const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("profil");
-  const [selectedDate, setSelectedDate] = useState("");
-  const [selectedTime, setSelectedTime] = useState("09:00");
-  const [selectedService, setSelectedService] = useState("Cours particulier");
-  const [error, setError] = useState("");
+  const [filter, setFilter] = useState<"upcoming" | "past" | "all">("upcoming");
   const [bookings, setBookings] = useState<any[]>([]);
+  const [error, setError] = useState("");
 
   if (!user) {
     return (
@@ -30,53 +26,31 @@ export function ComptePage() {
   }
 
   const fetchBookings = async () => {
-    const { data } = await supabase.from("bookings").select("*").eq("user_id", user.id);
-    setBookings(data || []);
-  };
-
-  // Charger les réservations quand on ouvre l'onglet planning
-  const handleTabClick = (tab: Tab) => {
-    setActiveTab(tab);
-    if (tab === "planning") fetchBookings();
-  };
-
-  const handleBooking = async () => {
-    if (!selectedDate) {
-      alert("Veuillez sélectionner une date.");
-      return;
-    }
-    const { data: existing } = await supabase
+    const { data, error } = await supabase
       .from("bookings")
       .select("*")
-      .eq("date", selectedDate)
-      .eq("time", selectedTime)
-      .maybeSingle();
-    if (existing) {
-      alert("Ce créneau est déjà réservé.");
-      return;
-    }
-    const success = await useCredits(1);
-    if (!success) {
-      alert("Crédits insuffisants. Veuillez acheter des séances.");
-      return;
-    }
-    const { error: insertError } = await supabase.from("bookings").insert({
-      user_id: user.id,
-      date: selectedDate,
-      time: selectedTime,
-      service: selectedService,
-    });
-    if (insertError) {
-      alert("Erreur lors de la réservation.");
-      return;
-    }
-    alert("Créneau réservé !");
-    fetchBookings();
+      .eq("user_id", user.id);
+    if (error) setError(error.message);
+    else setBookings(data || []);
+  };
+
+  const handleTabClick = (tab: Tab) => {
+    setActiveTab(tab);
+    if (tab === "reservations") fetchBookings();
   };
 
   const today = new Date().toISOString().split("T")[0];
-  const upcoming = bookings.filter(b => b.date >= today);
-  const past = bookings.filter(b => b.date < today);
+  const filteredBookings = bookings.filter((b) => {
+    if (filter === "upcoming") return b.date >= today;
+    if (filter === "past") return b.date < today;
+    return true;
+  });
+
+  const handleCancel = async (id: string) => {
+    const { error } = await supabase.from("bookings").delete().eq("id", id);
+    if (error) setError(error.message);
+    else fetchBookings();
+  };
 
   return (
     <div className="min-h-screen bg-[#F5EFE4] pt-20 px-8 md:px-14">
@@ -89,7 +63,7 @@ export function ComptePage() {
             { id: "profil", label: "Profil" },
             { id: "historique", label: "Historique" },
             { id: "credits", label: "Crédits" },
-            { id: "planning", label: "Planning" },
+            { id: "reservations", label: "Mes réservations" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -141,80 +115,48 @@ export function ComptePage() {
             </div>
           )}
 
-          {activeTab === "planning" && (
+          {activeTab === "reservations" && (
             <div>
-              <h2 className="text-2xl font-normal mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>Réserver un créneau</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <label className="text-[10px] tracking-[0.3em] uppercase text-[#1C1814]/40 block mb-2">Date</label>
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(e) => setSelectedDate(e.target.value)}
-                    min={new Date().toISOString().split("T")[0]}
-                    className="w-full border border-[#C09A3C]/20 rounded-sm px-4 py-2 text-[14px] outline-none focus:border-[#C09A3C] transition-colors bg-[#F8F3EC]"
-                  />
-                </div>
-                <div>
-                  <div className="mb-4">
-                    <label className="text-[10px] tracking-[0.3em] uppercase text-[#1C1814]/40">Horaire</label>
-                    <select value={selectedTime} onChange={(e) => setSelectedTime(e.target.value)} className="w-full border-b border-[#C09A3C]/15 py-2 text-[14px] outline-none focus:border-[#C09A3C] transition-colors">
-                      {HOURS.map((h) => {
-                        const time = `${h.toString().padStart(2, "0")}:00`;
-                        return <option key={time} value={time}>{time}</option>;
-                      })}
-                    </select>
-                  </div>
-                  <div className="mb-4">
-                    <label className="text-[10px] tracking-[0.3em] uppercase text-[#1C1814]/40">Service</label>
-                    <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)} className="w-full border-b border-[#C09A3C]/15 py-2 text-[14px] outline-none focus:border-[#C09A3C] transition-colors">
-                      <option>Cours particulier</option>
-                      <option>Cours collectif</option>
-                      <option>Travail du cheval</option>
-                      <option>Rééducation</option>
-                      <option>Éducation équine</option>
-                    </select>
-                  </div>
+              <h2 className="text-2xl font-normal mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>Mes réservations</h2>
+              {error && <p className="text-red-500 mb-4">{error}</p>}
+              <div className="flex gap-3 mb-6">
+                {[
+                  { id: "upcoming", label: "À venir" },
+                  { id: "past", label: "Passées" },
+                  { id: "all", label: "Toutes" },
+                ].map((f) => (
                   <button
-                    onClick={handleBooking}
-                    className="w-full py-3 bg-[#C09A3C] text-white text-[11px] tracking-[0.25em] uppercase hover:bg-[#1C1814] transition-colors"
+                    key={f.id}
+                    onClick={() => setFilter(f.id as any)}
+                    className={`px-4 py-2 text-xs uppercase tracking-wider ${
+                      filter === f.id ? "bg-[#C09A3C] text-white" : "bg-[#F8F3EC] text-[#1C1814]/60"
+                    }`}
                   >
-                    Réserver (1 crédit)
+                    {f.label}
                   </button>
-                  <p className="text-[11px] text-[#1C1814]/40 mt-2">Il vous reste {user.credits} crédits</p>
-                  {error && <p className="text-red-500 text-[12px] mt-2">{error}</p>}
-                </div>
+                ))}
               </div>
-              <div className="mt-8">
-                <h3 className="text-lg font-normal mb-4">Mes réservations</h3>
-                <h4 className="text-sm font-medium mb-2 text-[#C09A3C]">À venir</h4>
+              {filteredBookings.length === 0 ? (
+                <p className="text-[#1C1814]/40">Aucune réservation.</p>
+              ) : (
                 <ul className="space-y-2">
-                  {upcoming.length === 0 && <li className="text-sm text-gray-500">Aucune réservation à venir.</li>}
-                  {upcoming.map((b) => (
-                    <li key={b.id} className="text-[13px] text-[#1C1814]/60 flex justify-between">
-                      <span>{b.date} à {b.time} · {b.service}</span>
-                      <button
-                        onClick={async () => {
-                          await supabase.from("bookings").delete().eq("id", b.id);
-                          fetchBookings();
-                        }}
-                        className="text-red-500 text-xs"
-                      >
-                        Annuler
-                      </button>
+                  {filteredBookings.map((b) => (
+                    <li key={b.id} className="border-b border-[#C09A3C]/15 py-3 flex justify-between items-center">
+                      <div>
+                        <p className="text-sm">{b.date} à {b.time} · {b.service}</p>
+                      </div>
+                      {b.date >= today && (
+                        <button
+                          onClick={() => handleCancel(b.id)}
+                          className="text-red-500 text-xs"
+                        >
+                          Annuler
+                        </button>
+                      )}
                     </li>
                   ))}
                 </ul>
-                <h4 className="text-sm font-medium mb-2 mt-4 text-[#C09A3C]">Passées</h4>
-                <ul className="space-y-2">
-                  {past.length === 0 && <li className="text-sm text-gray-500">Aucune réservation passée.</li>}
-                  {past.map((b) => (
-                    <li key={b.id} className="text-[13px] text-[#1C1814]/60">
-                      {b.date} à {b.time} · {b.service}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              )}
             </div>
           )}
         </div>

@@ -1,3 +1,10 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /compte
+Disallow: /panier
+Disallow: /login
+Disallow: /confirm
+Disallow: /planning
+
 Sitemap: https://rg-equitation-education-equine.fr/sitemap.xml

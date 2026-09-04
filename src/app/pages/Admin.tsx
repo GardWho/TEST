@@ -9,10 +9,12 @@ export function AdminPage() {
   const [creditAmount, setCreditAmount] = useState(1);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [bookings, setBookings] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user || user.role !== "admin") return;
     fetchUsers();
+    fetchBookings();
   }, [user]);
 
   const fetchUsers = async () => {
@@ -25,6 +27,14 @@ export function AdminPage() {
     setLoading(false);
   };
 
+  const fetchBookings = async () => {
+    const { data, error } = await supabase
+      .from("bookings")
+      .select("*, profiles(email, full_name)");
+    if (error) setError(error.message);
+    else setBookings(data || []);
+  };
+
   const addCreditsToUser = async () => {
     if (!selectedUser || creditAmount <= 0) return;
     const { error } = await supabase
@@ -34,6 +44,15 @@ export function AdminPage() {
       alert(`Crédits ajoutés à ${selectedUser.email}`);
       setSelectedUser(null);
       fetchUsers();
+    }
+  };
+
+  const deleteBooking = async (bookingId: string) => {
+    const { error } = await supabase.from("bookings").delete().eq("id", bookingId);
+    if (error) setError(error.message);
+    else {
+      alert("Réservation annulée");
+      fetchBookings();
     }
   };
 
@@ -54,7 +73,8 @@ export function AdminPage() {
       </h1>
       {error && <div className="text-red-500 mb-4">{error}</div>}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Colonne gauche : liste des utilisateurs */}
         <div>
           <h2 className="text-xl font-normal mb-4">Liste des utilisateurs</h2>
           {loading ? (
@@ -84,9 +104,10 @@ export function AdminPage() {
           )}
         </div>
 
+        {/* Colonne droite : formulaire d'ajout de crédits + gestion réservations */}
         <div>
-          {selectedUser ? (
-            <div className="bg-white p-6 rounded-sm">
+          {selectedUser && (
+            <div className="bg-white p-6 rounded-sm mb-6">
               <h3 className="text-lg font-normal mb-4">Ajouter des crédits</h3>
               <p>Utilisateur : <strong>{selectedUser.email}</strong></p>
               <p>Crédits actuels : {selectedUser.credits}</p>
@@ -105,11 +126,36 @@ export function AdminPage() {
                 Valider
               </button>
             </div>
-          ) : (
-            <p className="text-sm text-gray-500">
-              Cliquez sur un utilisateur pour lui ajouter des crédits.
-            </p>
           )}
+
+          {/* Liste des réservations */}
+          <div className="bg-white p-6 rounded-sm">
+            <h2 className="text-xl font-normal mb-4">Réservations</h2>
+            {bookings.length === 0 ? (
+              <p className="text-sm text-gray-500">Aucune réservation pour le moment.</p>
+            ) : (
+              <ul className="space-y-2">
+                {bookings.map((b) => (
+                  <li key={b.id} className="bg-[#F8F3EC] p-3 rounded-sm flex justify-between items-center">
+                    <div>
+                      <p className="text-sm">
+                        {b.date} à {b.time} - {b.service}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {b.profiles?.email || "Utilisateur inconnu"}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => deleteBooking(b.id)}
+                      className="text-red-500 text-xs"
+                    >
+                      Annuler
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
     </div>
