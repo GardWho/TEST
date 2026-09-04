@@ -2,14 +2,22 @@ const express = require('express');
 const cors = require('cors');
 const Stripe = require('stripe');
 const nodemailer = require('nodemailer');
-require('dotenv').config({ path: '/var/www/rg-equitation/.env' });
-
-const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+require('dotenv').config();
 
 const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
+// ============================================
+// IMPORTANT POUR SUPABASE (ne pas supprimer)
+// ============================================
+const { createClient } = require('@supabase/supabase-js');
+
+// Utilisation de variables de secours pour éviter le crash
+const supabaseUrl = process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
