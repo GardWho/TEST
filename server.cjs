@@ -2,44 +2,25 @@ const express = require('express');
 const cors = require('cors');
 const Stripe = require('stripe');
 const nodemailer = require('nodemailer');
-const fs = require('fs');
-const path = require('path');
-
-// ============================================
-// LECTURE DIRECTE DU .env (sans dépendre de dotenv)
-// ============================================
-const envPath = path.join(__dirname, '.env');
-if (fs.existsSync(envPath)) {
-  const envContent = fs.readFileSync(envPath, 'utf8');
-  envContent.split('\n').forEach(line => {
-    const trimmed = line.trim();
-    if (trimmed && !trimmed.startsWith('#')) {
-      const [key, ...valueParts] = trimmed.split('=');
-      const value = valueParts.join('=').trim();
-      process.env[key.trim()] = value;
-    }
-  });
-  console.log('✅ .env chargé avec succès');
-} else {
-  console.error('❌ Fichier .env introuvable à', envPath);
-}
+const WebSocket = require('ws');
+require('dotenv').config();
 
 const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ============================================
-// SUPABASE (initialisation)
+// IMPORTANT POUR SUPABASE (configuration Realtime)
 // ============================================
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error('⚠️ SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY manquant dans .env');
-}
-
-const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseKey || 'placeholder-key');
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  {
+    auth: { persistSession: false },
+    realtime: { transport: WebSocket }  // ← Solution pour Node.js 20 : on passe le paquet "ws"
+  }
+);
 
 // Middleware
 app.use(cors());
@@ -338,6 +319,4 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Serveur démarré sur le port ${PORT}`);
-  console.log('🔍 SUPABASE_URL:', supabaseUrl ? 'présent' : 'MANQUANT');
-  console.log('🔍 SUPABASE_SERVICE_ROLE_KEY:', supabaseKey ? 'présent' : 'MANQUANT');
 });
