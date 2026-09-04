@@ -2,11 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { createClient, User, Session } from "@supabase/supabase-js";
 import { config } from "./config";
 
-// ✅ Utilisation des valeurs depuis config.ts (généré automatiquement)
-const supabase = createClient(
-  config.supabaseUrl,
-  config.supabaseAnonKey
-);
+const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
 
 type Purchase = {
   id: string;
@@ -29,6 +25,7 @@ type AppUser = {
   email: string;
   name: string;
   credits: number;
+  role: string;
   purchases: Purchase[];
   bookings: Booking[];
 };
@@ -39,47 +36,36 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  addCredits: (amount: number) => void;
-  useCredits: (amount: number) => boolean;
-  addPurchase: (purchase: Omit<Purchase, "id">) => void;
-  addBooking: (booking: Omit<Booking, "id">) => void;
+  addCredits: (amount: number) => Promise<void>;
+  useCredits: (amount: number) => Promise<boolean>;
+  addPurchase: (purchase: Omit<Purchase, "id">) => Promise<void>;
+  addBooking: (booking: Omit<Booking, "id">) => Promise<void>;
   isAuthenticated: boolean;
   loading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const USER_DATA_KEY = "user_data";
+const createUserData = (user: User): AppUser => ({
+  id: user.id,
+  email: user.email || "",
+  name: user.user_metadata?.full_name || user.user_metadata?.name || "Utilisateur",
+  credits: 0,
+  role: "user",
+  purchases: [],
+  bookings: [],
+});
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const getUserData = (userId: string): AppUser | null => {
-    const raw = localStorage.getItem(`${USER_DATA_KEY}_${userId}`);
-    return raw ? JSON.parse(raw) : null;
-  };
-
-  const saveUserData = (userData: AppUser) => {
-    localStorage.setItem(`${USER_DATA_KEY}_${userData.id}`, JSON.stringify(userData));
-  };
-
-  const createUserData = (user: User): AppUser => ({
-    id: user.id,
-    email: user.email || "",
-    name: user.user_metadata?.full_name || user.user_metadata?.name || "Utilisateur",
-    credits: 0,
-    purchases: [],
-    bookings: [],
-  });
-
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       if (session?.user) {
-        const userData = getUserData(session.user.id) || createUserData(session.user);
-        setUser(userData);
+        await loadProfile(session.user);
       }
       setLoading(false);
     });
@@ -88,8 +74,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (_event, session) => {
         setSession(session);
         if (session?.user) {
-          const userData = getUserData(session.user.id) || createUserData(session.user);
-          setUser(userData);
+          await loadProfile(session.user);
         } else {
           setUser(null);
         }
@@ -100,11 +85,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const loadProfile = async (authUser: User) => {
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", authUser.id)
+      .single();
+
+    if (error || !profile) {
+      // Créer un profil si inexistant
+      const newProfile = {
+        id: authUser.id,
+        email: authUser.email,
+        full_name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || "Utilisateur",
+        credits: 0,
+        role: "user",
+      };
+      await supabase.from("profiles").insert([newProfile]);
+setUser({ 
+  id: authUser.id, 
+  email: authUser.email || "", 
+  name: newProfile.full_name, 
+  credits: 0, 
+  role: "user", 
+  purchases: [], 
+  bookings: [] 
+});
+    } else {
+      // Charger les réservations de l'utilisateur
+      const { data: bookingsData } = await supabase.from("bookings").select("*").eq("user_id", authUser.id);
+      setUser({
+        id: profile.id,
+        email: profile.email,
+        name: profile.full_name || profile.name || "Utilisateur",
+        credits: profile.credits ?? 0,
+        role: profile.role || "user",
+        purchases: [],
+        bookings: bookingsData || [],
+      });
+    }
+  };
+
   const login = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
   };
 
@@ -115,45 +138,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: { full_name: name },
-      },
+      options: { data: { full_name: name } },
     });
     if (error) throw new Error(error.message);
   };
 
-  const addCredits = (amount: number) => {
+  const addCredits = async (amount: number) => {
     if (!user) return;
-    const updated = { ...user, credits: user.credits + amount };
-    setUser(updated);
-    saveUserData(updated);
+    const newCredits = user.credits + amount;
+    const { error } = await supabase.from("profiles").update({ credits: newCredits }).eq("id", user.id);
+    if (!error) setUser({ ...user, credits: newCredits });
   };
 
-  const useCredits = (amount: number): boolean => {
+  const useCredits = async (amount: number): Promise<boolean> => {
     if (!user || user.credits < amount) return false;
-    const updated = { ...user, credits: user.credits - amount };
-    setUser(updated);
-    saveUserData(updated);
-    return true;
+    const newCredits = user.credits - amount;
+    const { error } = await supabase.from("profiles").update({ credits: newCredits }).eq("id", user.id);
+    if (!error) {
+      setUser({ ...user, credits: newCredits });
+      return true;
+    }
+    return false;
   };
 
-  const addPurchase = (purchase: Omit<Purchase, "id">) => {
+  const addPurchase = async (purchase: Omit<Purchase, "id">) => {
     if (!user) return;
     const newPurchase: Purchase = { ...purchase, id: `p-${Date.now()}` };
-    const updated = { ...user, purchases: [...user.purchases, newPurchase] };
-    setUser(updated);
-    saveUserData(updated);
+    setUser({ ...user, purchases: [...user.purchases, newPurchase] });
   };
 
-  const addBooking = (booking: Omit<Booking, "id">) => {
+  const addBooking = async (booking: Omit<Booking, "id">) => {
     if (!user) return;
     const newBooking: Booking = { ...booking, id: `b-${Date.now()}` };
-    const updated = { ...user, bookings: [...user.bookings, newBooking] };
-    setUser(updated);
-    saveUserData(updated);
+    setUser({ ...user, bookings: [...user.bookings, newBooking] });
   };
 
   return (
