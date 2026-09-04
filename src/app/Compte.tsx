@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useAuth } from "../AuthContext";
+import { supabase } from "../lib/supabase";
 import { Link } from "react-router-dom";
 
 type Tab = "profil" | "historique" | "credits" | "planning";
 
 export function ComptePage() {
-  const { user, logout, useCredits, addBooking } = useAuth();
+  const { user, logout, useCredits } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("profil");
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("09:00");
   const [selectedService, setSelectedService] = useState("Cours particulier");
+  const [error, setError] = useState("");
 
   if (!user) {
     return (
@@ -24,17 +26,37 @@ export function ComptePage() {
     );
   }
 
-  const handleBooking = () => {
+  const handleBooking = async () => {
     if (!selectedDate) {
       alert("Veuillez sélectionner une date.");
       return;
     }
-    const success = useCredits(1);
+    // Vérifier que le créneau n'est pas déjà pris
+    const { data: existing } = await supabase
+      .from("bookings")
+      .select("*")
+      .eq("date", selectedDate)
+      .eq("time", selectedTime)
+      .maybeSingle();
+    if (existing) {
+      alert("Ce créneau est déjà réservé.");
+      return;
+    }
+    const success = await useCredits(1);
     if (!success) {
       alert("Crédits insuffisants. Veuillez acheter des séances.");
       return;
     }
-    addBooking({ date: selectedDate, time: selectedTime, service: selectedService, usedCredits: 1 });
+    const { error: insertError } = await supabase.from("bookings").insert({
+      user_id: user.id,
+      date: selectedDate,
+      time: selectedTime,
+      service: selectedService,
+    });
+    if (insertError) {
+      alert("Erreur lors de la réservation.");
+      return;
+    }
     alert("Créneau réservé !");
   };
 
@@ -137,18 +159,16 @@ export function ComptePage() {
                       <option>Éducation équine</option>
                     </select>
                   </div>
-                  <button onClick={handleBooking} className="w-full py-3 bg-[#C09A3C] text-white text-[11px] tracking-[0.25em] uppercase hover:bg-[#1C1814] transition-colors">Réserver (1 crédit)</button>
+                  <button
+                    onClick={handleBooking}
+                    className="w-full py-3 bg-[#C09A3C] text-white text-[11px] tracking-[0.25em] uppercase hover:bg-[#1C1814] transition-colors"
+                  >
+                    Réserver (1 crédit)
+                  </button>
                   <p className="text-[11px] text-[#1C1814]/40 mt-2">Il vous reste {user.credits} crédits</p>
+                  {error && <p className="text-red-500 text-[12px] mt-2">{error}</p>}
                 </div>
               </div>
-              {user.bookings.length > 0 && (
-                <div className="mt-8">
-                  <h3 className="text-lg font-normal mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>Mes réservations</h3>
-                  <div className="space-y-2">
-                    {user.bookings.map((b) => <div key={b.id} className="text-[13px] text-[#1C1814]/60">{new Date(b.date).toLocaleDateString()} à {b.time} · {b.service}</div>)}
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </div>

@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { createClient, User, Session } from "@supabase/supabase-js";
-import { config } from "./config";
-
-const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
+import { User, Session } from "@supabase/supabase-js";
+import { supabase } from "./lib/supabase";
 
 type Purchase = { id: string; date: string; items: { label: string; price: number }[]; total: number; status: "paid" | "pending"; };
 type Booking = { id: string; date: string; time: string; service: string; usedCredits: number };
@@ -30,7 +28,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Éviter les doubles appels en utilisant une variable
     let isMounted = true;
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -70,6 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .single();
 
       if (error) {
+        // Si le profil n'existe pas, on le crée (avec upsert pour éviter les doublons)
         if (error.code === "PGRST116") {
           const newProfile = {
             id: authUser.id,
@@ -81,13 +79,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           const { error: insertError } = await supabase
             .from("profiles")
             .upsert([newProfile], { onConflict: "id" });
-          
-          if (insertError) console.error("Erreur upsert:", insertError.message);
+          if (insertError) console.error("Erreur upsert profil:", insertError.message);
         } else {
           console.error("Erreur lecture profil:", error.message);
         }
       }
 
+      // Re-lire le profil (maintenant qu'il existe ou a été récupéré)
       const { data: profile2, error: error2 } = await supabase
         .from("profiles")
         .select("id, email, full_name, credits, role")
@@ -166,19 +164,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) throw new Error(error.message);
   };
 
+  // ✅ Utilise la fonction RPC pour un ajout atomique
   const addCredits = async (amount: number) => {
     if (!user) return;
-    const newCredits = user.credits + amount;
-    const { error } = await supabase.from("profiles").update({ credits: newCredits }).eq("id", user.id);
-    if (!error) setUser({ ...user, credits: newCredits });
+    const { data, error } = await supabase
+      .rpc("add_credits", { p_user_id: user.id, p_amount: amount });
+    if (error) console.error("Erreur addCredits:", error.message);
+    else {
+      setUser({ ...user, credits: user.credits + amount });
+    }
   };
 
+  // ✅ Utilise la fonction RPC pour un retrait atomique
   const useCredits = async (amount: number): Promise<boolean> => {
     if (!user || user.credits < amount) return false;
-    const newCredits = user.credits - amount;
-    const { error } = await supabase.from("profiles").update({ credits: newCredits }).eq("id", user.id);
-    if (!error) {
-      setUser({ ...user, credits: newCredits });
+    const { data, error } = await supabase
+      .rpc("use_credit", { p_user_id: user.id, p_amount: amount });
+    if (error) {
+      console.error("Erreur useCredits:", error.message);
+      return false;
+    }
+    if (data === true) {
+      setUser({ ...user, credits: user.credits - amount });
       return true;
     }
     return false;

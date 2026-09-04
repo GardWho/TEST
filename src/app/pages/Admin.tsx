@@ -27,11 +27,8 @@ export function AdminPage() {
 
   const addCreditsToUser = async () => {
     if (!selectedUser || creditAmount <= 0) return;
-    const newCredits = selectedUser.credits + creditAmount;
     const { error } = await supabase
-      .from("profiles")
-      .update({ credits: newCredits })
-      .eq("id", selectedUser.id);
+      .rpc("add_credits", { p_user_id: selectedUser.id, p_amount: creditAmount });
     if (error) setError(error.message);
     else {
       alert(`Crédits ajoutés à ${selectedUser.email}`);

@@ -18,7 +18,7 @@ export function PlanningPage() {
   const fetchBookings = async () => {
     const { data, error } = await supabase.from("bookings").select("*");
     if (error) setError(error.message);
-    else setBookings(data);
+    else setBookings(data || []);
   };
 
   const handleReservation = async () => {
