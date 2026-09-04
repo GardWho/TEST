@@ -2,19 +2,18 @@ const express = require('express');
 const cors = require('cors');
 const Stripe = require('stripe');
 const nodemailer = require('nodemailer');
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/.env' });
 
 const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ============================================
-// IMPORTANT POUR SUPABASE (ne pas supprimer)
+// IMPORTANT POUR SUPABASE
 // ============================================
 const { createClient } = require('@supabase/supabase-js');
-
-// Utilisation de variables de secours pour éviter le crash
-const supabaseUrl = process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key';
+// On lit les clés depuis le .env (chargé juste au-dessus)
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Middleware
@@ -92,9 +91,10 @@ app.post('/api/calculate-distance', async (req, res) => {
   const instructorAddress = '24 rue Minvielle, Bordeaux, France';
 
   try {
-    const geoUserResponse = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=jsonv2&limit=1`, {
-      headers: { 'User-Agent': 'RG-EQUITATION/1.0' }
-    });
+    const geoUserResponse = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=jsonv2&limit=1`,
+      { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
+    );
     const userData = await geoUserResponse.json();
 
     if (!userData || userData.length === 0) {
@@ -104,9 +104,10 @@ app.post('/api/calculate-distance', async (req, res) => {
     const userLat = parseFloat(userData[0].lat);
     const userLon = parseFloat(userData[0].lon);
 
-    const geoInstructorResponse = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(instructorAddress)}&format=jsonv2&limit=1`, {
-      headers: { 'User-Agent': 'RG-EQUITATION/1.0' }
-    });
+    const geoInstructorResponse = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(instructorAddress)}&format=jsonv2&limit=1`,
+      { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
+    );
     const instructorData = await geoInstructorResponse.json();
 
     if (!instructorData || instructorData.length === 0) {
