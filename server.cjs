@@ -7,6 +7,15 @@ require('dotenv').config();
 const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
+// ============================================
+// IMPORT SUPABASE (BACKEND)
+// ============================================
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -82,32 +91,11 @@ app.post('/api/calculate-distance', async (req, res) => {
   const instructorAddress = '24 rue Minvielle, Bordeaux, France';
 
   try {
-    // 1. Géocodage de l'adresse utilisateur
-    const geoUserUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=jsonv2&limit=1`;
-    console.log('🔍 Requête utilisateur:', geoUserUrl);
-
-    const geoUserResponse = await fetch(geoUserUrl, {
-      headers: {
-        'User-Agent': 'RG-EQUITATION/1.0',
-        'Accept': 'application/json',
-      },
-    });
-
-    if (!geoUserResponse.ok) {
-      const text = await geoUserResponse.text();
-      console.error('Erreur Nominatim utilisateur:', text);
-      return res.status(500).json({ error: 'Erreur lors du géocodage de votre adresse.' });
-    }
-
-    let userData;
-    try {
-      userData = await geoUserResponse.json();
-    } catch (parseError) {
-      console.error('Erreur de parsing JSON utilisateur:', parseError);
-      const text = await geoUserResponse.text();
-      console.error('Réponse brute:', text);
-      return res.status(500).json({ error: 'Réponse inattendue du service de géocodage.' });
-    }
+    const geoUserResponse = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=jsonv2&limit=1`,
+      { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
+    );
+    const userData = await geoUserResponse.json();
 
     if (!userData || userData.length === 0) {
       return res.status(404).json({ error: 'Adresse utilisateur non trouvée. Vérifiez votre saisie.' });
@@ -116,32 +104,11 @@ app.post('/api/calculate-distance', async (req, res) => {
     const userLat = parseFloat(userData[0].lat);
     const userLon = parseFloat(userData[0].lon);
 
-    // 2. Géocodage de l'adresse du moniteur
-    const geoInstructorUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(instructorAddress)}&format=jsonv2&limit=1`;
-    console.log('🔍 Requête moniteur:', geoInstructorUrl);
-
-    const geoInstructorResponse = await fetch(geoInstructorUrl, {
-      headers: {
-        'User-Agent': 'RG-EQUITATION/1.0',
-        'Accept': 'application/json',
-      },
-    });
-
-    if (!geoInstructorResponse.ok) {
-      const text = await geoInstructorResponse.text();
-      console.error('Erreur Nominatim moniteur:', text);
-      return res.status(500).json({ error: 'Erreur lors du géocodage de l\'adresse du moniteur.' });
-    }
-
-    let instructorData;
-    try {
-      instructorData = await geoInstructorResponse.json();
-    } catch (parseError) {
-      console.error('Erreur de parsing JSON moniteur:', parseError);
-      const text = await geoInstructorResponse.text();
-      console.error('Réponse brute:', text);
-      return res.status(500).json({ error: 'Réponse inattendue du service de géocodage.' });
-    }
+    const geoInstructorResponse = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(instructorAddress)}&format=jsonv2&limit=1`,
+      { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
+    );
+    const instructorData = await geoInstructorResponse.json();
 
     if (!instructorData || instructorData.length === 0) {
       return res.status(404).json({ error: 'Adresse du moniteur non trouvée.' });
@@ -150,25 +117,18 @@ app.post('/api/calculate-distance', async (req, res) => {
     const instructorLat = parseFloat(instructorData[0].lat);
     const instructorLon = parseFloat(instructorData[0].lon);
 
-    // 3. Calcul de la distance (formule de Haversine)
     const toRad = (deg) => deg * Math.PI / 180;
-    const R = 6371; // Rayon de la Terre en km
-
+    const R = 6371;
     const dLat = toRad(instructorLat - userLat);
     const dLon = toRad(instructorLon - userLon);
-
-    const a = Math.sin(dLat / 2) ** 2 +
-              Math.cos(toRad(userLat)) * Math.cos(toRad(instructorLat)) *
-              Math.sin(dLon / 2) ** 2;
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const a = Math.sin(dLat/2) ** 2 + Math.cos(toRad(userLat)) * Math.cos(toRad(instructorLat)) * Math.sin(dLon/2) ** 2;
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     const distanceSimple = Math.round(R * c);
-
-    // ✅ Doubler pour l'aller-retour
     const distanceKm = distanceSimple * 2;
 
     res.json({
-      distanceKm,          // ← Aller-retour (utilisé pour les frais de déplacement)
-      distanceSimple,      // ← Optionnel, pour information
+      distanceKm,
+      distanceSimple,
       address: userData[0].display_name,
       instructorAddress: instructorData[0].display_name,
     });
@@ -204,24 +164,8 @@ app.post('/api/send-email', async (req, res) => {
       from: `"Formulaire de contact" <${process.env.SMTP_USER}>`,
       to: 'contact@rg-equitation-education-equine.fr',
       subject: `Nouveau message de ${prenom} ${nom}`,
-      text: `
-Nom : ${nom}
-Prénom : ${prenom}
-Téléphone : ${telephone}
-Catégorie : ${categorie || 'Non précisée'}
-
-Message :
-${message}
-      `,
-      html: `
-<h2>Nouveau message de contact</h2>
-<p><strong>Nom :</strong> ${nom}</p>
-<p><strong>Prénom :</strong> ${prenom}</p>
-<p><strong>Téléphone :</strong> ${telephone}</p>
-<p><strong>Catégorie :</strong> ${categorie || 'Non précisée'}</p>
-<p><strong>Message :</strong></p>
-<p>${message.replace(/\n/g, '<br>')}</p>
-      `,
+      text: `Nom : ${nom}\nPrénom : ${prenom}\nTéléphone : ${telephone}\nCatégorie : ${categorie || 'Non précisée'}\n\nMessage :\n${message}`,
+      html: `<h2>Nouveau message de contact</h2><p><strong>Nom :</strong> ${nom}</p><p><strong>Prénom :</strong> ${prenom}</p><p><strong>Téléphone :</strong> ${telephone}</p><p><strong>Catégorie :</strong> ${categorie || 'Non précisée'}</p><p><strong>Message :</strong></p><p>${message.replace(/\n/g, '<br>')}</p>`,
     };
 
     await transporter.sendMail(mailOptions);
@@ -234,7 +178,7 @@ ${message}
 });
 
 // ============================================
-// ROUTE : Webhook Stripe (optionnel)
+// ROUTE : Webhook Stripe (crédit automatique)
 // ============================================
 app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
@@ -251,7 +195,32 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    console.log('Paiement réussi pour:', session.customer_email);
+    const userId = session.metadata.userId;
+    const items = JSON.parse(session.metadata.items);
+
+    // ✅ Calculer les crédits : 1 crédit par séance de cours ou travail
+    let creditsToAdd = 0;
+    for (const item of items) {
+      if (item.serviceType === 'cours' || item.serviceType === 'travail') {
+        creditsToAdd += item.quantity;
+      }
+    }
+
+    if (creditsToAdd > 0 && userId) {
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('credits')
+        .eq('id', userId)
+        .single();
+
+      if (profile) {
+        const newCredits = profile.credits + creditsToAdd;
+        await supabase.from('profiles').update({ credits: newCredits }).eq('id', userId);
+        console.log(`✅ ${creditsToAdd} crédits ajoutés à ${userId}`);
+      } else {
+        console.error('Profil introuvable pour', userId);
+      }
+    }
   }
 
   res.json({ received: true });
