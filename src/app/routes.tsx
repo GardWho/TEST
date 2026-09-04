@@ -13,6 +13,7 @@ import { EducationEquinePage } from "./pages/EducationEquine";
 import { PanierPage } from "./pages/Panier";
 import { PlanningPage } from "./pages/Planning";
 import { AdminPage } from "./pages/Admin";
+import { ConfirmEmail } from "./components/ConfirmEmail";
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
       { path: "education-equine", element: <EducationEquinePage /> },
       { path: "planning", element: <PlanningPage /> },
       { path: "admin", element: <AdminPage /> },
+      { path: "confirm", element: <ConfirmEmail /> },
     ],
   },
 ]);
