@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../AuthContext";
-import { createClient } from "@supabase/supabase-js";
-import { config } from "../../config";
-
-const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
+import { supabase } from "../../lib/supabase";
 
 export function AdminPage() {
   const { user } = useAuth();
@@ -20,7 +17,6 @@ export function AdminPage() {
 
   const fetchUsers = async () => {
     setLoading(true);
-    // Sélection explicite des colonnes
     const { data, error } = await supabase
       .from("profiles")
       .select("id, email, full_name, credits, role");
@@ -62,7 +58,6 @@ export function AdminPage() {
       {error && <div className="text-red-500 mb-4">{error}</div>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Colonne gauche : liste des utilisateurs */}
         <div>
           <h2 className="text-xl font-normal mb-4">Liste des utilisateurs</h2>
           {loading ? (
@@ -92,7 +87,6 @@ export function AdminPage() {
           )}
         </div>
 
-        {/* Colonne droite : formulaire d'ajout de crédits */}
         <div>
           {selectedUser ? (
             <div className="bg-white p-6 rounded-sm">

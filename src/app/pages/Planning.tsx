@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../AuthContext";
-import { createClient } from "@supabase/supabase-js";
-import { config } from "../../config";
-
-const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
+import { supabase } from "../../lib/supabase";
 
 export function PlanningPage() {
   const { user, useCredits } = useAuth();
@@ -57,7 +54,6 @@ export function PlanningPage() {
     fetchBookings();
   };
 
-  // Si l'utilisateur n'est pas connecté, on affiche un message
   if (!user) {
     return (
       <div className="min-h-screen bg-[#F5EFE4] pt-20 px-8 md:px-14">
