@@ -6,8 +6,10 @@ const fs = require('fs');
 const path = require('path');
 
 // ============================================
-// LECTURE DIRECTE DU .env (robuste)
+// IMPORTANT POUR SUPABASE (ne pas supprimer)
 // ============================================
+
+// Lecture directe du .env (robuste, sans dépendre de dotenv)
 const envPath = path.join(__dirname, '.env');
 if (fs.existsSync(envPath)) {
   const envContent = fs.readFileSync(envPath, 'utf8');
@@ -37,23 +39,20 @@ if (fs.existsSync(envPath)) {
 const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// ============================================
-// SUPABASE (configuration Realtime avec ws)
-// ============================================
+// Initialisation Supabase avec Realtime (transport ws pour Node.js 20)
 const WebSocket = require('ws');
 const { createClient } = require('@supabase/supabase-js');
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error('⚠️  ATTENTION : SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY manquants !');
-}
+const supabaseUrl = process.env.SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key';
 
 const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseKey || 'placeholder-key',
-  { auth: { persistSession: false }, realtime: { transport: WebSocket } }
+  supabaseUrl,
+  supabaseKey,
+  {
+    auth: { persistSession: false },
+    realtime: { transport: WebSocket }
+  }
 );
 
 // Middleware
@@ -65,18 +64,36 @@ app.use(express.json());
 // ============================================
 app.post('/api/create-checkout-session', async (req, res) => {
   const { items, deliveryKm, userId, userEmail } = req.body;
-  if (!items || items.length === 0) return res.status(400).json({ error: 'Panier vide' });
+
+  if (!items || items.length === 0) {
+    return res.status(400).json({ error: 'Panier vide' });
+  }
 
   try {
     const lineItems = items.map((item) => ({
-      price_data: { currency: 'eur', product_data: { name: item.label }, unit_amount: Math.round(item.price * 100) },
+      price_data: {
+        currency: 'eur',
+        product_data: {
+          name: item.label,
+        },
+        unit_amount: Math.round(item.price * 100),
+      },
       quantity: item.quantity,
     }));
 
     let deliveryFee = 0;
     if (deliveryKm > 15) {
       deliveryFee = (deliveryKm - 15) * 0.50;
-      lineItems.push({ price_data: { currency: 'eur', product_data: { name: `Frais de déplacement (${deliveryKm} km)` }, unit_amount: Math.round(deliveryFee * 100) }, quantity: 1 });
+      lineItems.push({
+        price_data: {
+          currency: 'eur',
+          product_data: {
+            name: `Frais de déplacement (${deliveryKm} km)`,
+          },
+          unit_amount: Math.round(deliveryFee * 100),
+        },
+        quantity: 1,
+      });
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -86,7 +103,11 @@ app.post('/api/create-checkout-session', async (req, res) => {
       success_url: `${process.env.FRONTEND_URL || 'https://rg-equitation-education-equine.fr'}/compte?success=true`,
       cancel_url: `${process.env.FRONTEND_URL || 'https://rg-equitation-education-equine.fr'}/panier?canceled=true`,
       customer_email: userEmail,
-      metadata: { userId, deliveryKm: deliveryKm.toString(), items: JSON.stringify(items.map(i => ({ label: i.label, quantity: i.quantity, serviceType: i.serviceType }))) },
+      metadata: {
+        userId: userId,
+        deliveryKm: deliveryKm.toString(),
+        items: JSON.stringify(items.map(i => ({ label: i.label, quantity: i.quantity, serviceType: i.serviceType })))
+      },
     });
 
     res.json({ id: session.id });
@@ -101,21 +122,36 @@ app.post('/api/create-checkout-session', async (req, res) => {
 // ============================================
 app.post('/api/calculate-distance', async (req, res) => {
   const { address } = req.body;
-  if (!address || address.length < 5) return res.status(400).json({ error: 'Adresse invalide' });
+
+  if (!address || address.length < 5) {
+    return res.status(400).json({ error: 'Adresse invalide' });
+  }
 
   const instructorAddress = '24 rue Minvielle, Bordeaux, France';
 
   try {
-    const geoUserResponse = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=jsonv2&limit=1`, { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } });
+    const geoUserResponse = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=jsonv2&limit=1`,
+      { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
+    );
     const userData = await geoUserResponse.json();
-    if (!userData || userData.length === 0) return res.status(404).json({ error: 'Adresse utilisateur non trouvée.' });
+
+    if (!userData || userData.length === 0) {
+      return res.status(404).json({ error: 'Adresse utilisateur non trouvée. Vérifiez votre saisie.' });
+    }
 
     const userLat = parseFloat(userData[0].lat);
     const userLon = parseFloat(userData[0].lon);
 
-    const geoInstructorResponse = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(instructorAddress)}&format=jsonv2&limit=1`, { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } });
+    const geoInstructorResponse = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(instructorAddress)}&format=jsonv2&limit=1`,
+      { headers: { 'User-Agent': 'RG-EQUITATION/1.0' } }
+    );
     const instructorData = await geoInstructorResponse.json();
-    if (!instructorData || instructorData.length === 0) return res.status(404).json({ error: 'Adresse du moniteur non trouvée.' });
+
+    if (!instructorData || instructorData.length === 0) {
+      return res.status(404).json({ error: 'Adresse du moniteur non trouvée.' });
+    }
 
     const instructorLat = parseFloat(instructorData[0].lat);
     const instructorLon = parseFloat(instructorData[0].lon);
@@ -129,7 +165,13 @@ app.post('/api/calculate-distance', async (req, res) => {
     const distanceSimple = Math.round(R * c);
     const distanceKm = distanceSimple * 2;
 
-    res.json({ distanceKm, distanceSimple, address: userData[0].display_name, instructorAddress: instructorData[0].display_name });
+    res.json({
+      distanceKm,
+      distanceSimple,
+      address: userData[0].display_name,
+      instructorAddress: instructorData[0].display_name,
+    });
+
   } catch (error) {
     console.error('Erreur calcul distance:', error);
     res.status(500).json({ error: 'Erreur lors du calcul de la distance.' });
@@ -141,15 +183,22 @@ app.post('/api/calculate-distance', async (req, res) => {
 // ============================================
 app.post('/api/send-email', async (req, res) => {
   const { nom, prenom, telephone, categorie, message } = req.body;
-  if (!nom || !prenom || !telephone || !message) return res.status(400).json({ error: 'Tous les champs sont requis' });
+
+  if (!nom || !prenom || !telephone || !message) {
+    return res.status(400).json({ error: 'Tous les champs sont requis' });
+  }
 
   try {
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.ionos.fr',
       port: parseInt(process.env.SMTP_PORT) || 587,
       secure: false,
-      auth: { user: process.env.SMTP_USER || 'contact@rg-equitation-education-equine.fr', pass: process.env.SMTP_PASSWORD },
+      auth: {
+        user: process.env.SMTP_USER || 'contact@rg-equitation-education-equine.fr',
+        pass: process.env.SMTP_PASSWORD,
+      },
     });
+
     const mailOptions = {
       from: `"Formulaire de contact" <${process.env.SMTP_USER}>`,
       to: 'contact@rg-equitation-education-equine.fr',
@@ -157,8 +206,10 @@ app.post('/api/send-email', async (req, res) => {
       text: `Nom : ${nom}\nPrénom : ${prenom}\nTéléphone : ${telephone}\nCatégorie : ${categorie || 'Non précisée'}\n\nMessage :\n${message}`,
       html: `<h2>Nouveau message de contact</h2><p><strong>Nom :</strong> ${nom}</p><p><strong>Prénom :</strong> ${prenom}</p><p><strong>Téléphone :</strong> ${telephone}</p><p><strong>Catégorie :</strong> ${categorie || 'Non précisée'}</p><p><strong>Message :</strong></p><p>${message.replace(/\n/g, '<br>')}</p>`,
     };
+
     await transporter.sendMail(mailOptions);
     res.status(200).json({ success: true, message: 'Email envoyé avec succès' });
+
   } catch (error) {
     console.error('Erreur SMTP:', error);
     res.status(500).json({ error: 'Erreur lors de l\'envoi de l\'email. Vérifiez vos identifiants SMTP.' });
@@ -170,35 +221,90 @@ app.post('/api/send-email', async (req, res) => {
 // ============================================
 app.post('/api/create-booking', async (req, res) => {
   const { userId, date, time, service } = req.body;
-  if (!userId || !date || !time || !service) return res.status(400).json({ error: 'Tous les champs sont requis' });
+  console.log('🔍 create-booking reçu:', { userId, date, time, service });
+
+  if (!userId || !date || !time || !service) {
+    return res.status(400).json({ error: 'Tous les champs sont requis' });
+  }
 
   try {
-    const { data: existing } = await supabase.from('bookings').select('*').eq('date', date).eq('time', time).maybeSingle();
-    if (existing) return res.status(409).json({ error: 'Ce créneau est déjà réservé.' });
+    // Vérifier que le créneau n'est pas déjà réservé
+    const { data: existing } = await supabase
+      .from('bookings')
+      .select('*')
+      .eq('date', date)
+      .eq('time', time)
+      .maybeSingle();
 
-    const { data: profile } = await supabase.from('profiles').select('credits').eq('id', userId).single();
-    if (!profile || profile.credits < 1) return res.status(400).json({ error: 'Crédits insuffisants.' });
+    if (existing) {
+      return res.status(409).json({ error: 'Ce créneau est déjà réservé.' });
+    }
 
-    const { data: success } = await supabase.rpc('use_credit', { p_user_id: userId, p_amount: 1 });
-    if (!success) return res.status(400).json({ error: 'Impossible de consommer le crédit.' });
+    // Vérifier que l'utilisateur existe et a des crédits
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('credits')
+      .eq('id', userId)
+      .single();
 
-    const { error: insertError } = await supabase.from('bookings').insert({ user_id: userId, date, time, service });
-    if (insertError) return res.status(500).json({ error: insertError.message });
+    if (profileError || !profile) {
+      console.error('Erreur profil:', profileError);
+      return res.status(400).json({ error: 'Utilisateur non trouvé.' });
+    }
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.ionos.fr',
-      port: parseInt(process.env.SMTP_PORT) || 587,
-      secure: false,
-      auth: { user: process.env.SMTP_USER || 'contact@rg-equitation-education-equine.fr', pass: process.env.SMTP_PASSWORD },
-    });
-    await transporter.sendMail({
-      from: `"Site RG Équitation" <${process.env.SMTP_USER}>`,
-      to: 'contact@rg-equitation-education-equine.fr',
-      subject: 'Nouvelle réservation',
-      html: `<p>Une nouvelle réservation a été effectuée :</p><ul><li><strong>Date :</strong> ${date}</li><li><strong>Heure :</strong> ${time}</li><li><strong>Service :</strong> ${service}</li></ul>`,
-    });
+    if (profile.credits < 1) {
+      return res.status(400).json({ error: 'Crédits insuffisants.' });
+    }
+
+    // Consommer le crédit (fonction RPC atomique)
+    const { data: success, error: rpcError } = await supabase
+      .rpc('use_credit', { p_user_id: userId, p_amount: 1 });
+
+    if (rpcError || !success) {
+      console.error('Erreur RPC use_credit:', rpcError);
+      return res.status(400).json({ error: 'Impossible de consommer le crédit.' });
+    }
+
+    // Insérer la réservation
+    const { error: insertError } = await supabase
+      .from('bookings')
+      .insert({ user_id: userId, date, time, service });
+
+    if (insertError) {
+      console.error('Erreur insertion réservation:', insertError);
+      return res.status(500).json({ error: insertError.message });
+    }
+
+    // Envoyer un email à l'admin (non bloquant si échec)
+    try {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.ionos.fr',
+        port: parseInt(process.env.SMTP_PORT) || 587,
+        secure: false,
+        auth: {
+          user: process.env.SMTP_USER || 'contact@rg-equitation-education-equine.fr',
+          pass: process.env.SMTP_PASSWORD,
+        },
+      });
+
+      await transporter.sendMail({
+        from: `"Site RG Équitation" <${process.env.SMTP_USER}>`,
+        to: 'contact@rg-equitation-education-equine.fr',
+        subject: 'Nouvelle réservation',
+        html: `<p>Une nouvelle réservation a été effectuée :</p>
+               <ul>
+                 <li><strong>Date :</strong> ${date}</li>
+                 <li><strong>Heure :</strong> ${time}</li>
+                 <li><strong>Service :</strong> ${service}</li>
+               </ul>`,
+      });
+    } catch (emailError) {
+      console.error('Erreur envoi email:', emailError);
+      // Ne pas bloquer la réservation si l'email échoue
+    }
 
     res.json({ success: true, message: 'Réservation créée avec succès.' });
+
   } catch (error) {
     console.error('Erreur création réservation:', error);
     res.status(500).json({ error: 'Erreur lors de la création de la réservation.' });
@@ -211,23 +317,35 @@ app.post('/api/create-booking', async (req, res) => {
 app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
   let event;
+
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err) {
     console.error('Webhook error:', err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
+
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     const userId = session.metadata.userId;
     const items = JSON.parse(session.metadata.items);
+
     let creditsToAdd = 0;
     for (const item of items) {
-      if (item.serviceType === 'cours' || item.serviceType === 'travail') creditsToAdd += item.quantity;
+      if (item.serviceType === 'cours' || item.serviceType === 'travail') {
+        creditsToAdd += item.quantity;
+      }
     }
+
     if (creditsToAdd > 0 && userId) {
-      const { data: profile } = await supabase.from('profiles').select('credits').eq('id', userId).single();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('credits')
+        .eq('id', userId)
+        .single();
+
       if (profile) {
         const newCredits = profile.credits + creditsToAdd;
         await supabase.from('profiles').update({ credits: newCredits }).eq('id', userId);
@@ -235,6 +353,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
       }
     }
   }
+
   res.json({ received: true });
 });
 
@@ -244,4 +363,6 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Serveur démarré sur le port ${PORT}`);
+  console.log('🔍 SUPABASE_URL:', supabaseUrl ? 'présent' : 'MANQUANT');
+  console.log('🔍 SUPABASE_SERVICE_ROLE_KEY:', supabaseKey ? 'présent' : 'MANQUANT');
 });
