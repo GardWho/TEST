@@ -4,31 +4,9 @@ import { config } from "./config";
 
 const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
 
-type Purchase = {
-  id: string;
-  date: string;
-  items: { label: string; price: number }[];
-  total: number;
-  status: "paid" | "pending";
-};
-
-type Booking = {
-  id: string;
-  date: string;
-  time: string;
-  service: string;
-  usedCredits: number;
-};
-
-type AppUser = {
-  id: string;
-  email: string;
-  name: string;
-  credits: number;
-  role: string;
-  purchases: Purchase[];
-  bookings: Booking[];
-};
+type Purchase = { id: string; date: string; items: { label: string; price: number }[]; total: number; status: "paid" | "pending"; };
+type Booking = { id: string; date: string; time: string; service: string; usedCredits: number };
+type AppUser = { id: string; email: string; name: string; credits: number; role: string; purchases: Purchase[]; bookings: Booking[] };
 
 type AuthContextType = {
   user: AppUser | null;
@@ -46,23 +24,17 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const createUserData = (user: User): AppUser => ({
-  id: user.id,
-  email: user.email || "",
-  name: user.user_metadata?.full_name || user.user_metadata?.name || "Utilisateur",
-  credits: 0,
-  role: "user",
-  purchases: [],
-  bookings: [],
-});
-
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Éviter les doubles appels en utilisant une variable
+    let isMounted = true;
+
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!isMounted) return;
       setSession(session);
       if (session?.user) {
         await loadProfile(session.user);
@@ -72,6 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        if (!isMounted) return;
         setSession(session);
         if (session?.user) {
           await loadProfile(session.user);
@@ -82,42 +55,64 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const loadProfile = async (authUser: User) => {
-    const { data: profile, error } = await supabase
-      .from("profiles")
-      .select("id, email, full_name, credits, role")
-      .eq("id", authUser.id)
-      .single();
+    try {
+      const { data: profile, error } = await supabase
+        .from("profiles")
+        .select("id, email, full_name, credits, role")
+        .eq("id", authUser.id)
+        .single();
 
-    if (error || !profile) {
-      const newProfile = {
-        id: authUser.id,
-        email: authUser.email || "",
-        full_name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || "Utilisateur",
-        credits: 0,
-        role: "user",
-      };
-      const { error: insertError } = await supabase.from("profiles").insert([newProfile]);
-      if (insertError) {
-        console.error("Erreur création profil:", insertError.message);
+      if (error) {
+        if (error.code === "PGRST116") {
+          const newProfile = {
+            id: authUser.id,
+            email: authUser.email || "",
+            full_name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || "Utilisateur",
+            credits: 0,
+            role: "user",
+          };
+          const { error: insertError } = await supabase
+            .from("profiles")
+            .upsert([newProfile], { onConflict: "id" });
+          
+          if (insertError) console.error("Erreur upsert:", insertError.message);
+        } else {
+          console.error("Erreur lecture profil:", error.message);
+        }
       }
-      setUser({
-        id: authUser.id,
-        email: authUser.email || "",
-        name: newProfile.full_name || "Utilisateur",
-        credits: 0,
-        role: "user",
-        purchases: [],
-        bookings: [],
-      });
-    } else {
-      const { data: bookingsData } = await supabase.from("bookings").select("*").eq("user_id", authUser.id);
-      
-      // ✅ Typage explicite pour éviter les erreurs TypeScript
-      const profilData = profile as {
+
+      const { data: profile2, error: error2 } = await supabase
+        .from("profiles")
+        .select("id, email, full_name, credits, role")
+        .eq("id", authUser.id)
+        .single();
+
+      if (error2) {
+        setUser({
+          id: authUser.id,
+          email: authUser.email || "",
+          name: authUser.user_metadata?.full_name || "Utilisateur",
+          credits: 0,
+          role: "user",
+          purchases: [],
+          bookings: [],
+        });
+        return;
+      }
+
+      const { data: bookingsData } = await supabase
+        .from("bookings")
+        .select("*")
+        .eq("user_id", authUser.id);
+
+      const profilData = profile2 as {
         id: string;
         full_name?: string | null;
         name?: string | null;
@@ -136,6 +131,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         role: profilData.role || "user",
         purchases: [],
         bookings: bookingsData || [],
+      });
+    } catch (err) {
+      console.error("Erreur inattendue loadProfile:", err);
+      setUser({
+        id: authUser.id,
+        email: authUser.email || "",
+        name: authUser.user_metadata?.full_name || "Utilisateur",
+        credits: 0,
+        role: "user",
+        purchases: [],
+        bookings: [],
       });
     }
   };
