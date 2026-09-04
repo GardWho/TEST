@@ -88,38 +88,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const loadProfile = async (authUser: User) => {
     const { data: profile, error } = await supabase
       .from("profiles")
-      .select("*")
+      .select("id, email, full_name, credits, role")
       .eq("id", authUser.id)
       .single();
 
     if (error || !profile) {
-      // Créer un profil si inexistant
       const newProfile = {
         id: authUser.id,
-        email: authUser.email,
+        email: authUser.email || "",
         full_name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || "Utilisateur",
         credits: 0,
         role: "user",
       };
-      await supabase.from("profiles").insert([newProfile]);
-setUser({ 
-  id: authUser.id, 
-  email: authUser.email || "", 
-  name: newProfile.full_name, 
-  credits: 0, 
-  role: "user", 
-  purchases: [], 
-  bookings: [] 
-});
-    } else {
-      // Charger les réservations de l'utilisateur
-      const { data: bookingsData } = await supabase.from("bookings").select("*").eq("user_id", authUser.id);
+      const { error: insertError } = await supabase.from("profiles").insert([newProfile]);
+      if (insertError) {
+        console.error("Erreur création profil:", insertError.message);
+      }
       setUser({
-        id: profile.id,
-        email: profile.email,
-        name: profile.full_name || profile.name || "Utilisateur",
-        credits: profile.credits ?? 0,
-        role: profile.role || "user",
+        id: authUser.id,
+        email: authUser.email || "",
+        name: newProfile.full_name || "Utilisateur",
+        credits: 0,
+        role: "user",
+        purchases: [],
+        bookings: [],
+      });
+    } else {
+      const { data: bookingsData } = await supabase.from("bookings").select("*").eq("user_id", authUser.id);
+      
+      // ✅ Typage explicite pour éviter les erreurs TypeScript
+      const profilData = profile as {
+        id: string;
+        full_name?: string | null;
+        name?: string | null;
+        email?: string | null;
+        credits?: number | null;
+        role?: string | null;
+      };
+
+      const userName = profilData.full_name || profilData.name || "Utilisateur";
+
+      setUser({
+        id: profilData.id,
+        email: profilData.email || "",
+        name: userName,
+        credits: profilData.credits ?? 0,
+        role: profilData.role || "user",
         purchases: [],
         bookings: bookingsData || [],
       });

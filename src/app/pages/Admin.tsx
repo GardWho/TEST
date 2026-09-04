@@ -11,6 +11,7 @@ export function AdminPage() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [creditAmount, setCreditAmount] = useState(1);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!user || user.role !== "admin") return;
@@ -18,9 +19,14 @@ export function AdminPage() {
   }, [user]);
 
   const fetchUsers = async () => {
-    const { data, error } = await supabase.from("profiles").select("*");
+    setLoading(true);
+    // Sélection explicite des colonnes
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, email, full_name, credits, role");
     if (error) setError(error.message);
-    else setUsers(data);
+    else setUsers(data || []);
+    setLoading(false);
   };
 
   const addCreditsToUser = async () => {
@@ -33,8 +39,8 @@ export function AdminPage() {
     if (error) setError(error.message);
     else {
       alert(`Crédits ajoutés à ${selectedUser.email}`);
-      fetchUsers();
       setSelectedUser(null);
+      fetchUsers();
     }
   };
 
@@ -59,27 +65,31 @@ export function AdminPage() {
         {/* Colonne gauche : liste des utilisateurs */}
         <div>
           <h2 className="text-xl font-normal mb-4">Liste des utilisateurs</h2>
-          <ul className="space-y-2">
-            {users.map((u) => (
-              <li key={u.id} className="bg-white p-4 rounded-sm flex justify-between items-center">
-                <div>
-                  <p className="font-medium">{u.email}</p>
-                  <p className="text-sm text-gray-500">
-                    {u.full_name} - {u.credits} crédits - {u.role}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setSelectedUser(u);
-                    setCreditAmount(1);
-                  }}
-                  className="bg-[#C09A3C] text-white px-3 py-1 text-xs uppercase"
-                >
-                  Ajouter crédits
-                </button>
-              </li>
-            ))}
-          </ul>
+          {loading ? (
+            <p className="text-sm text-gray-500">Chargement...</p>
+          ) : (
+            <ul className="space-y-2">
+              {users.map((u) => (
+                <li key={u.id} className="bg-white p-4 rounded-sm flex justify-between items-center">
+                  <div>
+                    <p className="font-medium">{u.email}</p>
+                    <p className="text-sm text-gray-500">
+                      {u.full_name || "Nom non défini"} - {u.credits} crédits - {u.role}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedUser(u);
+                      setCreditAmount(1);
+                    }}
+                    className="bg-[#C09A3C] text-white px-3 py-1 text-xs uppercase"
+                  >
+                    Ajouter crédits
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         {/* Colonne droite : formulaire d'ajout de crédits */}
