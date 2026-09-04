@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import { config } from "../../config";
 
@@ -7,34 +7,39 @@ const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey);
 
 export function ConfirmEmail() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     const handleConfirmation = async () => {
-      const token = searchParams.get("token");
-      const type = searchParams.get("type");
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const error = hashParams.get("error");
+      const errorDescription = hashParams.get("error_description");
+      const tokenHash = hashParams.get("token_hash");
+      const type = hashParams.get("type");
 
-      if (token && type === "signup") {
-        const { error } = await supabase.auth.verifyOtp({
-          token_hash: token,
+      if (error) {
+        alert(`Erreur : ${errorDescription || "Lien invalide ou expiré"}`);
+        navigate("/login");
+        return;
+      }
+
+      if (tokenHash && type === "signup") {
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
           type: "signup",
         });
 
-        if (error) {
-          console.error("Erreur de confirmation:", error.message);
+        if (verifyError) {
           alert("La confirmation a échoué. Le lien a peut-être expiré.");
         } else {
           alert("Email confirmé ! Vous pouvez maintenant vous connecter.");
         }
-      } else {
-        alert("Lien de confirmation invalide.");
       }
 
       navigate("/login");
     };
 
     handleConfirmation();
-  }, [navigate, searchParams]);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F5EFE4]">
