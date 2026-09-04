@@ -1,17 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../AuthContext";
 import { supabase } from "../lib/supabase";
 import { Link } from "react-router-dom";
 
-type Tab = "profil" | "historique" | "credits" | "reservations";
+type Tab = "profil" | "historique" | "credits" | "planning";
+
+// Créneaux de 7h à 19h inclus (13 créneaux)
+const HOURS = Array.from({ length: 13 }, (_, i) => i + 7);
+
+const getDaysInMonth = (year: number, month: number) =>
+  new Date(year, month + 1, 0).getDate();
+
+const getFirstDayOfMonth = (year: number, month: number) =>
+  new Date(year, month, 1).getDay();
 
 export function ComptePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, useCredits } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("profil");
-  const [filter, setFilter] = useState<"upcoming" | "past" | "all">("upcoming");
   const [bookings, setBookings] = useState<any[]>([]);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
+  const [selectedService, setSelectedService] = useState("Cours particulier");
   const [error, setError] = useState("");
+  const [filter, setFilter] = useState<"upcoming" | "past" | "all">("upcoming");
+  const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
+  const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
+  // ---- Récupérer les réservations quand l'onglet Planning est ouvert ----
+  useEffect(() => {
+    if (!user) return;
+    if (activeTab === "planning") fetchBookings();
+  }, [user, activeTab]);
+
+  const fetchBookings = async () => {
+    const { data, error } = await supabase
+      .from("bookings")
+      .select("*")
+      .eq("user_id", user!.id); // user est non-null ici car on est après le check dans le composant
+    if (error) setError(error.message);
+    else setBookings(data || []);
+  };
+
+  // ---- Vérification de connexion AVANT d'utiliser user ----
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F5EFE4]">
@@ -25,18 +55,49 @@ export function ComptePage() {
     );
   }
 
-  const fetchBookings = async () => {
-    const { data, error } = await supabase
+  // ---- Fonctions utilisant user (définies après le check) ----
+  const handleBooking = async () => {
+    if (!selectedDate) {
+      alert("Veuillez sélectionner une date dans le calendrier.");
+      return;
+    }
+    if (!selectedTime) {
+      alert("Veuillez sélectionner un horaire.");
+      return;
+    }
+    const { data: existing } = await supabase
       .from("bookings")
       .select("*")
-      .eq("user_id", user.id);
-    if (error) setError(error.message);
-    else setBookings(data || []);
+      .eq("date", selectedDate)
+      .eq("time", selectedTime)
+      .maybeSingle();
+    if (existing) {
+      alert("Ce créneau est déjà réservé.");
+      return;
+    }
+    const success = await useCredits(1);
+    if (!success) {
+      alert("Crédits insuffisants. Veuillez acheter des séances.");
+      return;
+    }
+    const { error: insertError } = await supabase.from("bookings").insert({
+      user_id: user.id,
+      date: selectedDate,
+      time: selectedTime,
+      service: selectedService,
+    });
+    if (insertError) {
+      alert("Erreur lors de la réservation.");
+      return;
+    }
+    alert("Créneau réservé !");
+    fetchBookings();
   };
 
-  const handleTabClick = (tab: Tab) => {
-    setActiveTab(tab);
-    if (tab === "reservations") fetchBookings();
+  const handleCancel = async (id: string) => {
+    const { error } = await supabase.from("bookings").delete().eq("id", id);
+    if (error) setError(error.message);
+    else fetchBookings();
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -46,11 +107,29 @@ export function ComptePage() {
     return true;
   });
 
-  const handleCancel = async (id: string) => {
-    const { error } = await supabase.from("bookings").delete().eq("id", id);
-    if (error) setError(error.message);
-    else fetchBookings();
+  const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+  const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
+
+  const daysArray: (number | null)[] = [
+    ...Array.from({ length: firstDay }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
+  ];
+
+  const formatDate = (day: number) => {
+    const month = (currentMonth + 1).toString().padStart(2, "0");
+    const year = currentYear;
+    const dayStr = day.toString().padStart(2, "0");
+    return `${year}-${month}-${dayStr}`;
   };
+
+  const bookingsByDay = bookings.reduce((acc, b) => {
+    acc[b.date] = (acc[b.date] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const selectedDateBookings = selectedDate
+    ? bookings.filter((b) => b.date === selectedDate)
+    : [];
 
   return (
     <div className="min-h-screen bg-[#F5EFE4] pt-20 px-8 md:px-14">
@@ -63,11 +142,11 @@ export function ComptePage() {
             { id: "profil", label: "Profil" },
             { id: "historique", label: "Historique" },
             { id: "credits", label: "Crédits" },
-            { id: "reservations", label: "Mes réservations" },
+            { id: "planning", label: "Planning" },
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => handleTabClick(tab.id as Tab)}
+              onClick={() => { setActiveTab(tab.id as Tab); if (tab.id === "planning") fetchBookings(); }}
               className={`pb-3 text-[11px] tracking-[0.25em] uppercase transition-colors ${
                 activeTab === tab.id ? "text-[#C09A3C] border-b-2 border-[#C09A3C]" : "text-[#1C1814]/40 hover:text-[#1C1814]/80"
               }`}
@@ -115,48 +194,138 @@ export function ComptePage() {
             </div>
           )}
 
-          {activeTab === "reservations" && (
+          {activeTab === "planning" && (
             <div>
-              <h2 className="text-2xl font-normal mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>Mes réservations</h2>
-              {error && <p className="text-red-500 mb-4">{error}</p>}
-              <div className="flex gap-3 mb-6">
-                {[
-                  { id: "upcoming", label: "À venir" },
-                  { id: "past", label: "Passées" },
-                  { id: "all", label: "Toutes" },
-                ].map((f) => (
-                  <button
-                    key={f.id}
-                    onClick={() => setFilter(f.id as any)}
-                    className={`px-4 py-2 text-xs uppercase tracking-wider ${
-                      filter === f.id ? "bg-[#C09A3C] text-white" : "bg-[#F8F3EC] text-[#1C1814]/60"
-                    }`}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-              {filteredBookings.length === 0 ? (
-                <p className="text-[#1C1814]/40">Aucune réservation.</p>
-              ) : (
-                <ul className="space-y-2">
-                  {filteredBookings.map((b) => (
-                    <li key={b.id} className="border-b border-[#C09A3C]/15 py-3 flex justify-between items-center">
-                      <div>
-                        <p className="text-sm">{b.date} à {b.time} · {b.service}</p>
-                      </div>
-                      {b.date >= today && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Calendrier */}
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <button
+                      onClick={() => {
+                        if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1); }
+                        else setCurrentMonth(currentMonth - 1);
+                      }}
+                      className="px-3 py-1 bg-[#C09A3C] text-white text-sm rounded"
+                    >←</button>
+                    <h2 className="text-lg font-normal">
+                      {new Date(currentYear, currentMonth, 1).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
+                    </h2>
+                    <button
+                      onClick={() => {
+                        if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(currentYear + 1); }
+                        else setCurrentMonth(currentMonth + 1);
+                      }}
+                      className="px-3 py-1 bg-[#C09A3C] text-white text-sm rounded"
+                    >→</button>
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-1 mb-2">
+                    {["L", "M", "M", "J", "V", "S", "D"].map((d, i) => (
+                      <div key={i} className="text-center text-[10px] uppercase text-[#1C1814]/40">{d}</div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-1">
+                    {daysArray.map((day, index) => {
+                      if (day === null) return <div key={index} />;
+                      const dateStr = formatDate(day);
+                      const count = bookingsByDay[dateStr] || 0;
+                      const isToday = dateStr === today;
+                      return (
                         <button
-                          onClick={() => handleCancel(b.id)}
-                          className="text-red-500 text-xs"
+                          key={index}
+                          onClick={() => { setSelectedDate(dateStr); setSelectedTime(""); }}
+                          className={`h-10 rounded-sm text-sm flex flex-col items-center justify-center relative ${
+                            isToday ? "bg-[#C09A3C]/10" : ""
+                          } ${count > 0 ? "bg-[#C09A3C]/20" : "bg-[#F8F3EC]"}`}
                         >
-                          Annuler
+                          <span className={selectedDate === dateStr ? "text-[#C09A3C] font-bold" : ""}>{day}</span>
+                          {count > 0 && <span className="text-[8px] text-[#C09A3C] mt-0.5">{count} résa</span>}
                         </button>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
+                      );
+                    })}
+                  </div>
+
+                  {selectedDate && selectedDateBookings.length > 0 && (
+                    <div className="mt-4">
+                      <h3 className="text-sm font-medium mb-2 text-[#C09A3C]">Réservations ce jour</h3>
+                      <ul className="space-y-2">
+                        {selectedDateBookings.map((b) => (
+                          <li key={b.id} className="bg-[#F8F3EC] p-2 rounded-sm flex justify-between text-sm">
+                            <span>{b.time} - {b.service}</span>
+                            {b.user_id === user.id && (
+                              <button onClick={() => handleCancel(b.id)} className="text-red-500 text-xs">Annuler</button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {/* Formulaire + historique */}
+                <div>
+                  <h2 className="text-xl font-normal mb-4">Réserver un créneau</h2>
+                  {!selectedDate ? (
+                    <p className="text-sm text-gray-500">Sélectionnez une date dans le calendrier.</p>
+                  ) : (
+                    <>
+                      <p className="text-sm mb-4">Date : <strong>{new Date(selectedDate + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</strong></p>
+                      <label className="block mb-2 text-sm">Horaire</label>
+                      <select value={selectedTime} onChange={(e) => setSelectedTime(e.target.value)} className="w-full border p-2 mb-4">
+                        <option value="">-- Choisir --</option>
+                        {HOURS.map((h) => {
+                          const time = `${h.toString().padStart(2, "0")}:00`;
+                          const isTaken = bookings.some((b) => b.date === selectedDate && b.time === time);
+                          return <option key={time} value={time} disabled={isTaken}>{time} {isTaken ? "(réservé)" : ""}</option>;
+                        })}
+                      </select>
+                      <label className="block mb-2 text-sm">Service</label>
+                      <select value={selectedService} onChange={(e) => setSelectedService(e.target.value)} className="w-full border p-2 mb-4">
+                        <option>Cours particulier</option>
+                        <option>Cours collectif</option>
+                        <option>Travail du cheval</option>
+                        <option>Rééducation</option>
+                        <option>Éducation équine</option>
+                      </select>
+                      <button onClick={handleBooking} className="w-full bg-[#C09A3C] text-white py-3 uppercase text-sm">Réserver (1 crédit)</button>
+                      <p className="text-xs mt-2">Votre solde : {user.credits} crédits</p>
+                    </>
+                  )}
+
+                  {/* Historique */}
+                  <div className="mt-8">
+                    <div className="flex gap-2 mb-4">
+                      {["upcoming", "past", "all"].map((f) => (
+                        <button
+                          key={f}
+                          onClick={() => setFilter(f as any)}
+                          className={`px-3 py-1 text-[10px] uppercase tracking-wider ${
+                            filter === f ? "bg-[#C09A3C] text-white" : "bg-[#F8F3EC] text-[#1C1814]/60"
+                          }`}
+                        >
+                          {f === "upcoming" ? "À venir" : f === "past" ? "Passées" : "Toutes"}
+                        </button>
+                      ))}
+                    </div>
+                    <h3 className="text-sm font-medium mb-2 text-[#C09A3C]">Mes réservations</h3>
+                    {filteredBookings.length === 0 ? (
+                      <p className="text-sm text-gray-500">Aucune réservation.</p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {filteredBookings.map((b) => (
+                          <li key={b.id} className="border-b border-[#C09A3C]/10 py-2 flex justify-between items-center">
+                            <span className="text-sm">{b.date} à {b.time} · {b.service}</span>
+                            {b.date >= today && (
+                              <button onClick={() => handleCancel(b.id)} className="text-red-500 text-xs">Annuler</button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>

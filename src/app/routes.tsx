@@ -11,7 +11,6 @@ import { TravailChevalPage } from "./pages/TravailCheval";
 import { ReeducationPage } from "./pages/Reeducation";
 import { EducationEquinePage } from "./pages/EducationEquine";
 import { PanierPage } from "./pages/Panier";
-import { PlanningPage } from "./pages/Planning";
 import { AdminPage } from "./pages/Admin";
 import { ConfirmEmail } from "./components/ConfirmEmail";
 
@@ -31,7 +30,6 @@ export const router = createBrowserRouter([
       { path: "travail-cheval", element: <TravailChevalPage /> },
       { path: "reeducation", element: <ReeducationPage /> },
       { path: "education-equine", element: <EducationEquinePage /> },
-      { path: "planning", element: <PlanningPage /> },
       { path: "admin", element: <AdminPage /> },
       { path: "confirm", element: <ConfirmEmail /> },
     ],
