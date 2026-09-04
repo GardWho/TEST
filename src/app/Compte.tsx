@@ -5,8 +5,14 @@ import { Link } from "react-router-dom";
 
 type Tab = "profil" | "historique" | "credits" | "planning";
 
-// Créneaux de 7h à 19h inclus (13 créneaux)
-const HOURS = Array.from({ length: 13 }, (_, i) => i + 7);
+// Génération des créneaux de 7h00 à 19h00 toutes les 15 minutes
+const times: string[] = [];
+for (let h = 7; h <= 18; h++) {
+  for (let m = 0; m < 60; m += 15) {
+    times.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
+  }
+}
+times.push("19:00");
 
 const getDaysInMonth = (year: number, month: number) =>
   new Date(year, month + 1, 0).getDate();
@@ -15,7 +21,7 @@ const getFirstDayOfMonth = (year: number, month: number) =>
   new Date(year, month, 1).getDay();
 
 export function ComptePage() {
-  const { user, logout, useCredits } = useAuth();
+  const { user, logout, useCredits, refreshProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("profil");
   const [bookings, setBookings] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
@@ -26,7 +32,6 @@ export function ComptePage() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
 
-  // ---- Récupérer les réservations quand l'onglet Planning est ouvert ----
   useEffect(() => {
     if (!user) return;
     if (activeTab === "planning") fetchBookings();
@@ -36,12 +41,19 @@ export function ComptePage() {
     const { data, error } = await supabase
       .from("bookings")
       .select("*")
-      .eq("user_id", user!.id); // user est non-null ici car on est après le check dans le composant
+      .eq("user_id", user!.id);
     if (error) setError(error.message);
     else setBookings(data || []);
   };
 
-  // ---- Vérification de connexion AVANT d'utiliser user ----
+  // Vérification si le créneau est à plus de 24h
+  const isAtLeast24hAhead = (date: string, time: string) => {
+    const bookingDateTime = new Date(`${date}T${time}`);
+    const now = new Date();
+    return bookingDateTime.getTime() - now.getTime() >= 24 * 60 * 60 * 1000;
+  };
+
+  // ✅ Vérification user AVANT d'utiliser user.id
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F5EFE4]">
@@ -55,46 +67,49 @@ export function ComptePage() {
     );
   }
 
-  // ---- Fonctions utilisant user (définies après le check) ----
   const handleBooking = async () => {
-    if (!selectedDate) {
-      alert("Veuillez sélectionner une date dans le calendrier.");
+    if (!selectedDate || !selectedTime) {
+      alert("Veuillez sélectionner une date et un horaire.");
       return;
     }
-    if (!selectedTime) {
-      alert("Veuillez sélectionner un horaire.");
+    if (!isAtLeast24hAhead(selectedDate, selectedTime)) {
+      alert("Impossible de réserver à moins de 24h du créneau.");
       return;
     }
-    const { data: existing } = await supabase
-      .from("bookings")
-      .select("*")
-      .eq("date", selectedDate)
-      .eq("time", selectedTime)
-      .maybeSingle();
-    if (existing) {
-      alert("Ce créneau est déjà réservé.");
-      return;
-    }
-    const success = await useCredits(1);
-    if (!success) {
-      alert("Crédits insuffisants. Veuillez acheter des séances.");
-      return;
-    }
-    const { error: insertError } = await supabase.from("bookings").insert({
-      user_id: user.id,
-      date: selectedDate,
-      time: selectedTime,
-      service: selectedService,
+
+    // Appel au backend pour créer la réservation et envoyer l'email à l'admin
+    const response = await fetch("/api/create-booking", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: user.id, // ✅ user est non-null ici
+        date: selectedDate,
+        time: selectedTime,
+        service: selectedService,
+      }),
     });
-    if (insertError) {
-      alert("Erreur lors de la réservation.");
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Erreur lors de la réservation.");
       return;
     }
+
+    // Recharger le profil pour mettre à jour le solde (le backend a déjà débité)
+    await refreshProfile();
+    await fetchBookings();
     alert("Créneau réservé !");
-    fetchBookings();
   };
 
   const handleCancel = async (id: string) => {
+    const { data: booking } = await supabase.from("bookings").select("*").eq("id", id).single();
+    if (booking) {
+      if (!isAtLeast24hAhead(booking.date, booking.time)) {
+        alert("Impossible d'annuler à moins de 24h du créneau.");
+        return;
+      }
+    }
     const { error } = await supabase.from("bookings").delete().eq("id", id);
     if (error) setError(error.message);
     else fetchBookings();
@@ -274,10 +289,10 @@ export function ComptePage() {
                       <label className="block mb-2 text-sm">Horaire</label>
                       <select value={selectedTime} onChange={(e) => setSelectedTime(e.target.value)} className="w-full border p-2 mb-4">
                         <option value="">-- Choisir --</option>
-                        {HOURS.map((h) => {
-                          const time = `${h.toString().padStart(2, "0")}:00`;
+                        {times.map((time) => {
                           const isTaken = bookings.some((b) => b.date === selectedDate && b.time === time);
-                          return <option key={time} value={time} disabled={isTaken}>{time} {isTaken ? "(réservé)" : ""}</option>;
+                          const isPast = !isAtLeast24hAhead(selectedDate, time);
+                          return <option key={time} value={time} disabled={isTaken || isPast}>{time} {isTaken ? "(réservé)" : isPast ? "(trop tard)" : ""}</option>;
                         })}
                       </select>
                       <label className="block mb-2 text-sm">Service</label>
@@ -285,8 +300,7 @@ export function ComptePage() {
                         <option>Cours particulier</option>
                         <option>Cours collectif</option>
                         <option>Travail du cheval</option>
-                        <option>Rééducation</option>
-                        <option>Éducation équine</option>
+                        {/* Rééducation et Éducation équine retirés */}
                       </select>
                       <button onClick={handleBooking} className="w-full bg-[#C09A3C] text-white py-3 uppercase text-sm">Réserver (1 crédit)</button>
                       <p className="text-xs mt-2">Votre solde : {user.credits} crédits</p>
@@ -316,7 +330,7 @@ export function ComptePage() {
                         {filteredBookings.map((b) => (
                           <li key={b.id} className="border-b border-[#C09A3C]/10 py-2 flex justify-between items-center">
                             <span className="text-sm">{b.date} à {b.time} · {b.service}</span>
-                            {b.date >= today && (
+                            {b.date >= today && isAtLeast24hAhead(b.date, b.time) && (
                               <button onClick={() => handleCancel(b.id)} className="text-red-500 text-xs">Annuler</button>
                             )}
                           </li>

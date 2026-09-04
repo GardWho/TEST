@@ -16,6 +16,7 @@ type AuthContextType = {
   useCredits: (amount: number) => Promise<boolean>;
   addPurchase: (purchase: Omit<Purchase, "id">) => Promise<void>;
   addBooking: (booking: Omit<Booking, "id">) => Promise<void>;
+  refreshProfile: () => Promise<void>;
   isAuthenticated: boolean;
   loading: boolean;
 };
@@ -59,40 +60,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const loadProfile = async (authUser: User) => {
-    try {
-      const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("id, email, full_name, credits, role")
-        .eq("id", authUser.id)
-        .single();
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select("id, email, full_name, credits, role")
+      .eq("id", authUser.id)
+      .maybeSingle();
 
-      if (error) {
-        // Si le profil n'existe pas, on le crée (avec upsert pour éviter les doublons)
-        if (error.code === "PGRST116") {
-          const newProfile = {
-            id: authUser.id,
-            email: authUser.email || "",
-            full_name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || "Utilisateur",
-            credits: 0,
-            role: "user",
-          };
-          const { error: insertError } = await supabase
-            .from("profiles")
-            .upsert([newProfile], { onConflict: "id" });
-          if (insertError) console.error("Erreur upsert profil:", insertError.message);
-        } else {
-          console.error("Erreur lecture profil:", error.message);
-        }
-      }
-
-      // Re-lire le profil (maintenant qu'il existe ou a été récupéré)
-      const { data: profile2, error: error2 } = await supabase
-        .from("profiles")
-        .select("id, email, full_name, credits, role")
-        .eq("id", authUser.id)
-        .single();
-
-      if (error2) {
+    if (!profile) {
+      // Créer un profil avec 0 crédit (jamais d'upsert qui écrase)
+      const newProfile = {
+        id: authUser.id,
+        email: authUser.email || "",
+        full_name: authUser.user_metadata?.full_name || authUser.user_metadata?.name || "Utilisateur",
+        credits: 0,
+        role: "user",
+      };
+      const { error: insertError } = await supabase.from("profiles").insert([newProfile]);
+      if (insertError) console.error("Erreur création profil:", insertError.message);
+      // Relecture pour être sûr
+      const { data: created } = await supabase.from("profiles").select("*").eq("id", authUser.id).single();
+      if (created) {
+        setUser({
+          id: created.id,
+          email: created.email || "",
+          name: created.full_name || "Utilisateur",
+          credits: created.credits ?? 0,
+          role: created.role || "user",
+          purchases: [],
+          bookings: [],
+        });
+      } else {
         setUser({
           id: authUser.id,
           email: authUser.email || "",
@@ -102,25 +99,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           purchases: [],
           bookings: [],
         });
-        return;
       }
-
-      const { data: bookingsData } = await supabase
-        .from("bookings")
-        .select("*")
-        .eq("user_id", authUser.id);
-
-      const profilData = profile2 as {
-        id: string;
-        full_name?: string | null;
-        name?: string | null;
-        email?: string | null;
-        credits?: number | null;
-        role?: string | null;
-      };
-
-      const userName = profilData.full_name || profilData.name || "Utilisateur";
-
+    } else {
+      const { data: bookingsData } = await supabase.from("bookings").select("*").eq("user_id", authUser.id);
+      // ✅ Typage correct : seulement full_name, jamais name
+      const profilData = profile as { id: string; full_name?: string | null; email?: string | null; credits?: number | null; role?: string | null };
+      const userName = profilData.full_name || "Utilisateur";
       setUser({
         id: profilData.id,
         email: profilData.email || "",
@@ -130,16 +114,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         purchases: [],
         bookings: bookingsData || [],
       });
-    } catch (err) {
-      console.error("Erreur inattendue loadProfile:", err);
+    }
+  };
+
+  // Recharger le profil (après un achat ou une réservation côté backend)
+  const refreshProfile = async () => {
+    if (!user) return;
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id, email, full_name, credits, role")
+      .eq("id", user.id)
+      .single();
+    if (profile) {
       setUser({
-        id: authUser.id,
-        email: authUser.email || "",
-        name: authUser.user_metadata?.full_name || "Utilisateur",
-        credits: 0,
-        role: "user",
-        purchases: [],
-        bookings: [],
+        id: profile.id,
+        email: profile.email || "",
+        name: profile.full_name || "Utilisateur",
+        credits: profile.credits ?? 0,
+        role: profile.role || "user",
+        purchases: user.purchases,
+        bookings: user.bookings,
       });
     }
   };
@@ -164,28 +158,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) throw new Error(error.message);
   };
 
-  // ✅ Utilise la fonction RPC pour un ajout atomique
+  // Utilise la fonction RPC add_credits (atomique) pour éviter les crédits illimités
   const addCredits = async (amount: number) => {
     if (!user) return;
-    const { data, error } = await supabase
+    const { error } = await supabase
       .rpc("add_credits", { p_user_id: user.id, p_amount: amount });
     if (error) console.error("Erreur addCredits:", error.message);
-    else {
-      setUser({ ...user, credits: user.credits + amount });
-    }
+    await refreshProfile();
   };
 
-  // ✅ Utilise la fonction RPC pour un retrait atomique
+  // Utilise la fonction RPC use_credit (atomique) pour éviter de débiter 2 fois
   const useCredits = async (amount: number): Promise<boolean> => {
     if (!user || user.credits < amount) return false;
-    const { data, error } = await supabase
+    const { data: success, error } = await supabase
       .rpc("use_credit", { p_user_id: user.id, p_amount: amount });
     if (error) {
       console.error("Erreur useCredits:", error.message);
       return false;
     }
-    if (data === true) {
-      setUser({ ...user, credits: user.credits - amount });
+    if (success === true) {
+      await refreshProfile();
       return true;
     }
     return false;
@@ -215,6 +207,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         useCredits,
         addPurchase,
         addBooking,
+        refreshProfile,
         isAuthenticated: !!user,
         loading,
       }}
