@@ -10,31 +10,33 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 // ============================================
 // IMPORT SUPABASE (BACKEND)
 // ============================================
-// ⚠️ CORRECTIF : @supabase/supabase-js construit toujours un RealtimeClient
-// en interne dès createClient(...), même si on ne s'en sert jamais (aucune
-// route ici n'utilise .channel()). Ce RealtimeClient a besoin d'un objet
-// WebSocket. Node.js ne l'a nativement qu'à partir de la version 22 ; en
-// dessous (comme ici, Node 20), il faut fournir une implémentation via
-// l'option "transport". `transport: null` n'est PAS une implémentation
-// valide : ça fait planter le process au démarrage, avant même qu'il
-// écoute le port — d'où les 502 sur TOUTES les routes.
-// Le paquet "ws" est déjà dans package.json : on s'en sert enfin ici.
+// ⚠️ CORRECTIF (v2) : @supabase/supabase-js construit toujours un
+// RealtimeClient en interne dès createClient(...), même si on ne s'en sert
+// jamais (aucune route ici n'utilise .channel()). Ce RealtimeClient exige
+// un WebSocket "natif" (global), disponible seulement à partir de Node 22.
+// Passer un WebSocket via l'option `realtime: { transport: ... }` n'a pas
+// suffi avec la version de @supabase/realtime-js installée ici (l'erreur
+// persistait à l'identique) : cette option ne semble pas être prise en
+// compte par cette version. On corrige donc à la source, en définissant
+// nous-mêmes le WebSocket global AVANT d'importer supabase-js — c'est
+// exactement ce que le message d'erreur "native WebSocket not found"
+// vérifie, donc ça ne dépend plus du nom exact d'une option interne.
+if (typeof globalThis.WebSocket === 'undefined') {
+  globalThis.WebSocket = require('ws');
+}
+
 const { createClient } = require('@supabase/supabase-js');
-const WebSocket = require('ws');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false }, realtime: { transport: WebSocket } }
+  { auth: { persistSession: false } }
 );
 
-// Le deuxième client avait le même problème latent : aucune option
-// "realtime" n'était précisée, donc il aurait planté à son tour juste
-// après le premier une fois celui-ci corrigé. Même correctif ici.
 const supabaseAnon = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY,
-  { auth: { persistSession: false }, realtime: { transport: WebSocket } }
+  { auth: { persistSession: false } }
 );
 
 process.on('unhandledRejection', (reason) => {
