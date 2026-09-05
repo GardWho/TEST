@@ -39,7 +39,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
-  const { user, addCredits, addPurchase } = useAuth();
+  // ⚠️ addCredits et addPurchase ont été retirés d'AuthContext (les crédits
+  // sont désormais gérés côté serveur via le webhook Stripe et les routes
+  // /api/*). Ils n'étaient de toute façon jamais appelés ici — seul "user"
+  // est réellement utilisé dans ce fichier.
+  const { user } = useAuth();
 
   const showNotification = (msg: string) => {
     setNotification(msg);
