@@ -8,8 +8,7 @@ const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ============================================
-// IMPORT SUPABASE (BACKEND) — Realtime désactivé côté serveur
-// (évite le crash Node 20, le planning se met à jour côté navigateur)
+// IMPORT SUPABASE (BACKEND) — Realtime désactivé (évite crash Node 20)
 // ============================================
 const { createClient } = require('@supabase/supabase-js');
 
