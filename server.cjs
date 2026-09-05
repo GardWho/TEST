@@ -8,14 +8,15 @@ const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ============================================
-// IMPORT SUPABASE (BACKEND) — Realtime désactivé (évite crash Node 20)
+// IMPORT SUPABASE (BACKEND) — On force l'utilisation de "ws"
 // ============================================
+const WebSocket = require('ws');
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false }, realtime: { transport: null } }
+  { auth: { persistSession: false }, realtime: { transport: WebSocket } }
 );
 
 const supabaseAnon = createClient(
