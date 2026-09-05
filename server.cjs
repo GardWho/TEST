@@ -8,15 +8,15 @@ const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ============================================
-// IMPORT SUPABASE (BACKEND)
+// IMPORT SUPABASE (BACKEND) — Realtime désactivé côté serveur
+// (évite le crash Node 20, le planning se met à jour côté navigateur)
 // ============================================
-const WebSocket = require('ws'); // Pour supporter les WebSockets avec Node.js 20
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false }, realtime: { transport: WebSocket } }
+  { auth: { persistSession: false }, realtime: { transport: null } }
 );
 
 const supabaseAnon = createClient(
@@ -36,7 +36,6 @@ app.use(cors());
 
 // ============================================
 // ROUTE : Webhook Stripe (crédit automatique après paiement)
-// Doit être AVANT express.json()
 // ============================================
 app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   const sig = req.headers['stripe-signature'];
@@ -73,8 +72,6 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
         const newCredits = profile.credits + creditsToAdd;
         await supabase.from('profiles').update({ credits: newCredits }).eq('id', userId);
         console.log(`✅ ${creditsToAdd} crédits ajoutés à ${userId}`);
-      } else {
-        console.error('Profil introuvable pour', userId, error?.message);
       }
     }
   }
@@ -86,7 +83,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
 app.use(express.json());
 
 // ============================================
-// Petit utilitaire : identifier l'utilisateur à partir du token envoyé
+// Petit utilitaire : identifier l'utilisateur à partir du token
 // ============================================
 async function getUserFromRequest(req) {
   const authHeader = req.headers.authorization || '';
