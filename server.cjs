@@ -10,10 +10,15 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 // ============================================
 // IMPORT SUPABASE (BACKEND) — clé "service_role"
 // ============================================
+const WebSocket = require('ws'); // Pour supporter les WebSockets avec Node.js 20
 const { createClient } = require('@supabase/supabase-js');
 const supabase = createClient(
   process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.SUPABASE_SERVICE_ROLE_KEY,
+  {
+    auth: { persistSession: false },
+    realtime: { transport: WebSocket } // ← Solution pour éviter le crash
+  }
 );
 
 // Filets de sécurité globaux
