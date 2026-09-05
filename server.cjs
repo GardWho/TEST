@@ -8,20 +8,33 @@ const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ============================================
-// IMPORT SUPABASE (BACKEND) — Realtime désactivé
+// IMPORT SUPABASE (BACKEND)
 // ============================================
+// ⚠️ CORRECTIF : @supabase/supabase-js construit toujours un RealtimeClient
+// en interne dès createClient(...), même si on ne s'en sert jamais (aucune
+// route ici n'utilise .channel()). Ce RealtimeClient a besoin d'un objet
+// WebSocket. Node.js ne l'a nativement qu'à partir de la version 22 ; en
+// dessous (comme ici, Node 20), il faut fournir une implémentation via
+// l'option "transport". `transport: null` n'est PAS une implémentation
+// valide : ça fait planter le process au démarrage, avant même qu'il
+// écoute le port — d'où les 502 sur TOUTES les routes.
+// Le paquet "ws" est déjà dans package.json : on s'en sert enfin ici.
 const { createClient } = require('@supabase/supabase-js');
+const WebSocket = require('ws');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
-  { auth: { persistSession: false }, realtime: { transport: null } }
+  { auth: { persistSession: false }, realtime: { transport: WebSocket } }
 );
 
+// Le deuxième client avait le même problème latent : aucune option
+// "realtime" n'était précisée, donc il aurait planté à son tour juste
+// après le premier une fois celui-ci corrigé. Même correctif ici.
 const supabaseAnon = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY,
-  { auth: { persistSession: false } }
+  { auth: { persistSession: false }, realtime: { transport: WebSocket } }
 );
 
 process.on('unhandledRejection', (reason) => {
