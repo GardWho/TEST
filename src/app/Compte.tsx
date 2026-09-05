@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../AuthContext";
-import { supabase } from "../lib/supabase";
 import { Link } from "react-router-dom";
 
 type Tab = "profil" | "historique" | "credits" | "planning";
@@ -17,12 +16,12 @@ times.push("19:00");
 const getDaysInMonth = (year: number, month: number) =>
   new Date(year, month + 1, 0).getDate();
 
-// ✅ Correction : alignement lundi = 0, mardi = 1, ..., dimanche = 6
+// Alignement lundi = 0
 const getFirstDayOfMonth = (year: number, month: number) =>
   (new Date(year, month, 1).getDay() + 6) % 7;
 
 export function ComptePage() {
-  const { user, logout, useCredits, refreshProfile } = useAuth();
+  const { user, logout, bookSlot, cancelBooking, refreshProfile, session } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("profil");
   const [bookings, setBookings] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
@@ -32,29 +31,40 @@ export function ComptePage() {
   const [filter, setFilter] = useState<"upcoming" | "past" | "all">("upcoming");
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     if (activeTab === "planning") fetchBookings();
   }, [user, activeTab]);
 
+  // Récupère toutes les réservations via le serveur
   const fetchBookings = async () => {
-    const { data, error } = await supabase
-      .from("bookings")
-      .select("*")
-      .eq("user_id", user!.id);
-    if (error) setError(error.message);
-    else setBookings(data || []);
+    try {
+      const response = await fetch("/api/bookings", {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data?.error || "Erreur lors du chargement des réservations.");
+        return;
+      }
+      setBookings(data.bookings || []);
+    } catch (err) {
+      console.error(err);
+      setError("Impossible de charger les réservations.");
+    }
   };
 
-  // Vérification si le créneau est à plus de 24h
+  // Vérification côté client (le serveur revérifie toujours)
   const isAtLeast24hAhead = (date: string, time: string) => {
     const bookingDateTime = new Date(`${date}T${time}`);
     const now = new Date();
     return bookingDateTime.getTime() - now.getTime() >= 24 * 60 * 60 * 1000;
   };
 
-  // ✅ Vérification user AVANT d'utiliser user.id
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F5EFE4]">
@@ -78,42 +88,30 @@ export function ComptePage() {
       return;
     }
 
-    // Appel au backend pour créer la réservation et envoyer l'email à l'admin
-    const response = await fetch("/api/create-booking", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: user.id, // ✅ user est non-null ici
-        date: selectedDate,
-        time: selectedTime,
-        service: selectedService,
-      }),
-    });
+    setSubmitting(true);
+    const result = await bookSlot({ date: selectedDate, time: selectedTime, service: selectedService });
+    setSubmitting(false);
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      alert(data.error || "Erreur lors de la réservation.");
+    if (!result.success) {
+      alert(result.error || "Une erreur est survenue.");
       return;
     }
 
-    // Recharger le profil pour mettre à jour le solde (le backend a déjà débité)
     await refreshProfile();
     await fetchBookings();
     alert("Créneau réservé !");
+    setSelectedDate("");
+    setSelectedTime("");
   };
 
-  const handleCancel = async (id: string) => {
-    const { data: booking } = await supabase.from("bookings").select("*").eq("id", id).single();
-    if (booking) {
-      if (!isAtLeast24hAhead(booking.date, booking.time)) {
-        alert("Impossible d'annuler à moins de 24h du créneau.");
-        return;
-      }
+  const handleCancel = async (bookingId: string) => {
+    const result = await cancelBooking(bookingId);
+    if (!result.success) {
+      alert(result.error || "Erreur lors de l'annulation.");
+      return;
     }
-    const { error } = await supabase.from("bookings").delete().eq("id", id);
-    if (error) setError(error.message);
-    else fetchBookings();
+    await refreshProfile();
+    await fetchBookings();
   };
 
   const today = new Date().toISOString().split("T")[0];
@@ -301,14 +299,15 @@ export function ComptePage() {
                         <option>Cours particulier</option>
                         <option>Cours collectif</option>
                         <option>Travail du cheval</option>
-                        {/* Rééducation et Éducation équine retirés */}
                       </select>
-                      <button onClick={handleBooking} className="w-full bg-[#C09A3C] text-white py-3 uppercase text-sm">Réserver (1 crédit)</button>
+                      <button onClick={handleBooking} disabled={submitting} className="w-full bg-[#C09A3C] text-white py-3 uppercase text-sm disabled:opacity-50">
+                        {submitting ? "Réservation..." : "Réserver (1 crédit)"}
+                      </button>
                       <p className="text-xs mt-2">Votre solde : {user.credits} crédits</p>
                     </>
                   )}
 
-                  {/* Historique */}
+                  {/* Historique de mes réservations */}
                   <div className="mt-8">
                     <div className="flex gap-2 mb-4">
                       {["upcoming", "past", "all"].map((f) => (
@@ -331,7 +330,7 @@ export function ComptePage() {
                         {filteredBookings.map((b) => (
                           <li key={b.id} className="border-b border-[#C09A3C]/10 py-2 flex justify-between items-center">
                             <span className="text-sm">{b.date} à {b.time} · {b.service}</span>
-                            {b.date >= today && isAtLeast24hAhead(b.date, b.time) && (
+                            {b.date >= today && b.user_id === user.id && (
                               <button onClick={() => handleCancel(b.id)} className="text-red-500 text-xs">Annuler</button>
                             )}
                           </li>

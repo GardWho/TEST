@@ -6,16 +6,17 @@ type Purchase = { id: string; date: string; items: { label: string; price: numbe
 type Booking = { id: string; date: string; time: string; service: string; usedCredits: number };
 type AppUser = { id: string; email: string; name: string; credits: number; role: string; purchases: Purchase[]; bookings: Booking[] };
 
+type BookingInput = { date: string; time: string; service: string };
+type BookingResult = { success: boolean; error?: string };
+
 type AuthContextType = {
   user: AppUser | null;
   session: Session | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
-  addCredits: (amount: number) => Promise<void>;
-  useCredits: (amount: number) => Promise<boolean>;
-  addPurchase: (purchase: Omit<Purchase, "id">) => Promise<void>;
-  addBooking: (booking: Omit<Booking, "id">) => Promise<void>;
+  bookSlot: (booking: BookingInput) => Promise<BookingResult>;
+  cancelBooking: (bookingId: string) => Promise<BookingResult>;
   refreshProfile: () => Promise<void>;
   isAuthenticated: boolean;
   loading: boolean;
@@ -60,14 +61,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const loadProfile = async (authUser: User) => {
-    const { data: profile, error } = await supabase
+    const { data: profile } = await supabase
       .from("profiles")
       .select("id, email, full_name, credits, role")
       .eq("id", authUser.id)
       .maybeSingle();
 
     if (!profile) {
-      // Créer un profil avec 0 crédit (jamais d'upsert qui écrase)
       const newProfile = {
         id: authUser.id,
         email: authUser.email || "",
@@ -77,7 +77,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       };
       const { error: insertError } = await supabase.from("profiles").insert([newProfile]);
       if (insertError) console.error("Erreur création profil:", insertError.message);
-      // Relecture pour être sûr
       const { data: created } = await supabase.from("profiles").select("*").eq("id", authUser.id).single();
       if (created) {
         setUser({
@@ -90,25 +89,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           bookings: [],
         });
       } else {
-        setUser({
-          id: authUser.id,
-          email: authUser.email || "",
-          name: authUser.user_metadata?.full_name || "Utilisateur",
-          credits: 0,
-          role: "user",
-          purchases: [],
-          bookings: [],
-        });
+        setUser({ id: authUser.id, email: authUser.email || "", name: authUser.user_metadata?.full_name || "Utilisateur", credits: 0, role: "user", purchases: [], bookings: [] });
       }
     } else {
       const { data: bookingsData } = await supabase.from("bookings").select("*").eq("user_id", authUser.id);
-      // ✅ Typage correct : seulement full_name, jamais name
       const profilData = profile as { id: string; full_name?: string | null; email?: string | null; credits?: number | null; role?: string | null };
-      const userName = profilData.full_name || "Utilisateur";
       setUser({
         id: profilData.id,
         email: profilData.email || "",
-        name: userName,
+        name: profilData.full_name || "Utilisateur",
         credits: profilData.credits ?? 0,
         role: profilData.role || "user",
         purchases: [],
@@ -117,7 +106,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Recharger le profil (après un achat ou une réservation côté backend)
   const refreshProfile = async () => {
     if (!user) return;
     const { data: profile } = await supabase
@@ -126,15 +114,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .eq("id", user.id)
       .single();
     if (profile) {
-      setUser({
-        id: profile.id,
-        email: profile.email || "",
-        name: profile.full_name || "Utilisateur",
-        credits: profile.credits ?? 0,
-        role: profile.role || "user",
-        purchases: user.purchases,
-        bookings: user.bookings,
-      });
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              email: profile.email || prev.email,
+              name: profile.full_name || prev.name,
+              credits: profile.credits ?? prev.credits,
+              role: profile.role || prev.role,
+            }
+          : prev
+      );
     }
   };
 
@@ -158,41 +148,71 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) throw new Error(error.message);
   };
 
-  // Utilise la fonction RPC add_credits (atomique) pour éviter les crédits illimités
-  const addCredits = async (amount: number) => {
-    if (!user) return;
-    const { error } = await supabase
-      .rpc("add_credits", { p_user_id: user.id, p_amount: amount });
-    if (error) console.error("Erreur addCredits:", error.message);
-    await refreshProfile();
+  const bookSlot = async (booking: BookingInput): Promise<BookingResult> => {
+    if (!session) return { success: false, error: "Vous devez être connecté." };
+    try {
+      const response = await fetch("/api/create-booking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(booking),
+      });
+      let data: any = null;
+      try { data = await response.json(); } catch { data = null; }
+      if (!response.ok) {
+        return { success: false, error: data?.error || `Erreur serveur (${response.status})` };
+      }
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              credits: data?.credits ?? prev.credits,
+              bookings: data?.booking
+                ? [
+                    ...prev.bookings,
+                    {
+                      id: data.booking.id,
+                      date: data.booking.date,
+                      time: data.booking.time,
+                      service: data.booking.service,
+                      usedCredits: 1,
+                    },
+                  ]
+                : prev.bookings,
+            }
+          : prev
+      );
+      return { success: true };
+    } catch (err) {
+      console.error("Erreur bookSlot:", err);
+      return { success: false, error: "Impossible de contacter le serveur." };
+    }
   };
 
-  // Utilise la fonction RPC use_credit (atomique) pour éviter de débiter 2 fois
-  const useCredits = async (amount: number): Promise<boolean> => {
-    if (!user || user.credits < amount) return false;
-    const { data: success, error } = await supabase
-      .rpc("use_credit", { p_user_id: user.id, p_amount: amount });
-    if (error) {
-      console.error("Erreur useCredits:", error.message);
-      return false;
-    }
-    if (success === true) {
+  const cancelBooking = async (bookingId: string): Promise<BookingResult> => {
+    if (!session) return { success: false, error: "Vous devez être connecté." };
+    try {
+      const response = await fetch("/api/cancel-booking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ bookingId }),
+      });
+      let data: any = null;
+      try { data = await response.json(); } catch { data = null; }
+      if (!response.ok) {
+        return { success: false, error: data?.error || `Erreur serveur (${response.status})` };
+      }
       await refreshProfile();
-      return true;
+      return { success: true };
+    } catch (err) {
+      console.error("Erreur cancelBooking:", err);
+      return { success: false, error: "Impossible de contacter le serveur." };
     }
-    return false;
-  };
-
-  const addPurchase = async (purchase: Omit<Purchase, "id">) => {
-    if (!user) return;
-    const newPurchase: Purchase = { ...purchase, id: `p-${Date.now()}` };
-    setUser({ ...user, purchases: [...user.purchases, newPurchase] });
-  };
-
-  const addBooking = async (booking: Omit<Booking, "id">) => {
-    if (!user) return;
-    const newBooking: Booking = { ...booking, id: `b-${Date.now()}` };
-    setUser({ ...user, bookings: [...user.bookings, newBooking] });
   };
 
   return (
@@ -203,10 +223,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login,
         logout,
         register,
-        addCredits,
-        useCredits,
-        addPurchase,
-        addBooking,
+        bookSlot,
+        cancelBooking,
         refreshProfile,
         isAuthenticated: !!user,
         loading,

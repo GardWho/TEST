@@ -2,14 +2,24 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../AuthContext";
 import { supabase } from "../../lib/supabase";
 
+type Profile = { id: string; email: string; full_name: string | null; credits: number; role: string };
+type BookingRow = {
+  id: string;
+  date: string;
+  time: string;
+  service: string;
+  profiles?: { email?: string; full_name?: string } | null;
+};
+
 export function AdminPage() {
-  const { user } = useAuth();
-  const [users, setUsers] = useState<any[]>([]);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [creditAmount, setCreditAmount] = useState(1);
+  const { user, session } = useAuth();
+  const [users, setUsers] = useState<Profile[]>([]);
+  const [selectedUser, setSelectedUser] = useState<Profile | null>(null);
+  const [creditAmount, setCreditAmount] = useState("1");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [bookings, setBookings] = useState<BookingRow[]>([]);
 
   useEffect(() => {
     if (!user || user.role !== "admin") return;
@@ -35,24 +45,76 @@ export function AdminPage() {
     else setBookings(data || []);
   };
 
+  // Passe par le serveur pour vérifier le rôle admin
   const addCreditsToUser = async () => {
-    if (!selectedUser || creditAmount <= 0) return;
-    const { error } = await supabase
-      .rpc("add_credits", { p_user_id: selectedUser.id, p_amount: creditAmount });
-    if (error) setError(error.message);
-    else {
-      alert(`Crédits ajoutés à ${selectedUser.email}`);
+    if (!selectedUser || !session) return;
+
+    const amount = parseInt(creditAmount, 10);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setError("Merci de saisir un nombre de crédits valide (supérieur à 0).");
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin-add-credits", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ targetUserId: selectedUser.id, amount }),
+      });
+
+      let data: any = null;
+      try { data = await response.json(); } catch { data = null; }
+
+      if (!response.ok) {
+        setError(data?.error || `Erreur serveur (${response.status}).`);
+        return;
+      }
+
+      alert(`${amount} crédit(s) ajouté(s) à ${selectedUser.email}`);
       setSelectedUser(null);
+      setCreditAmount("1");
       fetchUsers();
+    } catch (err) {
+      console.error(err);
+      setError("Impossible de contacter le serveur.");
+    } finally {
+      setSaving(false);
     }
   };
 
+  // Annule et rembourse le crédit
   const deleteBooking = async (bookingId: string) => {
-    const { error } = await supabase.from("bookings").delete().eq("id", bookingId);
-    if (error) setError(error.message);
-    else {
-      alert("Réservation annulée");
+    if (!session) return;
+    try {
+      const response = await fetch("/api/cancel-booking", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ bookingId }),
+      });
+
+      let data: any = null;
+      try { data = await response.json(); } catch { data = null; }
+
+      if (!response.ok) {
+        setError(data?.error || `Erreur serveur (${response.status}).`);
+        return;
+      }
+
+      alert("Réservation annulée (le crédit a été remboursé au client).");
       fetchBookings();
+      fetchUsers();
+    } catch (err) {
+      console.error(err);
+      setError("Impossible de contacter le serveur.");
     }
   };
 
@@ -67,7 +129,7 @@ export function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F5EFE4] pt-32 px-8 md:px-14">
+    <div className="min-h-screen bg-[#F5EFE4] pt-32 px-8 md:px-14 pb-16">
       <h1 className="text-3xl font-normal mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>
         Administration
       </h1>
@@ -92,7 +154,8 @@ export function AdminPage() {
                   <button
                     onClick={() => {
                       setSelectedUser(u);
-                      setCreditAmount(1);
+                      setCreditAmount("1");
+                      setError("");
                     }}
                     className="bg-[#C09A3C] text-white px-3 py-1 text-xs uppercase"
                   >
@@ -115,16 +178,26 @@ export function AdminPage() {
               <input
                 type="number"
                 min="1"
+                step="1"
                 value={creditAmount}
-                onChange={(e) => setCreditAmount(parseInt(e.target.value))}
+                onChange={(e) => setCreditAmount(e.target.value)}
                 className="w-full border p-2"
               />
-              <button
-                onClick={addCreditsToUser}
-                className="mt-4 bg-[#C09A3C] text-white px-4 py-2 uppercase text-sm"
-              >
-                Valider
-              </button>
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={addCreditsToUser}
+                  disabled={saving}
+                  className="bg-[#C09A3C] text-white px-4 py-2 uppercase text-sm disabled:opacity-50"
+                >
+                  {saving ? "Enregistrement..." : "Valider"}
+                </button>
+                <button
+                  onClick={() => setSelectedUser(null)}
+                  className="px-4 py-2 uppercase text-sm text-[#1C1814]/50 hover:text-[#1C1814]"
+                >
+                  Annuler
+                </button>
+              </div>
             </div>
           )}
 
