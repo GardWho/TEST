@@ -12,13 +12,22 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 // ============================================
 const WebSocket = require('ws'); // Pour supporter les WebSockets avec Node.js 20
 const { createClient } = require('@supabase/supabase-js');
+
+// Client pour les opérations (contourne RLS avec service_role)
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
   {
     auth: { persistSession: false },
-    realtime: { transport: WebSocket } // ← Solution pour éviter le crash
+    realtime: { transport: WebSocket }
   }
+);
+
+// Client pour vérifier l'utilisateur à partir du token (utilise la clé anon)
+const supabaseAnon = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY,
+  { auth: { persistSession: false } }
 );
 
 // Filets de sécurité globaux
@@ -90,7 +99,8 @@ async function getUserFromRequest(req) {
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!token) return null;
 
-  const { data, error } = await supabase.auth.getUser(token);
+  // Utilise le client anon pour vérifier le token (fiable)
+  const { data, error } = await supabaseAnon.auth.getUser(token);
   if (error || !data?.user) return null;
   return data.user;
 }
