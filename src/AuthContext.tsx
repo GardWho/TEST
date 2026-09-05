@@ -32,15 +32,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // 1. Récupérer la session existante
+    supabase.auth.getSession().then(async ({ data: { session: initialSession } }) => {
       if (!isMounted) return;
-      setSession(session);
-      if (session?.user) {
-        await loadProfile(session.user);
+
+      let currentSession = initialSession;
+
+      // 2. Si la session est expirée, on tente de la rafraîchir
+      if (!currentSession || (currentSession.expires_at && currentSession.expires_at * 1000 < Date.now())) {
+        const { data } = await supabase.auth.refreshSession();
+        currentSession = data.session;
       }
+
+      setSession(currentSession);
+
+      if (currentSession?.user) {
+        await loadProfile(currentSession.user);
+      }
+
       setLoading(false);
     });
 
+    // 3. Écouter les changements de session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (!isMounted) return;
