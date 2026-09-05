@@ -16,7 +16,6 @@ times.push("19:00");
 const getDaysInMonth = (year: number, month: number) =>
   new Date(year, month + 1, 0).getDate();
 
-// Alignement lundi = 0
 const getFirstDayOfMonth = (year: number, month: number) =>
   (new Date(year, month, 1).getDay() + 6) % 7;
 
@@ -35,10 +34,13 @@ export function ComptePage() {
 
   useEffect(() => {
     if (!user) return;
-    if (activeTab === "planning") fetchBookings();
+    if (activeTab === "planning") {
+      fetchBookings();
+      const interval = setInterval(fetchBookings, 5000); // Rafraîchit toutes les 5s
+      return () => clearInterval(interval);
+    }
   }, [user, activeTab]);
 
-  // Récupère toutes les réservations via le serveur
   const fetchBookings = async () => {
     try {
       const response = await fetch("/api/bookings", {
@@ -58,7 +60,6 @@ export function ComptePage() {
     }
   };
 
-  // Vérification côté client (le serveur revérifie toujours)
   const isAtLeast24hAhead = (date: string, time: string) => {
     const bookingDateTime = new Date(`${date}T${time}`);
     const now = new Date();
