@@ -8,29 +8,23 @@ const app = express();
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ============================================
-// IMPORT SUPABASE (BACKEND) — clé "service_role"
+// IMPORT SUPABASE (BACKEND)
 // ============================================
 const WebSocket = require('ws'); // Pour supporter les WebSockets avec Node.js 20
 const { createClient } = require('@supabase/supabase-js');
 
-// Client pour les opérations (contourne RLS avec service_role)
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: { persistSession: false },
-    realtime: { transport: WebSocket }
-  }
+  { auth: { persistSession: false }, realtime: { transport: WebSocket } }
 );
 
-// Client pour vérifier l'utilisateur à partir du token (utilise la clé anon)
 const supabaseAnon = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY,
   { auth: { persistSession: false } }
 );
 
-// Filets de sécurité globaux
 process.on('unhandledRejection', (reason) => {
   console.error('⚠️ Unhandled Rejection:', reason);
 });
@@ -99,7 +93,6 @@ async function getUserFromRequest(req) {
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!token) return null;
 
-  // Utilise le client anon pour vérifier le token (fiable)
   const { data, error } = await supabaseAnon.auth.getUser(token);
   if (error || !data?.user) return null;
   return data.user;
@@ -323,7 +316,6 @@ app.post('/api/create-booking', async (req, res) => {
       .single();
 
     if (insertError) {
-      // La réservation a échoué : on rembourse le crédit déjà débité.
       await supabase.from('profiles').update({ credits: profile.credits }).eq('id', authUser.id);
       console.error('Erreur création réservation:', insertError.message);
       return res.status(500).json({ error: 'Erreur lors de la création de la réservation.' });
@@ -378,7 +370,6 @@ app.post('/api/cancel-booking', async (req, res) => {
       return res.status(500).json({ error: deleteError.message });
     }
 
-    // Remboursement du crédit au propriétaire de la réservation
     const { data: ownerProfile } = await supabase
       .from('profiles')
       .select('credits')
