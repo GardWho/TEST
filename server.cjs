@@ -33,12 +33,6 @@ const supabase = createClient(
   { auth: { persistSession: false } }
 );
 
-const supabaseAnon = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY,
-  { auth: { persistSession: false } }
-);
-
 process.on('unhandledRejection', (reason) => {
   console.error('⚠️ Unhandled Rejection:', reason);
 });
@@ -264,7 +258,7 @@ async function getUserFromRequest(req) {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!token) return null;
-  const { data, error } = await supabaseAnon.auth.getUser(token);
+const { data, error } = await supabase.auth.getUser(token);
   if (error || !data?.user) return null;
   return data.user;
 }
