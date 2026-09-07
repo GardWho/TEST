@@ -17,7 +17,6 @@ const prestationsSubMenu = [
   { to: "/education-equine", label: "Débourrage & éducation" },
 ];
 
-// Icônes SVG inline
 const MenuIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <line x1="4" x2="20" y1="6" y2="6" />
@@ -105,9 +104,7 @@ export function Layout() {
                     className="relative"
                     onMouseEnter={() => setDropdownOpen(true)}
                     onMouseLeave={() => {
-                      setTimeout(() => {
-                        setDropdownOpen(false);
-                      }, 1200);
+                      setTimeout(() => setDropdownOpen(false), 1200);
                     }}
                   >
                     <NavLink
@@ -276,6 +273,10 @@ export function Layout() {
             </a>
             <p className="text-[11px] tracking-wider" style={{ color: "rgba(245,239,228,0.3)" }}>© 2023 R.G. ÉQUITATION & ÉDUCATION ÉQUINE</p>
             <p className="text-[11px] tracking-wider mt-1" style={{ color: "rgba(245,239,228,0.35)" }}>SIRET 978 982 866 00011</p>
+            <div className="flex gap-4 justify-center mt-2">
+              <NavLink to="/mentions-legales" className="text-[11px] text-[#C09A3C] hover:text-white">Mentions légales</NavLink>
+              <NavLink to="/confidentialite" className="text-[11px] text-[#C09A3C] hover:text-white">Confidentialité</NavLink>
+            </div>
           </div>
           <div className="text-right">
             <p className="text-[11px] tracking-wider" style={{ color: "rgba(245,239,228,0.25)" }}>Crédit photo : <span className="text-[#C09A3C]/60">KP Photographies</span></p>

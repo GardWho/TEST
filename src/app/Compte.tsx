@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 
 type Tab = "profil" | "historique" | "credits" | "planning";
 
-// Génération des créneaux de 7h00 à 19h00 toutes les 15 minutes
 const times: string[] = [];
 for (let h = 7; h <= 18; h++) {
   for (let m = 0; m < 60; m += 15) {
@@ -13,14 +12,11 @@ for (let h = 7; h <= 18; h++) {
 }
 times.push("19:00");
 
-const getDaysInMonth = (year: number, month: number) =>
-  new Date(year, month + 1, 0).getDate();
-
-const getFirstDayOfMonth = (year: number, month: number) =>
-  (new Date(year, month, 1).getDay() + 6) % 7;
+const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+const getFirstDayOfMonth = (year: number, month: number) => (new Date(year, month, 1).getDay() + 6) % 7;
 
 export function ComptePage() {
-  const { user, logout, bookSlot, cancelBooking, refreshProfile, session } = useAuth();
+  const { user, logout, bookSlot, cancelBooking, refreshProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("profil");
   const [bookings, setBookings] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState("");
@@ -36,18 +32,14 @@ export function ComptePage() {
     if (!user) return;
     if (activeTab === "planning") {
       fetchBookings();
-      const interval = setInterval(fetchBookings, 5000); // Rafraîchit toutes les 5s
+      const interval = setInterval(fetchBookings, 5000);
       return () => clearInterval(interval);
     }
   }, [user, activeTab]);
 
   const fetchBookings = async () => {
     try {
-      const response = await fetch("/api/bookings", {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`,
-        },
-      });
+      const response = await fetch("/api/bookings", { credentials: 'include' });
       const data = await response.json();
       if (!response.ok) {
         setError(data?.error || "Erreur lors du chargement des réservations.");
@@ -71,33 +63,20 @@ export function ComptePage() {
       <div className="min-h-screen flex items-center justify-center bg-[#F5EFE4]">
         <div className="text-center">
           <p className="text-[15px] text-[#1C1814]/60">Veuillez vous connecter</p>
-          <Link to="/login" className="inline-block mt-4 px-6 py-2 bg-[#C09A3C] text-white text-[11px] tracking-[0.25em] uppercase hover:bg-[#1C1814] transition-colors">
-            Se connecter
-          </Link>
+          <Link to="/login" className="inline-block mt-4 px-6 py-2 bg-[#C09A3C] text-white text-[11px] tracking-[0.25em] uppercase hover:bg-[#1C1814] transition-colors">Se connecter</Link>
         </div>
       </div>
     );
   }
 
   const handleBooking = async () => {
-    if (!selectedDate || !selectedTime) {
-      alert("Veuillez sélectionner une date et un horaire.");
-      return;
-    }
-    if (!isAtLeast24hAhead(selectedDate, selectedTime)) {
-      alert("Impossible de réserver à moins de 24h du créneau.");
-      return;
-    }
+    if (!selectedDate || !selectedTime) { alert("Veuillez sélectionner une date et un horaire."); return; }
+    if (!isAtLeast24hAhead(selectedDate, selectedTime)) { alert("Impossible de réserver à moins de 24h du créneau."); return; }
 
     setSubmitting(true);
     const result = await bookSlot({ date: selectedDate, time: selectedTime, service: selectedService });
     setSubmitting(false);
-
-    if (!result.success) {
-      alert(result.error || "Une erreur est survenue.");
-      return;
-    }
-
+    if (!result.success) { alert(result.error || "Une erreur est survenue."); return; }
     await refreshProfile();
     await fetchBookings();
     alert("Créneau réservé !");
@@ -107,10 +86,7 @@ export function ComptePage() {
 
   const handleCancel = async (bookingId: string) => {
     const result = await cancelBooking(bookingId);
-    if (!result.success) {
-      alert(result.error || "Erreur lors de l'annulation.");
-      return;
-    }
+    if (!result.success) { alert(result.error || "Erreur lors de l'annulation."); return; }
     await refreshProfile();
     await fetchBookings();
   };
@@ -124,27 +100,18 @@ export function ComptePage() {
 
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
-
   const daysArray: (number | null)[] = [
     ...Array.from({ length: firstDay }, () => null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
-
   const formatDate = (day: number) => {
     const month = (currentMonth + 1).toString().padStart(2, "0");
     const year = currentYear;
     const dayStr = day.toString().padStart(2, "0");
     return `${year}-${month}-${dayStr}`;
   };
-
-  const bookingsByDay = bookings.reduce((acc, b) => {
-    acc[b.date] = (acc[b.date] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const selectedDateBookings = selectedDate
-    ? bookings.filter((b) => b.date === selectedDate)
-    : [];
+  const bookingsByDay = bookings.reduce((acc, b) => { acc[b.date] = (acc[b.date] || 0) + 1; return acc; }, {} as Record<string, number>);
+  const selectedDateBookings = selectedDate ? bookings.filter((b) => b.date === selectedDate) : [];
 
   return (
     <div className="min-h-screen bg-[#F5EFE4] pt-20 px-8 md:px-14">
@@ -159,15 +126,7 @@ export function ComptePage() {
             { id: "credits", label: "Crédits" },
             { id: "planning", label: "Planning" },
           ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => { setActiveTab(tab.id as Tab); if (tab.id === "planning") fetchBookings(); }}
-              className={`pb-3 text-[11px] tracking-[0.25em] uppercase transition-colors ${
-                activeTab === tab.id ? "text-[#C09A3C] border-b-2 border-[#C09A3C]" : "text-[#1C1814]/40 hover:text-[#1C1814]/80"
-              }`}
-            >
-              {tab.label}
-            </button>
+            <button key={tab.id} onClick={() => { setActiveTab(tab.id as Tab); if (tab.id === "planning") fetchBookings(); }} className={`pb-3 text-[11px] tracking-[0.25em] uppercase transition-colors ${activeTab === tab.id ? "text-[#C09A3C] border-b-2 border-[#C09A3C]" : "text-[#1C1814]/40 hover:text-[#1C1814]/80"}`}>{tab.label}</button>
           ))}
         </div>
 
@@ -204,7 +163,6 @@ export function ComptePage() {
             <div>
               <h2 className="text-2xl font-normal mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>Mes crédits</h2>
               <p className="text-[15px] mb-4">Vous avez <strong>{user.credits}</strong> séances créditées.</p>
-              <p className="text-[13px] text-[#1C1814]/60">Chaque achat de cours vous crédite d'autant de séances.</p>
               <Link to="/prestations" className="inline-block mt-4 px-6 py-2 bg-[#C09A3C] text-white text-[11px] tracking-[0.25em] uppercase hover:bg-[#1C1814] transition-colors">Acheter des séances</Link>
             </div>
           )}
@@ -212,34 +170,17 @@ export function ComptePage() {
           {activeTab === "planning" && (
             <div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Calendrier */}
                 <div>
                   <div className="flex justify-between items-center mb-4">
-                    <button
-                      onClick={() => {
-                        if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1); }
-                        else setCurrentMonth(currentMonth - 1);
-                      }}
-                      className="px-3 py-1 bg-[#C09A3C] text-white text-sm rounded"
-                    >←</button>
-                    <h2 className="text-lg font-normal">
-                      {new Date(currentYear, currentMonth, 1).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}
-                    </h2>
-                    <button
-                      onClick={() => {
-                        if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(currentYear + 1); }
-                        else setCurrentMonth(currentMonth + 1);
-                      }}
-                      className="px-3 py-1 bg-[#C09A3C] text-white text-sm rounded"
-                    >→</button>
+                    <button onClick={() => { if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(currentYear - 1); } else setCurrentMonth(currentMonth - 1); }} className="px-3 py-1 bg-[#C09A3C] text-white text-sm rounded">←</button>
+                    <h2 className="text-lg font-normal">{new Date(currentYear, currentMonth, 1).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}</h2>
+                    <button onClick={() => { if (currentMonth === 11) { setCurrentMonth(0); setCurrentYear(currentYear + 1); } else setCurrentMonth(currentMonth + 1); }} className="px-3 py-1 bg-[#C09A3C] text-white text-sm rounded">→</button>
                   </div>
-
                   <div className="grid grid-cols-7 gap-1 mb-2">
                     {["L", "M", "M", "J", "V", "S", "D"].map((d, i) => (
                       <div key={i} className="text-center text-[10px] uppercase text-[#1C1814]/40">{d}</div>
                     ))}
                   </div>
-
                   <div className="grid grid-cols-7 gap-1">
                     {daysArray.map((day, index) => {
                       if (day === null) return <div key={index} />;
@@ -247,20 +188,13 @@ export function ComptePage() {
                       const count = bookingsByDay[dateStr] || 0;
                       const isToday = dateStr === today;
                       return (
-                        <button
-                          key={index}
-                          onClick={() => { setSelectedDate(dateStr); setSelectedTime(""); }}
-                          className={`h-10 rounded-sm text-sm flex flex-col items-center justify-center relative ${
-                            isToday ? "bg-[#C09A3C]/10" : ""
-                          } ${count > 0 ? "bg-[#C09A3C]/20" : "bg-[#F8F3EC]"}`}
-                        >
+                        <button key={index} onClick={() => { setSelectedDate(dateStr); setSelectedTime(""); }} className={`h-10 rounded-sm text-sm flex flex-col items-center justify-center relative ${isToday ? "bg-[#C09A3C]/10" : ""} ${count > 0 ? "bg-[#C09A3C]/20" : "bg-[#F8F3EC]"}`}>
                           <span className={selectedDate === dateStr ? "text-[#C09A3C] font-bold" : ""}>{day}</span>
                           {count > 0 && <span className="text-[8px] text-[#C09A3C] mt-0.5">{count} résa</span>}
                         </button>
                       );
                     })}
                   </div>
-
                   {selectedDate && selectedDateBookings.length > 0 && (
                     <div className="mt-4">
                       <h3 className="text-sm font-medium mb-2 text-[#C09A3C]">Réservations ce jour</h3>
@@ -277,13 +211,9 @@ export function ComptePage() {
                     </div>
                   )}
                 </div>
-
-                {/* Formulaire + historique */}
                 <div>
                   <h2 className="text-xl font-normal mb-4">Réserver un créneau</h2>
-                  {!selectedDate ? (
-                    <p className="text-sm text-gray-500">Sélectionnez une date dans le calendrier.</p>
-                  ) : (
+                  {!selectedDate ? <p className="text-sm text-gray-500">Sélectionnez une date dans le calendrier.</p> : (
                     <>
                       <p className="text-sm mb-4">Date : <strong>{new Date(selectedDate + "T00:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</strong></p>
                       <label className="block mb-2 text-sm">Horaire</label>
@@ -301,32 +231,18 @@ export function ComptePage() {
                         <option>Cours collectif</option>
                         <option>Travail du cheval</option>
                       </select>
-                      <button onClick={handleBooking} disabled={submitting} className="w-full bg-[#C09A3C] text-white py-3 uppercase text-sm disabled:opacity-50">
-                        {submitting ? "Réservation..." : "Réserver (1 crédit)"}
-                      </button>
+                      <button onClick={handleBooking} disabled={submitting} className="w-full bg-[#C09A3C] text-white py-3 uppercase text-sm disabled:opacity-50">{submitting ? "Réservation..." : "Réserver (1 crédit)"}</button>
                       <p className="text-xs mt-2">Votre solde : {user.credits} crédits</p>
                     </>
                   )}
-
-                  {/* Historique de mes réservations */}
                   <div className="mt-8">
                     <div className="flex gap-2 mb-4">
                       {["upcoming", "past", "all"].map((f) => (
-                        <button
-                          key={f}
-                          onClick={() => setFilter(f as any)}
-                          className={`px-3 py-1 text-[10px] uppercase tracking-wider ${
-                            filter === f ? "bg-[#C09A3C] text-white" : "bg-[#F8F3EC] text-[#1C1814]/60"
-                          }`}
-                        >
-                          {f === "upcoming" ? "À venir" : f === "past" ? "Passées" : "Toutes"}
-                        </button>
+                        <button key={f} onClick={() => setFilter(f as any)} className={`px-3 py-1 text-[10px] uppercase tracking-wider ${filter === f ? "bg-[#C09A3C] text-white" : "bg-[#F8F3EC] text-[#1C1814]/60"}`}>{f === "upcoming" ? "À venir" : f === "past" ? "Passées" : "Toutes"}</button>
                       ))}
                     </div>
                     <h3 className="text-sm font-medium mb-2 text-[#C09A3C]">Mes réservations</h3>
-                    {filteredBookings.length === 0 ? (
-                      <p className="text-sm text-gray-500">Aucune réservation.</p>
-                    ) : (
+                    {filteredBookings.length === 0 ? <p className="text-sm text-gray-500">Aucune réservation.</p> : (
                       <ul className="space-y-2">
                         {filteredBookings.map((b) => (
                           <li key={b.id} className="border-b border-[#C09A3C]/10 py-2 flex justify-between items-center">

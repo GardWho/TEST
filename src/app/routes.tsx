@@ -13,6 +13,7 @@ import { EducationEquinePage } from "./pages/EducationEquine";
 import { PanierPage } from "./pages/Panier";
 import { AdminPage } from "./pages/Admin";
 import { ConfirmEmail } from "./components/ConfirmEmail";
+import { MentionsLegalesPage, ConfidentialitePage } from "./pages/Legal";
 
 export const router = createBrowserRouter([
   {
@@ -32,6 +33,8 @@ export const router = createBrowserRouter([
       { path: "education-equine", element: <EducationEquinePage /> },
       { path: "admin", element: <AdminPage /> },
       { path: "confirm", element: <ConfirmEmail /> },
+      { path: "mentions-legales", element: <MentionsLegalesPage /> },
+      { path: "confidentialite", element: <ConfidentialitePage /> },
     ],
   },
 ]);
