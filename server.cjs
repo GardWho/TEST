@@ -88,20 +88,49 @@ app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email et mot de passe requis' });
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return res.status(401).json({ error: error.message });
+  try {
+    // Appel direct à l'API REST Supabase pour l'authentification
+    const authResponse = await fetch(`${process.env.SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+      method: 'POST',
+      headers: {
+        'apikey': process.env.SUPABASE_ANON_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', data.user.id).single();
+    const authData = await authResponse.json();
 
-  req.session.user = {
-    id: data.user.id,
-    email: data.user.email,
-    name: profile?.full_name || 'Utilisateur',
-    credits: profile?.credits || 0,
-    role: profile?.role || 'user'
-  };
+    if (!authResponse.ok) {
+      return res.status(401).json({ error: authData.msg || 'Email ou mot de passe incorrect' });
+    }
 
-  res.json({ user: req.session.user });
+    // Récupérer le profil utilisateur via l'API REST
+    const userId = authData.user.id;
+    const profileResponse = await fetch(`${process.env.SUPABASE_URL}/rest/v1/profiles?select=*&id=eq.${userId}`, {
+      headers: {
+        'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+      },
+    });
+
+    const profileData = await profileResponse.json();
+    const profile = profileData[0] || {};
+
+    // Stocker la session utilisateur
+    req.session.user = {
+      id: userId,
+      email: authData.user.email,
+      name: profile.full_name || 'Utilisateur',
+      credits: profile.credits || 0,
+      role: profile.role || 'user',
+    };
+
+    return res.json({ user: req.session.user });
+  } catch (error) {
+    console.error('Erreur login:', error.message);
+    return res.status(500).json({ error: 'Erreur serveur lors de la connexion' });
+  }
 });
 
 app.post('/api/logout', (req, res) => {
