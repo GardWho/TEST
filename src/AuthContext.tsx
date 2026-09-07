@@ -32,28 +32,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let isMounted = true;
 
-    // 1. Récupérer la session existante
-    supabase.auth.getSession().then(async ({ data: { session: initialSession } }) => {
-      if (!isMounted) return;
+    // 1. Toujours tenter de rafraîchir la session au démarrage
+    (async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        let currentSession = initialSession;
 
-      let currentSession = initialSession;
+        if (!currentSession) {
+          const { data } = await supabase.auth.refreshSession();
+          currentSession = data.session;
+        }
 
-      // 2. Si la session est expirée, on tente de la rafraîchir
-      if (!currentSession || (currentSession.expires_at && currentSession.expires_at * 1000 < Date.now())) {
-        const { data } = await supabase.auth.refreshSession();
-        currentSession = data.session;
+        // Vérifier si le token est expiré, et le rafraîchir si besoin
+        if (currentSession && currentSession.expires_at && currentSession.expires_at * 1000 < Date.now() + 60000) {
+          const { data } = await supabase.auth.refreshSession();
+          currentSession = data.session;
+        }
+
+        if (!isMounted) return;
+        setSession(currentSession);
+
+        if (currentSession?.user) {
+          await loadProfile(currentSession.user);
+        }
+      } catch (err) {
+        console.error("Erreur récupération session:", err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
+    })();
 
-      setSession(currentSession);
-
-      if (currentSession?.user) {
-        await loadProfile(currentSession.user);
-      }
-
-      setLoading(false);
-    });
-
-    // 3. Écouter les changements de session
+    // 2. Écouter les changements de session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (!isMounted) return;
@@ -88,8 +97,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         credits: 0,
         role: "user",
       };
-      const { error: insertError } = await supabase.from("profiles").insert([newProfile]);
-      if (insertError) console.error("Erreur création profil:", insertError.message);
+      // Utiliser upsert pour éviter les erreurs de doublon
+      const { error: upsertError } = await supabase.from("profiles").upsert([newProfile], { onConflict: "id" });
+      if (upsertError) console.error("Erreur upsert profil:", upsertError.message);
+
       const { data: created } = await supabase.from("profiles").select("*").eq("id", authUser.id).single();
       if (created) {
         setUser({
