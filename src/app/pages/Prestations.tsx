@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { SEO } from "../components/SEO";
 
-const HERO_IMG =
-  "/images/acceuil/acceuil.png";
+const HERO_IMG = "/images/acceuil/acceuil.png";
 
 const services = [
   {
@@ -10,35 +10,48 @@ const services = [
     sub: "Cours particuliers et collectifs, du loisir à la compétition, adaptés à vos objectifs et à votre niveau.",
     img: "/images/cours-part/cours-part.jpg",
     link: "/cours",
+    alt: "Cours d'équitation particuliers et collectifs à Bordeaux avec Roxane Gaudon",
   },
   {
     title: "Travail du cheval",
     sub: "Travail monté ou à pied, préparation physique et mentale de votre cheval.",
     img: "/images/travail-cheval/travail-cheval2.jpg",
     link: "/travail-cheval",
+    alt: "Travail du cheval monté et à pied à Bordeaux : préparation physique et mentale",
   },
   {
     title: "Rééducation",
     sub: "Résolution des troubles comportementaux, remise en confiance et travail de fond.",
     img: "/images/travail-cheval/travail-cheval.jpg",
     link: "/reeducation",
+    alt: "Rééducation équine à Bordeaux : résolution des troubles comportementaux et remise en confiance",
   },
   {
     title: "Débourrage & éducation",
     sub: "Débourrage et éducation du jeune cheval dans le respect de ses capacités et de son rythme.",
     img: "/images/débourage-education/débourage-education.jpg",
     link: "/education-equine",
+    alt: "Débourrage et éducation du jeune cheval à Bordeaux dans le respect de son rythme",
   },
 ];
 
 export function Prestations() {
   return (
     <div style={{ background: "#F5EFE4" }}>
+
+      <SEO
+        title="Prestations équestres à Bordeaux | Roxane Gaudon - RG Équitation"
+        description="Cours particuliers et collectifs, travail du cheval, rééducation, débourrage & éducation. Découvrez toutes les prestations de Roxane Gaudon à Bordeaux et alentours."
+        canonical="https://rg-equitation-education-equine.fr/prestations"
+        keywords="prestations équestres Bordeaux, cours équitation, travail cheval, rééducation équine, débourrage, Roxane Gaudon"
+        ogImage="https://rg-equitation-education-equine.fr/images/acceuil/acceuil.png"
+      />
+
       {/* ── HERO ── */}
       <div className="relative h-[55vh] min-h-[400px] overflow-hidden bg-[#2A2318]">
         <img
           src={HERO_IMG}
-          alt="Prestations équestres"
+          alt="Prestations équestres à Bordeaux : cours, travail du cheval, rééducation et débourrage"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ filter: "sepia(18%) saturate(0.9)", opacity: 0.6 }}
         />
@@ -57,7 +70,7 @@ export function Prestations() {
         </div>
       </div>
 
-      {/* ── SERVICES (4 cartes agrandies) ── */}
+      {/* ── SERVICES ── */}
       <section className="bg-[#EDE4D0] py-24">
         <div className="max-w-[1400px] mx-auto px-8 md:px-14">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -70,7 +83,7 @@ export function Prestations() {
                 <div className="relative h-72 overflow-hidden bg-[#D4C9B8]">
                   <img
                     src={s.img}
-                    alt={s.title}
+                    alt={s.alt}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     style={{ filter: "sepia(12%)" }}
                     onError={(e) => {

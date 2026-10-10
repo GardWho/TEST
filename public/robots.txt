@@ -1,10 +1,41 @@
+# robots.txt pour rg-equitation-education-equine.fr
+# Autorise l'exploration de toutes les pages publiques
+# Bloque les pages privées et d'administration
+
 User-agent: *
 Allow: /
-Disallow: /admin
+
+# Pages privées à ne pas indexer
+Disallow: /login
 Disallow: /compte
 Disallow: /panier
-Disallow: /login
+Disallow: /admin
 Disallow: /confirm
-Disallow: /planning
 
+# Dossier API (backend)
+Disallow: /api/
+
+# Éviter l'exploration des fichiers de build
+Disallow: /node_modules/
+Disallow: /*.json$
+Disallow: /*.js$
+
+# Déclaration du sitemap
 Sitemap: https://rg-equitation-education-equine.fr/sitemap.xml
+
+# Directives spécifiques pour les robots connus
+User-agent: Googlebot
+Allow: /
+Disallow: /login
+Disallow: /compte
+Disallow: /panier
+Disallow: /admin
+Disallow: /api/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /login
+Disallow: /compte
+Disallow: /panier
+Disallow: /admin
+Disallow: /api/

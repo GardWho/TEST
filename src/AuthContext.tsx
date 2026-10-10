@@ -18,6 +18,7 @@ type BookingResult = { success: boolean; error?: string };
 type AuthContextType = {
   user: AppUser | null;
   login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   bookSlot: (booking: BookingInput) => Promise<BookingResult>;
@@ -52,6 +53,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Erreur de connexion');
     setUser({ ...data.user, purchases: [], bookings: [] });
+  };
+
+  const register = async (name: string, email: string, password: string) => {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erreur lors de l'inscription");
+    // On ne connecte pas automatiquement — l'utilisateur doit se connecter après
   };
 
   const logout = async () => {
@@ -102,7 +115,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, refreshProfile, bookSlot, cancelBooking, isAuthenticated: !!user, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, refreshProfile, bookSlot, cancelBooking, isAuthenticated: !!user, loading }}>
       {children}
     </AuthContext.Provider>
   );

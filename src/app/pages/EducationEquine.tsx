@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { SEO } from "../components/SEO";
 
 const heroImg = "/images/bannières/banniere-05.webp";
 const sideImg = "/images/débourage-education/débourage-education2.jpg";
@@ -6,11 +7,20 @@ const sideImg = "/images/débourage-education/débourage-education2.jpg";
 export function EducationEquinePage() {
   return (
     <div className="bg-[#F5EFE4] min-h-screen">
+
+      <SEO
+        title="Débourrage & éducation équine à Bordeaux | Roxane Gaudon"
+        description="Débourrage et éducation du jeune cheval à Bordeaux avec Roxane Gaudon. Bases solides dans le respect du rythme du cheval. À partir de 800€. Devis sur demande."
+        canonical="https://rg-equitation-education-equine.fr/education-equine"
+        keywords="débourrage cheval Bordeaux, éducation jeune cheval, équitation éthologique, Roxane Gaudon"
+        ogImage="https://rg-equitation-education-equine.fr/images/bannières/banniere-05.webp"
+      />
+
       {/* HERO */}
       <div className="relative h-[40vh] min-h-[280px] overflow-hidden bg-[#2A2318]">
         <img
           src={heroImg}
-          alt="Débourrage & éducation"
+          alt="Débourrage et éducation équine à Bordeaux avec Roxane Gaudon"
           className="absolute inset-0 w-full h-full object-cover object-[center_30%]"
           style={{ filter: "sepia(18%) saturate(0.9)", opacity: 0.6 }}
         />
@@ -57,7 +67,7 @@ export function EducationEquinePage() {
           <div className="relative h-[300px] md:h-[400px] overflow-hidden rounded-sm">
             <img
               src={sideImg}
-              alt="Débourrage & éducation"
+              alt="Débourrage et éducation équine par Roxane Gaudon à Bordeaux : mise en place des bases dans le respect du cheval"
               className="w-full h-full object-cover object-center"
             />
           </div>

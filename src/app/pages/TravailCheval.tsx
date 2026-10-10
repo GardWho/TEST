@@ -1,9 +1,8 @@
 import { useCart } from "../components/CartContext";
+import { SEO } from "../components/SEO";
 
-const heroImg =
-  "/images/bannières/banniere-06.webp";
+const heroImg = "/images/bannières/banniere-06.webp";
 
-// Nouveaux tarifs
 const items = [
   { label: "Travail du cheval 1h (préparation comprise)", price: 50 },
   { label: "Carte 5 séances travail 1h (préparation comprise)", price: 240 },
@@ -15,10 +14,19 @@ export function TravailChevalPage() {
 
   return (
     <div className="bg-[#F5EFE4] min-h-screen">
+
+      <SEO
+        title="Travail du cheval à Bordeaux | Roxane Gaudon - RG Équitation"
+        description="Travail du cheval à Bordeaux avec Roxane Gaudon : éducation, remise en confiance et travail spécifique. Séance 1h à 50€. Cartes de 5 et 10 séances disponibles."
+        canonical="https://rg-equitation-education-equine.fr/travail-cheval"
+        keywords="travail cheval Bordeaux, éducation cheval, Roxane Gaudon, monitrice équestre, travail monté, travail à pied"
+        ogImage="https://rg-equitation-education-equine.fr/images/bannières/banniere-06.webp"
+      />
+
       <div className="relative h-[40vh] min-h-[280px] overflow-hidden bg-[#2A2318]">
         <img
           src={heroImg}
-          alt="Travail du cheval"
+          alt="Travail du cheval à Bordeaux avec Roxane Gaudon : travail monté et à pied"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ filter: "sepia(18%) saturate(0.9)", opacity: 0.6 }}
         />

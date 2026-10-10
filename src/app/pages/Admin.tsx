@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../AuthContext";
+import { SEO } from "../components/SEO";
 
 type Profile = { id: string; email: string; full_name: string | null; credits: number; role: string };
 type BookingRow = { id: string; date: string; time: string; service: string; profiles?: { email?: string; full_name?: string } | null };
@@ -78,11 +79,31 @@ export function AdminPage() {
   };
 
   if (!user || user.role !== "admin") {
-    return <div className="min-h-screen flex items-center justify-center bg-[#F5EFE4]"><p>Accès réservé aux administrateurs.</p></div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F5EFE4]">
+
+        <SEO
+          title="Administration | RG Équitation"
+          description="Espace d'administration réservé."
+          canonical="https://rg-equitation-education-equine.fr/admin"
+          noindex={true}
+        />
+
+        <p>Accès réservé aux administrateurs.</p>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen bg-[#F5EFE4] pt-32 px-8 md:px-14 pb-16">
+
+      <SEO
+        title="Administration | RG Équitation"
+        description="Espace d'administration RG Équitation : gestion des utilisateurs, crédits et réservations."
+        canonical="https://rg-equitation-education-equine.fr/admin"
+        noindex={true}
+      />
+
       <h1 className="text-3xl font-normal mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>Administration</h1>
       {error && <div className="text-red-500 mb-4">{error}</div>}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

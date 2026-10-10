@@ -1,16 +1,16 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
+import { SEO } from "../components/SEO";
 
 const HERO_IMG = "/images/professionnels/professionnels.jpg";
 
 const galerieImages = Array.from({ length: 15 }, (_, i) => ({
   src: `/images/galerie/galerie${i + 1}.jpg`,
-  alt: `Galerie ${i + 1}`,
+  alt: `Séance d'équitation à Bordeaux avec Roxane Gaudon, monitrice diplômée d'État - photo ${i + 1}`,
 }));
 
-// Image de secours si une image est manquante
-const FALLBACK_IMG = "/images/galerie/galerie1.jpg"; // Assure-toi qu'elle existe
+const FALLBACK_IMG = "/images/galerie/galerie1.jpg";
 
 export function Propos() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -28,6 +28,15 @@ export function Propos() {
 
   return (
     <div className="bg-[#F8F3EC]">
+
+      <SEO
+        title="À propos | Roxane Gaudon, monitrice équestre à Bordeaux"
+        description="Découvrez le parcours de Roxane Gaudon, monitrice d'équitation diplômée d'État (BPJEPS, CCIEE, CCPEE) et son approche éthologique respectueuse du cheval."
+        canonical="https://rg-equitation-education-equine.fr/a-propos"
+        keywords="Roxane Gaudon, monitrice équitation Bordeaux, éthologie équine, BPJEPS équestre, formation équitation"
+        ogImage="https://rg-equitation-education-equine.fr/images/professionnels/professionnels.jpg"
+      />
+
       {/* HERO split-screen */}
       <section className="min-h-screen grid grid-cols-1 md:grid-cols-2">
         <div className="flex flex-col justify-center px-10 md:px-20 lg:px-28 pb-20 md:pb-0 pt-24 md:pt-28 order-2 md:order-1">
@@ -68,7 +77,7 @@ export function Propos() {
         <div className="relative min-h-[60vw] md:min-h-screen order-1 md:order-2 bg-[#E8DDD0] overflow-hidden">
           <img
             src={HERO_IMG}
-            alt="Professionnels — RG Connexion Équine"
+            alt="Roxane Gaudon, monitrice d'équitation diplômée d'État à Bordeaux, en séance avec un cheval"
             className="absolute inset-0 w-full h-full object-cover object-[center_20%]"
             onError={handleImageError}
           />
@@ -103,7 +112,7 @@ export function Propos() {
               La légèreté, la cohérence et la progressivité restent au cœur de chaque accompagnement.
             </p>
             <p className="text-[#C09A3C] font-medium italic text-center" style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.1em" }}>
-                — Roxane
+                — Roxane Gaudon
             </p>
           </div>
         </div>

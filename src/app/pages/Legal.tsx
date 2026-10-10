@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { SEO } from "../components/SEO";
 
 const containerStyle = "max-w-3xl mx-auto px-8 py-16 bg-[#F5EFE4] min-h-screen";
 const titleStyle = "text-3xl font-normal mb-8 text-[#1C1814]";
@@ -9,12 +10,21 @@ const linkStyle = "text-[#C09A3C] hover:text-[#1C1814] transition-colors";
 export function MentionsLegalesPage() {
   return (
     <div className={containerStyle}>
+
+      <SEO
+        title="Mentions légales | Roxane Gaudon - RG Équitation"
+        description="Mentions légales du site RG Équitation & Éducation Équine de Roxane Gaudon. Informations sur l'éditeur, l'hébergeur et la propriété intellectuelle."
+        canonical="https://rg-equitation-education-equine.fr/mentions-legales"
+        keywords="mentions légales, RG Équitation, Roxane Gaudon"
+      />
+
       <h1 className={titleStyle}>Mentions légales</h1>
       <p className={textStyle}>Conformément aux dispositions de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique, il est précisé aux utilisateurs du site l'identité des différents intervenants dans le cadre de sa réalisation et de son suivi.</p>
 
       <h2 className={subtitleStyle}>Éditeur du site</h2>
       <p className={textStyle}>
         <strong>R.G. ÉQUITATION & ÉDUCATION ÉQUINE</strong><br />
+        Roxane Gaudon<br />
         SIRET : 978 982 866 00011<br />
         Email : contact@rg-equitation-education-equine.fr<br />
         Téléphone : +33 6 52 05 37 78<br />
@@ -29,7 +39,7 @@ export function MentionsLegalesPage() {
       </p>
 
       <h2 className={subtitleStyle}>Directeur de la publication</h2>
-      <p className={textStyle}>R.G. ÉQUITATION & ÉDUCATION ÉQUINE</p>
+      <p className={textStyle}>Roxane Gaudon</p>
 
       <h2 className={subtitleStyle}>Contact</h2>
       <p className={textStyle}>
@@ -44,6 +54,14 @@ export function MentionsLegalesPage() {
 export function ConfidentialitePage() {
   return (
     <div className={containerStyle}>
+
+      <SEO
+        title="Politique de confidentialité | Roxane Gaudon - RG Équitation"
+        description="Politique de confidentialité et RGPD du site RG Équitation de Roxane Gaudon. Informations sur la collecte et l'utilisation de vos données personnelles."
+        canonical="https://rg-equitation-education-equine.fr/confidentialite"
+        keywords="politique confidentialité, RGPD, RG Équitation, Roxane Gaudon"
+      />
+
       <h1 className={titleStyle}>Politique de confidentialité</h1>
       <p className={textStyle}>Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons vos données personnelles lorsque vous utilisez notre site. Nous respectons le Règlement Général sur la Protection des Données (RGPD).</p>
 

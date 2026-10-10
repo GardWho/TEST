@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Phone, Mail, ArrowRight, Check } from "lucide-react";
+import { SEO } from "../components/SEO";
 
 const HERO_IMG = "/images/contact/contact.jpg";
 
@@ -30,7 +31,6 @@ export function Contact() {
     setError("");
 
     try {
-      // ✅ Appel vers le backend SMTP IONOS
       const response = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -58,6 +58,15 @@ export function Contact() {
 
   return (
     <div className="bg-[#F8F3EC]">
+
+      <SEO
+        title="Contact | Roxane Gaudon - RG Équitation à Bordeaux"
+        description="Contactez Roxane Gaudon, monitrice d'équitation à Bordeaux : téléphone (+33 6 52 05 37 78), email ou formulaire. Réponse sous 48h. Déplacement inclus dans les 15 premiers km."
+        canonical="https://rg-equitation-education-equine.fr/contact"
+        keywords="contact équitation Bordeaux, Roxane Gaudon contact, devis cours équitation, monitrice équestre Bordeaux"
+        ogImage="https://rg-equitation-education-equine.fr/images/contact/contact.jpg"
+      />
+
       <section className="min-h-screen grid grid-cols-1 md:grid-cols-2">
         <div className="flex flex-col justify-center px-10 md:px-20 lg:px-28 pt-32 md:pt-0 pb-20 md:pb-0 order-2 md:order-1">
           <div className="max-w-lg">
@@ -85,7 +94,11 @@ export function Contact() {
           </div>
         </div>
         <div className="relative min-h-[60vw] md:min-h-screen order-1 md:order-2 bg-[#E8DDD0]">
-          <img src={HERO_IMG} alt="Cavalière et son cheval — RG Connexion Équine" className="absolute inset-0 w-full h-full object-cover object-center" />
+          <img
+            src={HERO_IMG}
+            alt="Roxane Gaudon, monitrice équestre à Bordeaux, accompagnant un cavalier et son cheval"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
           <div className="absolute inset-0 bg-gradient-to-l from-transparent to-[#F8F3EC]/20" />
           <div className="absolute bottom-8 left-8 text-[10px] tracking-[0.35em] uppercase text-white/60"></div>
         </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../AuthContext";
 import { Link } from "react-router-dom";
+import { SEO } from "./components/SEO";
 
 type Tab = "profil" | "historique" | "credits" | "planning";
 
@@ -61,6 +62,14 @@ export function ComptePage() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F5EFE4]">
+
+        <SEO
+          title="Mon compte | RG Équitation"
+          description="Accédez à votre espace personnel RG Équitation pour gérer vos réservations et vos crédits."
+          canonical="https://rg-equitation-education-equine.fr/compte"
+          noindex={true}
+        />
+
         <div className="text-center">
           <p className="text-[15px] text-[#1C1814]/60">Veuillez vous connecter</p>
           <Link to="/login" className="inline-block mt-4 px-6 py-2 bg-[#C09A3C] text-white text-[11px] tracking-[0.25em] uppercase hover:bg-[#1C1814] transition-colors">Se connecter</Link>
@@ -115,6 +124,14 @@ export function ComptePage() {
 
   return (
     <div className="min-h-screen bg-[#F5EFE4] pt-20 px-8 md:px-14">
+
+      <SEO
+        title="Mon compte | RG Équitation"
+        description="Gérez vos réservations, vos crédits et vos informations personnelles sur votre espace RG Équitation."
+        canonical="https://rg-equitation-education-equine.fr/compte"
+        noindex={true}
+      />
+
       <div className="max-w-[1400px] mx-auto">
         <h1 className="text-4xl font-normal mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>Mon compte</h1>
         <p className="text-[14px] text-[#1C1814]/60 mb-8">Bonjour {user.name} · {user.credits} crédits disponibles</p>

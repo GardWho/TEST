@@ -2,14 +2,13 @@ import { Link } from "react-router-dom";
 import { useCart } from "../components/CartContext";
 import { useState, useEffect } from "react";
 import { Trash2, ShoppingBag, MapPin, X } from "lucide-react";
+import { SEO } from "../components/SEO";
 
-// Adresse de base du moniteur
 const INSTRUCTOR_ADDRESS = "24 rue Minvielle, Bordeaux, France";
 
-// Composant Toast (notification)
 const Toast = ({ message, onClose }: { message: string; onClose: () => void }) => {
   useEffect(() => {
-    const timer = setTimeout(onClose, 3000); // Disparaît après 3s
+    const timer = setTimeout(onClose, 3000);
     return () => clearTimeout(timer);
   }, [onClose]);
 
@@ -45,11 +44,10 @@ export function PanierPage() {
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
 
-  // ✅ Calcul réel de la distance via le backend
   const calculateRealDistance = async (userAddress: string) => {
     setIsCalculating(true);
     setCalculatedKm(null);
-    
+
     try {
       const response = await fetch('/api/calculate-distance', {
         method: 'POST',
@@ -65,7 +63,7 @@ export function PanierPage() {
 
       setCalculatedKm(data.distanceKm);
       setDeliveryKm(data.distanceKm);
-      
+
     } catch (error: any) {
       console.error("Erreur de calcul:", error);
       alert(error.message || "Erreur lors du calcul de la distance.");
@@ -82,7 +80,6 @@ export function PanierPage() {
     }
   };
 
-  // Afficher une notification quand un article est ajouté
   useEffect(() => {
     if (items.length > 0) {
       const lastItem = items[items.length - 1];
@@ -95,6 +92,14 @@ export function PanierPage() {
   if (items.length === 0) {
     return (
       <div className="min-h-screen bg-[#F5EFE4] pt-32 pb-16 px-8">
+
+        <SEO
+          title="Panier | RG Équitation"
+          description="Votre panier de prestations équestres."
+          canonical="https://rg-equitation-education-equine.fr/panier"
+          noindex={true}
+        />
+
         <div className="max-w-4xl mx-auto text-center">
           <div className="bg-white p-12 rounded-sm shadow-sm">
             <ShoppingBag size={64} className="text-[#C09A3C]/30 mx-auto mb-6" />
@@ -118,7 +123,14 @@ export function PanierPage() {
 
   return (
     <div className="min-h-screen bg-[#F5EFE4] pt-32 pb-16 px-8">
-      {/* Toast notification */}
+
+      <SEO
+        title="Panier | RG Équitation"
+        description="Votre panier de prestations équestres."
+        canonical="https://rg-equitation-education-equine.fr/panier"
+        noindex={true}
+      />
+
       {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage(null)} />}
 
       <div className="max-w-4xl mx-auto">
@@ -130,7 +142,6 @@ export function PanierPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Liste des articles */}
           <div className="lg:col-span-2 space-y-4">
             {items.map((item) => (
               <div
@@ -167,14 +178,12 @@ export function PanierPage() {
             </button>
           </div>
 
-          {/* Résumé */}
           <div className="lg:col-span-1">
             <div className="bg-white p-6 rounded-sm shadow-sm sticky top-24">
               <h2 className="text-lg font-normal mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
                 Résumé
               </h2>
 
-              {/* Champ adresse avec calcul réel */}
               <div className="mb-4">
                 <label className="text-[10px] tracking-[0.3em] uppercase text-[#1C1814]/40 block mb-2 flex items-center gap-2">
                   <MapPin size={14} className="text-[#C09A3C]" />
@@ -196,7 +205,7 @@ export function PanierPage() {
                 </button>
                 {calculatedKm !== null && (
                   <p className="text-[12px] text-[#1C1814]/60 mt-2">
-                    Distance estimée : <span className="font-medium">{calculatedKm} km</span>
+                    Distance estimée (aller-retour) : <span className="font-medium">{calculatedKm} km</span>
                     {calculatedKm > 15 && (
                       <span className="text-[#C09A3C] block mt-1">
                         Frais de déplacement : +{((calculatedKm - 15) * 0.50).toFixed(2)} €
@@ -206,7 +215,6 @@ export function PanierPage() {
                 )}
               </div>
 
-              {/* Totaux */}
               <div className="space-y-2 pt-4 border-t border-[#C09A3C]/10">
                 <div className="flex justify-between text-[14px] text-[#1C1814]/60">
                   <span>Sous-total</span>
@@ -224,7 +232,6 @@ export function PanierPage() {
                 </div>
               </div>
 
-              {/* Bouton paiement */}
               <button
                 onClick={proceedToCheckout}
                 disabled={loading}

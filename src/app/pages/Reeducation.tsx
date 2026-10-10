@@ -1,23 +1,32 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../components/CartContext";
+import { SEO } from "../components/SEO";
 
-const heroImg =
-  "images/réeducation/réeducation.jpg";
+const heroImg = "images/réeducation/réeducation.jpg";
 
 export function ReeducationPage() {
   const { addItem } = useCart();
 
   return (
     <div className="bg-[#F5EFE4] min-h-screen">
+
+      <SEO
+        title="Rééducation équine à Bordeaux | Roxane Gaudon - RG Équitation"
+        description="Rééducation équine à Bordeaux avec Roxane Gaudon : bilan initial (1h30, 80€) puis formules mensuelles de 280 à 780€. Approche éthologique respectueuse du cheval."
+        canonical="https://rg-equitation-education-equine.fr/reeducation"
+        keywords="rééducation cheval Bordeaux, comportement cheval, éthologie équine, Roxane Gaudon, remise en confiance"
+        ogImage="https://rg-equitation-education-equine.fr/images/réeducation/réeducation.jpg"
+      />
+
       {/* HERO */}
       <div className="relative h-[40vh] min-h-[280px] overflow-hidden bg-[#2A2318]">
         <img
           src={heroImg}
-          alt="Rééducation équine"
+          alt="Rééducation équine à Bordeaux avec Roxane Gaudon : remise en confiance et travail comportemental"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ filter: "sepia(18%) saturate(0.9)", opacity: 0.6, objectPosition: "center 30%" }}
         />
-        
+
         <div className="absolute inset-0 bg-gradient-to-t from-[#1C1814]/70 via-transparent to-[#1C1814]/30" />
         <div className="relative z-10 h-full flex flex-col justify-end px-10 md:px-20 pb-10">
           <p className="text-[9px] tracking-[0.48em] uppercase mb-3" style={{ color: "#C09A3C" }}>
@@ -34,7 +43,7 @@ export function ReeducationPage() {
 
       {/* CONTENU */}
       <div className="max-w-[1400px] mx-auto px-8 md:px-14 py-16">
-        
+
         {/* ── SECTION BILAN en fond noir ── */}
         <section className="mb-20 bg-[#1C1814] p-10 md:p-16 rounded-sm">
           <div className="max-w-3xl mx-auto">

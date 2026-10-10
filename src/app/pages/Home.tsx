@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
+import { SEO } from "../components/SEO";
 
 const I = {
   hero:    "/images/acceuil/acceuil3.jpg",
@@ -21,6 +22,7 @@ const services = [
     desc: "Cours particuliers, travail technique et accompagnement personnalisé.",
     link: "/cours",
     icon: LogoCoaching,
+    alt: "Cours particuliers d'équitation à Bordeaux avec Roxane Gaudon, monitrice diplômée d'État",
   },
   {
     id: "travail",
@@ -28,6 +30,7 @@ const services = [
     desc: "Éducation, rééducation, remise en confiance et travail spécifique.",
     link: "/travail-cheval",
     icon: LogoTravail,
+    alt: "Travail éducatif du cheval à Bordeaux : éducation et remise en confiance",
   },
   {
     id: "education",
@@ -35,6 +38,7 @@ const services = [
     desc: "Mise en place des bases solides dans le respect du cheval.",
     link: "/education-equine",
     icon: LogoEducation,
+    alt: "Débourrage et éducation du jeune cheval à Bordeaux dans le respect de son rythme",
   },
   {
     id: "concours",
@@ -42,6 +46,7 @@ const services = [
     desc: "Préparation, stratégie, détente et suivi en compétition.",
     link: "/reeducation",
     icon: LogoConcours,
+    alt: "Coaching équestre en compétition à Bordeaux : préparation et stratégie",
   },
   {
     id: "collectif",
@@ -49,6 +54,7 @@ const services = [
     desc: "Groupes de 2 à 10 cavaliers pour progresser ensemble.",
     link: "/cours",
     icon: LogoCollectif,
+    alt: "Cours collectifs d'équitation à Bordeaux pour groupes de 2 à 10 cavaliers",
   },
 ];
 
@@ -85,11 +91,19 @@ export function Home() {
   return (
     <div style={{ background: "#F5EFE4" }}>
 
+      <SEO
+        title="Cours d'équitation à Bordeaux | Roxane Gaudon - RG Équitation"
+        description="Roxane Gaudon, monitrice d'équitation diplômée d'État à Bordeaux. Cours particuliers et collectifs, travail du cheval, rééducation et débourrage. Déplacement inclus sur 15 km."
+        canonical="https://rg-equitation-education-equine.fr/"
+        keywords="Roxane Gaudon, cours équitation Bordeaux, monitrice équestre Bordeaux, travail du cheval, rééducation équine, débourrage, Gironde"
+        ogImage="https://rg-equitation-education-equine.fr/images/acceuil/acceuil3.jpg"
+      />
+
       {/* ── HERO ── */}
       <section className="relative h-[90vh] min-h-[600px] overflow-hidden bg-[#2A2318]">
         <img
           src={I.hero}
-          alt="Cavalière dans la forêt"
+          alt="Roxane Gaudon donnant un cours d'équitation dans une forêt près de Bordeaux"
           onLoad={() => setImgLoaded(true)}
           className="absolute inset-0 w-full h-full object-cover object-[center_50%] transition-opacity duration-700"
           style={{ opacity: imgLoaded ? 0.72 : 0, filter: "sepia(18%) saturate(1.1)" }}
@@ -155,7 +169,7 @@ export function Home() {
                 className="group bg-[#FDF8F0] p-5 rounded-sm shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 text-center"
               >
                 <div className="flex justify-center mb-3">
-                  <img src={s.icon} alt={s.title} className="w-14 h-14 object-contain group-hover:scale-110 transition-transform duration-300" />
+                  <img src={s.icon} alt={s.alt} className="w-14 h-14 object-contain group-hover:scale-110 transition-transform duration-300" />
                 </div>
                 <h3 className="text-lg font-normal mb-1 text-[#1C1814] group-hover:text-[#C09A3C] transition-colors" style={{ fontFamily: "'Playfair Display', serif" }}>
                   {s.title}
@@ -175,7 +189,11 @@ export function Home() {
         <div className="max-w-[1400px] mx-auto px-8 md:px-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
             <div className="relative">
-              <img src={I.riding} alt="Raphaëlle G. — Monitrice équestre" className="w-full h-[400px] md:h-[500px] object-cover object-top" />
+              <img
+                src={I.riding}
+                alt="Roxane Gaudon, monitrice d'équitation diplômée d'État à Bordeaux, en séance avec un cavalier"
+                className="w-full h-[400px] md:h-[500px] object-cover object-top"
+              />
               <div className="absolute -bottom-4 -right-4 w-24 h-24 border border-[#C09A3C]/30 hidden md:block" />
             </div>
             <div>
@@ -202,7 +220,7 @@ export function Home() {
         <div className="absolute inset-0">
           <img
             src={I.quote}
-            alt="Cheval au coucher du soleil"
+            alt="Cheval au coucher du soleil, image symbolisant la relation entre le cavalier et son cheval"
             loading="eager"
             className="w-full h-full object-cover transition-transform duration-200 will-change-transform"
             style={{
@@ -229,7 +247,11 @@ export function Home() {
       <section className="py-20 px-8 md:px-16 max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="relative h-[320px] md:h-[400px] overflow-hidden rounded-sm">
-            <img src={I.golden} alt="Zones d'intervention" className="w-full h-full object-cover" />
+            <img
+              src={I.golden}
+              alt="Zone d'intervention des cours d'équitation : Bordeaux et alentours, Gironde"
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="flex flex-col items-center text-center">
             <p className="text-[11px] tracking-[0.35em] uppercase text-[#C09A3C] mb-1">RELATION • LÉGÈRETÉ • PERFORMANCE</p>
@@ -238,9 +260,9 @@ export function Home() {
             <p className="text-[14px] text-[#1C1814]/60 leading-relaxed font-light max-w-md">sur votre lieu d'équitation - Bordeaux et alentours (15 premiers km inclus).</p>
             <div className="mt-6 border border-[#C09A3C]/25 p-5 w-full max-w-md">
               <p className="text-[9px] tracking-[0.4em] uppercase text-[#C09A3C] mb-2">SUIVEZ-NOUS SUR INSTAGRAM</p>
-<a href="https://www.instagram.com/rgequitationeducationequine" target="_blank" rel="noopener noreferrer" className="text-[14px] font-light text-[#C09A3C]">
-  @rgequitationeducationequine
-</a>
+              <a href="https://www.instagram.com/rgequitationeducationequine" target="_blank" rel="noopener noreferrer" className="text-[14px] font-light text-[#C09A3C]">
+                @rgequitationeducationequine
+              </a>
             </div>
           </div>
         </div>

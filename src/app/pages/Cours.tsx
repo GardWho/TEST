@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useCart } from "../components/CartContext";
 import { useState } from "react";
+import { SEO } from "../components/SEO";
 
 const heroImg = "/images/bannières/banniere-01.webp";
 const coursPartImg = "/images/cours-part/cours-part.jpg";
@@ -45,11 +46,20 @@ export function CoursPage() {
 
   return (
     <div className="bg-[#F5EFE4] min-h-screen">
+
+      <SEO
+        title="Cours d'équitation à Bordeaux | Roxane Gaudon - RG Équitation"
+        description="Cours particuliers (65€/h) et collectifs (dès 25€/pers) à Bordeaux avec Roxane Gaudon. Cartes de 5 et 10 séances. Préparation aux Galops 1 à 7. Déplacement inclus sur 15 km."
+        canonical="https://rg-equitation-education-equine.fr/cours"
+        keywords="cours équitation Bordeaux, cours particuliers équitation, cours collectifs, Galops, Roxane Gaudon"
+        ogImage="https://rg-equitation-education-equine.fr/images/cours-part/cours-part.jpg"
+      />
+
       {/* ─── HERO ─── */}
       <div className="relative h-[40vh] min-h-[280px] overflow-hidden bg-[#2A2318]">
         <img
           src={heroImg}
-          alt="Cours d'équitation"
+          alt="Cours d'équitation à Bordeaux avec Roxane Gaudon : cours particuliers et collectifs tous niveaux"
           className="absolute inset-0 w-full h-full object-cover object-[center_30%]"
           style={{ filter: "sepia(18%) saturate(0.9)", opacity: 0.6 }}
         />
@@ -70,9 +80,7 @@ export function CoursPage() {
       {/* ─── CONTENU ─── */}
       <div className="max-w-[1400px] mx-auto px-8 md:px-14 py-12 space-y-12">
 
-        {/* ============================================================ */}
-        {/* SECTION : COURS PARTICULIERS (AGRANDIE) */}
-        {/* ============================================================ */}
+        {/* SECTION : COURS PARTICULIERS */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
           <div>
             <h2 className="text-2xl md:text-3xl font-normal text-[#1C1814] mb-3" style={{ fontFamily: "'Playfair Display', serif" }}>
@@ -85,7 +93,6 @@ export function CoursPage() {
               Cartes valables 1 an à partir de la date d'achat.
             </p>
 
-            {/* ✅ CARTES AGRANDIES (min-h-[220px] + p-6) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {coursParticuliers.map((item) => (
                 <div
@@ -112,16 +119,14 @@ export function CoursPage() {
           <div className="relative h-[280px] lg:h-[350px] overflow-hidden rounded-sm bg-[#D4C9B8]">
             <img
               src={coursPartImg}
-              alt="Cours particuliers"
+              alt="Cours d'équitation particuliers à Bordeaux avec Roxane Gaudon, monitrice diplômée d'État"
               className="w-full h-full object-cover"
               style={{ filter: "sepia(12%)" }}
             />
           </div>
         </section>
 
-        {/* ============================================================ */}
-        {/* SECTION : COURS COLLECTIFS (AGRANDIE) */}
-        {/* ============================================================ */}
+        {/* SECTION : COURS COLLECTIFS */}
         <section>
           <h2 className="text-2xl md:text-3xl font-normal text-[#1C1814] mb-3 text-center" style={{ fontFamily: "'Playfair Display', serif" }}>
             Cours collectifs
@@ -131,7 +136,6 @@ export function CoursPage() {
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-            {/* Gauche : 3 paliers (AGRANDIS) */}
             <div className="space-y-3 flex flex-col justify-center">
               {paliers.map((palier) => (
                 <div
@@ -144,7 +148,6 @@ export function CoursPage() {
               ))}
             </div>
 
-            {/* Droite : Sélecteur (AGRANDI) */}
             <div className="bg-[#EDE4D0] p-6 md:p-8 rounded-sm flex flex-col items-center justify-center h-full">
               <p className="text-[8px] tracking-[0.3em] uppercase text-[#1C1814]/60 mb-2">
                 Nombre de cavaliers
@@ -187,7 +190,7 @@ export function CoursPage() {
       <div className="relative h-[200px] md:h-[300px] overflow-hidden bg-[#D4C9B8] w-full">
         <img
           src={bannerImg}
-          alt="Bannière"
+          alt="Cours collectifs d'équitation à Bordeaux en petit groupe de cavaliers"
           className="w-full h-full object-cover"
           style={{ filter: "sepia(12%)" }}
         />

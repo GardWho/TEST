@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
+import { SEO } from "./components/SEO";
 
 export function LoginPage() {
   const [email, setEmail] = useState("");
@@ -36,6 +37,14 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F5EFE4] px-8">
+
+      <SEO
+        title={isRegistering ? "Créer un compte | RG Équitation" : "Connexion | RG Équitation"}
+        description="Accédez à votre espace personnel RG Équitation pour gérer vos réservations et vos crédits."
+        canonical="https://rg-equitation-education-equine.fr/login"
+        noindex={true}
+      />
+
       <div className="max-w-md w-full bg-white p-8 rounded-sm shadow-lg">
         <h1 className="text-3xl font-normal mb-6 text-center" style={{ fontFamily: "'Playfair Display', serif" }}>
           {isRegistering ? "Créer un compte" : "Connexion"}
@@ -73,6 +82,7 @@ export function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={6}
               className="w-full border-b border-[#1C1814]/15 py-2 text-[14px] outline-none focus:border-[#C09A3C] transition-colors"
             />
           </div>
